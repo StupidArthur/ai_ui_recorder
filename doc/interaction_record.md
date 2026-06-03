@@ -1227,8 +1227,52 @@
 - 全部 **System** md（Phase 1/2/4 主调用 + repair + 遗留 step-analysis）按 `langgpt_standard.md` 重写为 9 维度：Role / Profile / Background / Goals / Constraints / Skills / Workflows / Output Format / Initialization
 - Phase 1、Phase 4 的 JSON 字段表与示例合并进各 System 的 **Output Format** 章节
 - **`workflow.js`**：移除 Phase 1 的 `response_format.json_schema` 传参（MiniMax 等模型不支持或效果差）
-- **`step-structured.js` / `agent-txt.js`**：移除 Schema 导出；`prompts/schema/*.json` 保留为参考副本
+- **`step-structured.js` / `agent-txt.js`**：移除 Schema 导出；`prompts/schema/` 已删除，契约仅以 System md 为准
 - 更新 `prompts/总纲.md`、`prompts/README.md`
+
+---
+
+## 2026-06-03 — 移除 JSON repair LLM
+
+- 删除 `phase1-batch-repair-system.md`、`phase4-agent-txt-repair-system.md` 及 repair 调用链
+- Phase 1 解析失败：fallback 步骤 + `llm_audit` 标记
+- Phase 4 解析失败：本地 1:1 兜底（保留）
+
+---
+
+## 2026-06-03 — 删除 Phase 1 遗留逐条分析 Prompt
+
+- 删除 `phase1-step-analysis-system.md`、`step-analysis.js`（旧版逐条 Markdown 分析，`workflow` 从未引用）
+- `prompts/md/` 现为每 Phase 一份 System：`phase1-structured` / `phase2-case-window` / `phase4-agent-txt`
+
+---
+
+## 2026-06-03 — Skill Prompt 重命名（3 份精华）
+
+| 旧名 | 新名 |
+|------|------|
+| `phase1-structured-system.md` | `snapshots-2-steps-skill.md` |
+| `phase2-case-window-system.md` | `steps-2-cases-skill.md` |
+| `phase4-agent-txt-system.md` | `case-4-agents-skill.md` |
+
+- 去掉文件名中的 `phase*`、`-system`；统一 `-skill` 后缀，与产物链 `snapshots → step_2 → cases → case_4_agents` 对齐
+- 更新 `step-structured.js`、`case-generation.js`、`agent-txt.js`、`loader.js`、`prompts/README.md`、`总纲.md`
+
+---
+
+## 2026-06-03 — User Prompt 内嵌代码
+
+- 删除 `prompts/md/*-user.md`（6 个）
+- User 拼接逻辑迁入 `step-structured.js`、`case-generation.js`、`agent-txt.js`、`step-analysis.js`
+- `md/` 仅保留 System Prompt；`loader.js` 只读 System
+
+---
+
+## 2026-06-03 — 删除 prompts/schema
+
+- 移除 `prompts/schema/*.json` 及 `loader.loadPromptSchema`
+- 打包脚本不再复制 `prompts/schema`
+- JSON 契约仅以各 System md 的 Output Format 为准
 
 ---
 

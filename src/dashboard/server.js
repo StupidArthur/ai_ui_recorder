@@ -14,6 +14,7 @@
  *   POST /api/record/stop         - 停止录制
  *   POST /api/translate/start     - 开始 AI 翻译
  *   GET  /api/runs                - 获取所有录制历史列表
+ *   GET  /api/runs/:runId/files   - 列出该 run 下可预览的「给人看」产物（白名单且已生成）
  *   GET  /api/runs/:runId/file    - 读取指定录制目录下的文件
  *   GET  /api/logs                - SSE 实时日志流
  */
@@ -31,18 +32,25 @@ import {
   AI_STEPS_STRUCTURED_FILENAME,
   AI_CASES_FILENAME,
   AI_STEPS_ERRORS_FILENAME,
-  MIDSCENE_NO_ASSERT_FILENAME,
   PREPROCESS_LOG_FILENAME,
   GENERATE_LOG_FILENAME,
-  SELENIUM_DRAFT_FILENAME,
-  SELENIUM_FINAL_FILENAME,
-  SELENIUM_EXPORT_ENABLED,
+  DASHBOARD_PREVIEW_FILES,
 } from '../utils/config.js';
 
 // ==================== 常量 ====================
 
 /** Dashboard HTTP 服务端口 */
 const DASHBOARD_PORT = 3000;
+
+/**
+ * 返回 run 目录下「给人看」且已生成的预览文件（白名单 + 存在性检查）
+ *
+ * @param {string} runDir - run 绝对路径
+ * @returns {string[]}
+ */
+function listRunPreviewFiles(runDir) {
+  return DASHBOARD_PREVIEW_FILES.filter((name) => fs.existsSync(path.join(runDir, name)));
+}
 
 /** 静态文件目录（pkg 打包时 import.meta.url 为 undefined，用 exe 所在目录） */
 let STATIC_DIR;
@@ -200,11 +208,9 @@ function getRunsList() {
         || fs.existsSync(path.join(runDir, AI_STEPS_FILENAME));
       const hasCases = fs.existsSync(path.join(runDir, AI_CASES_FILENAME));
       const hasStepErrors = fs.existsSync(path.join(runDir, AI_STEPS_ERRORS_FILENAME));
-      const hasMidscene = fs.existsSync(path.join(runDir, MIDSCENE_NO_ASSERT_FILENAME));
+      const hasAgentTxt = fs.existsSync(path.join(runDir, 'case_4_agents.txt'));
       const hasPreprocessLog = fs.existsSync(path.join(runDir, PREPROCESS_LOG_FILENAME));
       const hasGenerateLog = fs.existsSync(path.join(runDir, GENERATE_LOG_FILENAME));
-      const hasSeleniumDraft = fs.existsSync(path.join(runDir, SELENIUM_DRAFT_FILENAME));
-      const hasSeleniumFinal = fs.existsSync(path.join(runDir, SELENIUM_FINAL_FILENAME));
 
       let meta = null;
       if (hasMeta) {
@@ -220,11 +226,9 @@ function getRunsList() {
         hasSteps,
         hasCases,
         hasStepErrors,
-        hasMidscene,
+        hasAgentTxt,
         hasPreprocessLog,
         hasGenerateLog,
-        hasSeleniumDraft,
-        hasSeleniumFinal,
         totalActions: meta?.totalActions || 0,
         targetUrl: meta?.targetUrl || '',
         recordStartTime: meta?.recordStartTime || '',
@@ -274,7 +278,6 @@ function handleStatus(req, res) {
     state: currentState,
     defaultUrl: TARGET_URL,
     lastRunDir: lastRunDir ? path.basename(lastRunDir) : null,
-    seleniumExportEnabled: SELENIUM_EXPORT_ENABLED,
   });
 }
 
@@ -426,6 +429,27 @@ function handleGetRuns(req, res) {
 }
 
 /**
+ * GET /api/runs/:runId/files - 列出该 run 下可预览的文件
+ */
+function handleGetRunFiles(req, res, runId) {
+  if (!runId || runId.includes('..') || runId.includes('/') || runId.includes('\\')) {
+    return sendError(res, 400, '非法 runId');
+  }
+
+  const runDir = path.join(OUTPUT_BASE_DIR, runId);
+  if (!fs.existsSync(runDir)) {
+    return sendError(res, 404, '录制目录不存在');
+  }
+
+  try {
+    const files = listRunPreviewFiles(runDir);
+    sendJSON(res, 200, { files });
+  } catch (error) {
+    sendError(res, 500, `扫描文件失败: ${error.message}`);
+  }
+}
+
+/**
  * GET /api/runs/:runId/file?path=xxx - 读取指定录制目录下的文件
  */
 function handleGetRunFile(req, res, runId, filePath) {
@@ -545,6 +569,13 @@ function handleAPI(req, res, pathname, searchParams) {
   // GET /api/runs
   if (pathname === '/api/runs' && req.method === 'GET') {
     handleGetRuns(req, res);
+    return true;
+  }
+
+  // GET /api/runs/:runId/files
+  const runFilesMatch = pathname.match(/^\/api\/runs\/([^/]+)\/files$/);
+  if (runFilesMatch && req.method === 'GET') {
+    handleGetRunFiles(req, res, runFilesMatch[1]);
     return true;
   }
 

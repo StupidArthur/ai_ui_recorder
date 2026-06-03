@@ -38,30 +38,11 @@
       letter-spacing: 0.5px;
     }
 
-    .header .status-badge {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 14px;
-      padding: 6px 14px;
-      border-radius: 20px;
-      background: rgba(255,255,255,0.1);
-    }
-
-    .status-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: #52c41a;
-      transition: background 0.3s;
-    }
-
-    .status-dot.recording { background: #ff4d4f; animation: pulse 1.5s infinite; }
-    .status-dot.translating { background: #1890ff; animation: pulse 1.5s infinite; }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.4; }
+    .header .header-version {
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.8);
+      letter-spacing: 0.2px;
+      white-space: nowrap;
     }
 
     /* ==================== 操作栏 ==================== */
@@ -246,8 +227,7 @@
     .badge-steps { background: #13c2c2; }
     .badge-cases { background: #52c41a; }
     .badge-errors { background: #fa8c16; }
-    .badge-midscene { background: #2f54eb; }
-    .badge-selenium { background: #eb2f96; }
+    .badge-agent { background: #722ed1; }
 
     /* 文件操作按钮组 */
     .file-actions {
@@ -272,6 +252,13 @@
     .file-btn:hover { color: #1890ff; border-color: #1890ff; }
     .file-btn.active { color: #1890ff; border-color: #1890ff; background: #e6f7ff; }
     .file-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .file-actions-loading,
+    .file-actions-empty {
+      font-size: 13px;
+      color: #999;
+      padding: 4px 0;
+    }
 
     /* 文件预览区 */
     .file-preview {
@@ -370,10 +357,7 @@
   <!-- 标题栏 -->
   <div class="header">
     <h1>AI UI Recorder</h1>
-    <div class="status-badge">
-      <div class="status-dot" id="statusDot"></div>
-      <span id="statusText">空闲</span>
-    </div>
+    <span class="header-version">V0.91 designed by @yuzechao</span>
   </div>
 
   <!-- 操作栏 -->
@@ -407,18 +391,7 @@
       <div class="runs-list" id="runsList">
         <div class="empty-state">加载中...</div>
       </div>
-      <div class="file-actions" id="fileActions" style="display: none;">
-        <button class="file-btn" data-file="meta.json" onclick="loadFile('meta.json')">meta.json</button>
-        <button class="file-btn" data-file="step_2_structured_steps.json" onclick="loadFile('step_2_structured_steps.json')">step_2_structured_steps.json</button>
-        <button class="file-btn" data-file="step_2_structured_steps.errors.json" onclick="loadFile('step_2_structured_steps.errors.json')">step_2_structured_steps.errors.json</button>
-        <button class="file-btn" data-file="AI_cases.md" onclick="loadFile('AI_cases.md')">AI_cases.md</button>
-        <button class="file-btn" data-file="step_4_midscene_no_assert.yaml" onclick="loadFile('step_4_midscene_no_assert.yaml')">step_4_midscene_no_assert.yaml</button>
-        <button class="file-btn" data-file="step_0_selenium_draft.py" onclick="loadFile('step_0_selenium_draft.py')">step_0_selenium_draft.py</button>
-        <button class="file-btn" data-file="step_0_selenium_from_recording.py" onclick="loadFile('step_0_selenium_from_recording.py')">step_0_selenium_from_recording.py</button>
-        <button class="file-btn" data-file="recorder.log" onclick="loadFile('recorder.log')">recorder.log</button>
-        <button class="file-btn" data-file="preprocess.log" onclick="loadFile('preprocess.log')">preprocess.log</button>
-        <button class="file-btn" data-file="generate.log" onclick="loadFile('generate.log')">generate.log</button>
-      </div>
+      <div class="file-actions" id="fileActions" style="display: none;"></div>
       <div class="file-preview" id="filePreview">
         <div class="preview-placeholder">选择左侧录制记录，查看文件内容</div>
       </div>
@@ -474,11 +447,8 @@
     let currentState = 'idle';
     let selectedRunId = null;
     let autoScroll = true;
-    let seleniumExportEnabled = false;
     let runsById = {};
 
-    const statusDot = document.getElementById('statusDot');
-    const statusText = document.getElementById('statusText');
     const urlInput = document.getElementById('urlInput');
     const btnRecord = document.getElementById('btnRecord');
     const btnStop = document.getElementById('btnStop');
@@ -487,24 +457,6 @@
     const runsList = document.getElementById('runsList');
     const fileActions = document.getElementById('fileActions');
     const filePreview = document.getElementById('filePreview');
-    const FILE_EXISTENCE_MAP = {
-      'meta.json': 'hasMeta',
-      'step_2_structured_steps.json': 'hasSteps',
-      'step_2_structured_steps.errors.json': 'hasStepErrors',
-      'AI_cases.md': 'hasCases',
-      'step_4_midscene_no_assert.yaml': 'hasMidscene',
-      'step_0_selenium_draft.py': 'hasSeleniumDraft',
-      'step_0_selenium_from_recording.py': 'hasSeleniumFinal',
-      'recorder.log': 'hasMeta',
-      'preprocess.log': 'hasPreprocessLog',
-      'generate.log': 'hasGenerateLog',
-    };
-
-    const STATE_LABELS = {
-      idle: '空闲',
-      recording: '录制中',
-      translating: '翻译中',
-    };
 
     /**
      * 更新界面状态
@@ -512,8 +464,6 @@
      */
     function updateState(state) {
       currentState = state;
-      statusDot.className = 'status-dot' + (state !== 'idle' ? ` ${state}` : '');
-      statusText.textContent = STATE_LABELS[state] || state;
 
       const isIdle = state === 'idle';
       urlInput.disabled = !isIdle;
@@ -742,9 +692,8 @@
                 ${run.hasMeta ? '<span class="badge badge-meta">meta</span>' : ''}
                 ${run.hasSteps ? '<span class="badge badge-steps">steps</span>' : ''}
                 ${run.hasCases ? '<span class="badge badge-cases">cases</span>' : ''}
+                ${run.hasAgentTxt ? '<span class="badge badge-agent">agent</span>' : ''}
                 ${run.hasStepErrors ? '<span class="badge badge-errors">step-errors</span>' : ''}
-                ${run.hasMidscene ? '<span class="badge badge-midscene">midscene</span>' : ''}
-                ${(run.hasSeleniumDraft || run.hasSeleniumFinal) ? '<span class="badge badge-selenium">selenium</span>' : ''}
               </div>
             </div>
           `;
@@ -756,42 +705,56 @@
           fileActions.style.display = 'none';
           filePreview.innerHTML = '<div class="preview-placeholder">选择左侧录制记录，查看文件内容</div>';
         } else if (selectedRunId) {
-          updateFileButtonsByRun(selectedRunId);
+          renderRunFileButtons(selectedRunId);
         }
       } catch (error) {
         runsList.innerHTML = '<div class="empty-state">加载失败</div>';
       }
     }
 
-    function selectRun(runId) {
+    async function selectRun(runId) {
       selectedRunId = runId;
-      fileActions.style.display = 'flex';
       filePreview.innerHTML = '<div class="preview-placeholder">选择上方文件按钮查看内容</div>';
 
-      // 刷新列表高亮
       document.querySelectorAll('.run-item').forEach(el => {
         el.classList.toggle('active', el.querySelector('.run-title').textContent === runId);
       });
 
-      // 重置文件按钮状态
-      document.querySelectorAll('.file-btn').forEach(el => el.classList.remove('active'));
-      updateFileButtonsByRun(runId);
+      await renderRunFileButtons(runId);
     }
 
     /**
-     * 根据当前 run 产物存在性启用/禁用文件按钮
+     * 从服务端扫描结果动态渲染文件按钮（仅展示磁盘上真实存在的文件）
+     *
      * @param {string} runId
      */
-    function updateFileButtonsByRun(runId) {
-      const run = runsById[runId];
-      const btns = document.querySelectorAll('.file-btn');
-      btns.forEach(btn => {
-        const fileName = btn.dataset.file;
-        const flagKey = FILE_EXISTENCE_MAP[fileName];
-        // 未配置映射时保持可点，配置了则按 run 标记决定
-        const enabled = !flagKey || Boolean(run && run[flagKey]);
-        btn.disabled = !enabled;
-      });
+    async function renderRunFileButtons(runId) {
+      fileActions.innerHTML = '<span class="file-actions-loading">加载文件列表...</span>';
+      fileActions.style.display = 'flex';
+
+      try {
+        const resp = await fetch(`/api/runs/${encodeURIComponent(runId)}/files`);
+        if (!resp.ok) {
+          const err = await resp.json();
+          fileActions.innerHTML = `<span class="file-actions-empty">${err.error || '加载失败'}</span>`;
+          return;
+        }
+
+        const { files } = await resp.json();
+        if (!files || files.length === 0) {
+          fileActions.style.display = 'none';
+          filePreview.innerHTML = '<div class="preview-placeholder">该录制目录下暂无可预览文件</div>';
+          return;
+        }
+
+        fileActions.innerHTML = files.map((filePath) => {
+          const label = filePath;
+          return `<button type="button" class="file-btn" data-file="${escapeHtml(filePath)}">${escapeHtml(label)}</button>`;
+        }).join('');
+        fileActions.style.display = 'flex';
+      } catch (error) {
+        fileActions.innerHTML = `<span class="file-actions-empty">加载失败: ${escapeHtml(error.message)}</span>`;
+      }
     }
 
     // ==================== 文件查阅 ====================
@@ -914,6 +877,12 @@
 
     // ==================== 初始化 ====================
 
+    fileActions.addEventListener('click', (e) => {
+      const btn = e.target.closest('.file-btn');
+      if (!btn?.dataset.file) return;
+      loadFile(btn.dataset.file);
+    });
+
     async function init() {
       // 获取初始状态
       try {
@@ -921,8 +890,6 @@
         const status = await resp.json();
         updateState(status.state);
         urlInput.value = status.defaultUrl || '';
-        seleniumExportEnabled = Boolean(status.seleniumExportEnabled);
-        appendLog('STATE', `[系统] Selenium 导出开关: ${seleniumExportEnabled ? '已开启' : '未开启'}`);
       } catch (_) {
         appendLog('ERROR', '[系统] 获取初始状态失败');
       }

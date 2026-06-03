@@ -1,0 +1,80 @@
+{
+  "type": "object",
+  "properties": {
+    "parsedSteps": {
+      "type": "array",
+      "description": "解析后的 UI 动作数组。必须与输入的动作数组一一对应，数量完全一致。",
+      "items": {
+        "type": "object",
+        "properties": {
+          "index": {
+            "type": "number",
+            "description": "必须与输入数据的 index 严格保持一致，这是对齐的唯一标识"
+          },
+          "description": {
+            "type": "string",
+            "description": "【必填，绝不能为空】一句话清晰描述该动作（例如：点击了左侧的'系统设置'菜单）。如果目标元素没有名字，请描述为'点击了未知元素'，严禁输出空字符串！"
+          },
+          "actionKind": {
+            "type": "string",
+            "enum": [
+              "click",
+              "doubleClick",
+              "rightClick",
+              "keyPress",
+              "input",
+              "assert",
+              "sleep",
+              "other"
+            ],
+            "description": "动作类型归类"
+          },
+          "target": {
+            "type": "string",
+            "description": "动作的直接作用对象名称或标识（例如：'提交按钮'，'用户名输入框'）"
+          },
+          "uiChange": {
+            "type": "string",
+            "description": "【必填，绝不能为空】动作发生后，UI 产生了什么具体变化（例如：'弹出了确认对话框'，'无可见变化'）。严禁输出空字符串！"
+          },
+          "page": {
+            "type": "string",
+            "description": "当前发生操作的页面名称或区域"
+          },
+          "basis": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "你得出以上结论的证据来源（如：DOM Diff中新增了某节点，Input增量显示输入了xxx）"
+          },
+          "inputText": {
+            "type": "string",
+            "description": "如果是输入操作，输入了什么内容？若无则留空"
+          },
+          "key": {
+            "type": "string",
+            "description": "如果是按键操作，按下了什么键？若无则留空"
+          },
+          "assertText": {
+            "type": "string",
+            "description": "预留断言字段，默认留空"
+          },
+          "confidence": {
+            "type": "number",
+            "description": "你对这条翻译的置信度 (0.0 到 1.0)"
+          }
+        },
+        "required": [
+          "index",
+          "description",
+          "actionKind",
+          "target",
+          "uiChange",
+          "page",
+          "basis",
+          "confidence"
+        ]
+      }
+    }
+  },
+  "required": ["parsedSteps"]
+}

@@ -1,8 +1,8 @@
 /**
  * step-structured.js - Phase 1 微批处理 Prompt 入口
  *
- * Prompt 正文：prompts/md/phase1-structured-*.md
- * 输出 JSON 契约已合并进 phase1-structured-system.md 的 Output Format 章节。
+ * Skill：prompts/md/snapshots-2-steps-skill.md
+ * User：本文件内嵌（动态数据拼接）
  */
 
 import { loadPromptMd } from './loader.js';
@@ -13,28 +13,7 @@ import { loadPromptMd } from './loader.js';
  * @returns {string}
  */
 export function buildSystemPrompt() {
-  return loadPromptMd('phase1-structured-system.md');
-}
-
-/**
- * 构建 Phase 1 批次 JSON 修复 System Prompt
- *
- * @returns {string}
- */
-export function buildBatchRepairSystemPrompt() {
-  return loadPromptMd('phase1-batch-repair-system.md');
-}
-
-/**
- * 构建 Phase 1 批次 JSON 修复 User Prompt
- *
- * @param {string} rawReply - LLM 原始输出
- * @returns {string}
- */
-export function buildBatchRepairUserPrompt(rawReply) {
-  return loadPromptMd('phase1-batch-repair-user.md', {
-    rawReply: String(rawReply || '').slice(0, 8000),
-  });
+  return loadPromptMd('snapshots-2-steps-skill.md');
 }
 
 /**
@@ -55,9 +34,10 @@ export function buildUserPrompt(enrichedActionsBatch, recentSteps) {
     contextHistory = '(无历史上下文，这是起始操作)';
   }
 
+  const actionCount = enrichedActionsBatch.length;
   const actionBlocks = enrichedActionsBatch
     .map((action, i) => {
-      const header = `=============【动作 Index: ${action.index} (第 ${i + 1}/${enrichedActionsBatch.length} 个)】=============`;
+      const header = `=============【动作 Index: ${action.index} (第 ${i + 1}/${actionCount} 个)】=============`;
       const body = JSON.stringify(
         {
           type: action.type,
@@ -74,9 +54,13 @@ export function buildUserPrompt(enrichedActionsBatch, recentSteps) {
     })
     .join('\n');
 
-  return loadPromptMd('phase1-structured-user.md', {
-    contextHistory,
-    actionCount: enrichedActionsBatch.length,
-    actionBlocks,
-  });
+  return `【历史上下文参考】
+以下是发生在本次批处理之前的最近几次动作解析结果，仅供你理解上下文逻辑，**不需要**在你的输出中包含它们：
+${contextHistory}
+
+【本次需要解析的动作数组】
+注意：以下共有 ${actionCount} 个动作。你必须输出 ${actionCount} 个解析结果。
+
+${actionBlocks}
+请立即开始解析，并严格按照 System Prompt 的 Output Format 输出 JSON 对象。`;
 }

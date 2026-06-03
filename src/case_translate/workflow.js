@@ -4,7 +4,7 @@
  * 当前流程：
  *   Phase 1: 生成结构化步骤 JSON（step_2_structured_steps.json）
  *   Phase 2: 基于结构化步骤归纳 AI_cases.md
- *   Phase 3: 输出 Midscene YAML（no_assert）
+ *   Phase 4: 生成 case_4_agents.txt
  *
  * 设计目标：
  * - 不再依赖 AI_steps.md 作为主数据
@@ -22,15 +22,11 @@ import {
   AI_CASES_FILENAME,
   PHASE2_CASE_WINDOW_STEPS,
   PHASE2_CASE_WINDOW_MAX_TOKENS,
-  SELENIUM_EXPORT_ENABLED,
   LLM_AUTO_HEAL_ENABLED,
 } from '../utils/config.js';
 
-import { regenerateFromStructured } from '../selenium_export/regenerate-from-structured.js';
-
-import { cleanMarkdownFence, parseJsonFromLlmReply, callChat } from './ai-client.js';
+import { cleanMarkdownFence, parseJsonFromLlmReply } from './ai-client.js';
 import { createLlmAudit } from './llm-audit.js';
-import { generateMidsceneYaml } from './midscene/index.js';
 import { generateAgentTxt } from './phase4/agent-txt-generator.js';
 
 import {
@@ -46,20 +42,18 @@ import {
 import {
   buildSystemPrompt as buildStructuredStepSystemPrompt,
   buildUserPrompt as buildStructuredStepUserPrompt,
-  buildBatchRepairSystemPrompt,
-  buildBatchRepairUserPrompt,
 } from './prompts/step-structured.js';
 
 // ==================== 核心入口函数 ====================
 
 /**
- * 执行完整的 AI 翻译工作流（Phase 1 + Phase 2 + Phase 3）
+ * 执行完整的 AI 翻译工作流（Phase 1 + Phase 2 + Phase 4）
  *
  * @param {string} runDir - 录制输出目录路径（如 output/run_2026-02-15T06-08-43）
  * @param {Array<Object>} enrichedActions - 预处理后的富化 action 数据数组
  * @param {Object} [options] - 可选配置
  * @param {Object} [options.log] - 日志器实例
- * @returns {Promise<{ stepsFile: string, casesFile: string, midsceneNoAssertFile: string, agentTxtFile: string|null }>}
+ * @returns {Promise<{ stepsFile: string, casesFile: string, agentTxtFile: string|null }>}
  */
 export async function runWorkflow(runDir, enrichedActions, options = {}) {
   const { log } = options;
@@ -91,14 +85,6 @@ export async function runWorkflow(runDir, enrichedActions, options = {}) {
     log.warn(`[Phase 1] 存在 ${errors.length} 条 LLM 输出异常（自愈已关闭，详见 llm_audit）: ${stepErrorsFile}`);
   }
 
-  if (SELENIUM_EXPORT_ENABLED) {
-    try {
-      regenerateFromStructured(runDir, { log });
-    } catch (error) {
-      if (log) log.warn(`[Selenium] 终稿生成失败（已忽略）: ${error.message}`);
-    }
-  }
-
   // ========== Phase 2：归纳用例 ==========
   if (log) log.info(`[Phase 2] 正在归纳测试用例 (窗口大小=${phaseWindowSize})...`);
   const phase2Start = Date.now();
@@ -108,10 +94,6 @@ export async function runWorkflow(runDir, enrichedActions, options = {}) {
   const phase2Elapsed = ((Date.now() - phase2Start) / 1000).toFixed(1);
   if (log) log.info(`[Phase 2] 完成，耗时 ${phase2Elapsed}s`);
   if (log) log.info(`[Phase 2] 文件已保存: ${casesFile}`);
-
-  // ========== Phase 3：Midscene YAML ==========
-  if (log) log.info('[Phase 3] 正在生成 Midscene YAML（no_assert）...');
-  const { noAssertFile } = generateMidsceneYaml(runDir, steps, { log });
 
   // ========== Phase 4：Agent TXT 生成 ==========
   let agentTxtFile = null;
@@ -130,7 +112,6 @@ export async function runWorkflow(runDir, enrichedActions, options = {}) {
   return {
     stepsFile,
     casesFile,
-    midsceneNoAssertFile: noAssertFile,
     agentTxtFile,
   };
 }
@@ -228,38 +209,8 @@ async function runPhase1Structured(stepsFile, stepErrorsFile, enrichedActions, o
         { temperature: 0, maxTokens: 2000 },
       );
 
-      // 解析批量返回（失败时尝试 JSON 修复重试）
+      // 解析批量返回
       let batchResult = parseBatchStructuredSteps(rawReply, actionBatch, skipNoiseIndices, log);
-      let repairCallId = null;
-
-      if (
-        batchResult.parsedSteps.length === 0
-        && batchResult.errors.some((e) => e.type === 'batch-parse-error' || e.type === 'batch-structure-error')
-      ) {
-        if (log) log.warn(`[Phase 1] 批次 ${startIdx}~${endIdx} JSON 解析失败，尝试修复重试...`);
-        const repairResult = await tryRepairBatchStructuredReply(rawReply, llmAudit, {
-          batchStartIndex: startIdx,
-          batchEndIndex: endIdx,
-        });
-        if (repairResult) {
-          repairCallId = repairResult.callId;
-          batchResult = parseBatchStructuredSteps(repairResult.raw, actionBatch, skipNoiseIndices, log);
-          const repairOk =
-            batchResult.parsedSteps.length === actionBatch.length
-            && batchResult.failedIndices.length === 0;
-          llmAudit.markOutcome(repairCallId, {
-            ok: repairOk,
-            problems: repairOk
-              ? []
-              : batchResult.errors.map((e) => `[${e.type}] index=${e.index}: ${e.reason}`),
-            details: {
-              kind: 'json-repair',
-              parsedCount: batchResult.parsedSteps.length,
-              expectedCount: actionBatch.length,
-            },
-          });
-        }
-      }
 
       const batchProblems = batchResult.errors.map(
         (e) => `[${e.type}] index=${e.index ?? 'batch'}: ${e.reason}`,
@@ -276,8 +227,6 @@ async function runPhase1Structured(stepsFile, stepErrorsFile, enrichedActions, o
           parsedCount: batchResult.parsedSteps.length,
           expectedCount: actionBatch.length,
           failedIndices: batchResult.failedIndices,
-          usedRepair: Boolean(repairCallId),
-          repairCallId,
         },
       });
 
@@ -423,35 +372,6 @@ function parseBatchLlmJson(rawReply) {
     } catch (__) {
       return null;
     }
-  }
-}
-
-/**
- * 批次 JSON 修复：要求模型将非法输出修正为 { parsedSteps: [...] }
- *
- * @param {string} rawReply
- * @param {ReturnType<typeof createLlmAudit>} llmAudit
- * @param {{ batchStartIndex: number, batchEndIndex: number }} meta
- * @returns {Promise<{ callId: string, raw: string }|null>}
- */
-async function tryRepairBatchStructuredReply(rawReply, llmAudit, meta) {
-  const messages = [
-    { role: 'system', content: buildBatchRepairSystemPrompt() },
-    { role: 'user', content: buildBatchRepairUserPrompt(rawReply) },
-  ];
-
-  try {
-    return await llmAudit.call(
-      {
-        phase: 'phase1-repair',
-        label: `json repair batch index ${meta.batchStartIndex}~${meta.batchEndIndex}`,
-        extra: meta,
-      },
-      messages,
-      { temperature: 0, maxTokens: 2500 },
-    );
-  } catch (_) {
-    return null;
   }
 }
 
@@ -748,71 +668,6 @@ async function runPhase2FromStructured(steps, casesFile, options = {}) {
 // ==================== 工具函数 ====================
 
 /**
- * 尝试解析并校验结构化 step
- *
- * @param {string} rawReply
- * @param {Object} enrichedAction
- * @param {number} actionIndex
- * @returns {{ ok: true, step: Object } | { ok: false, error: string }}
- */
-function parseAndValidateStructuredStep(rawReply, enrichedAction, actionIndex, intervalFromPreviousMs) {
-  const normalized = cleanMarkdownFence(rawReply).trim();
-  let parsed;
-  try {
-    parsed = JSON.parse(normalized);
-  } catch (_) {
-    const extracted = extractFirstJsonObject(normalized);
-    if (!extracted) {
-      return { ok: false, error: 'JSON 解析失败，且未提取到对象' };
-    }
-    try {
-      parsed = JSON.parse(extracted);
-    } catch (err) {
-      return { ok: false, error: `JSON 解析失败: ${err.message}` };
-    }
-  }
-
-  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
-    return { ok: false, error: '输出不是 JSON 对象' };
-  }
-
-  const step = normalizeStructuredStep(parsed, enrichedAction, actionIndex, intervalFromPreviousMs);
-  const validationError = validateStructuredStep(step);
-  if (validationError) {
-    return { ok: false, error: validationError };
-  }
-  return { ok: true, step };
-}
-
-/**
- * 单条修复：要求模型把已有输出修正为严格 JSON
- *
- * @param {string} rawReply
- * @param {Object} enrichedAction
- * @param {number} actionIndex
- * @returns {Promise<{ ok: true, step: Object } | { ok: false, error: string }>}
- */
-async function tryRepairStructuredStep(rawReply, enrichedAction, actionIndex, intervalFromPreviousMs) {
-  const messages = [
-    {
-      role: 'system',
-      content: `你是 JSON 修复器。只输出一个合法 JSON 对象，不要任何解释。\n对象必须包含字段：description, uiChange, page, basis, actionKind, target, inputText, key, assertText, confidence。`,
-    },
-    {
-      role: 'user',
-      content: `请把下面文本修正为合法 JSON 对象：\n\n${rawReply}`,
-    },
-  ];
-
-  try {
-    const repairedRaw = await callChat(messages, { temperature: 0, maxTokens: 800 });
-    return parseAndValidateStructuredStep(repairedRaw, enrichedAction, actionIndex, intervalFromPreviousMs);
-  } catch (error) {
-    return { ok: false, error: `修复调用失败: ${error.message}` };
-  }
-}
-
-/**
  * 结构化 step 归一化
  *
  * @param {Object} parsed
@@ -970,19 +825,6 @@ function normalizeTimestamp(value, fallback = null) {
  */
 function writeJsonIncremental(filePath, data) {
   fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf-8');
-}
-
-/**
- * 提取首个 JSON 对象片段
- *
- * @param {string} text
- * @returns {string|null}
- */
-function extractFirstJsonObject(text) {
-  const start = text.indexOf('{');
-  const end = text.lastIndexOf('}');
-  if (start < 0 || end <= start) return null;
-  return text.slice(start, end + 1);
 }
 
 /**

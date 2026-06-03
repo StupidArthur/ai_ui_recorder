@@ -5,7 +5,7 @@
  *
  * 设计目标：
  * - 保证步骤编号绝对单调递增（LLM 不可靠，本地渲染保证）
- * - LLM JSON 解析失败时：修复重试 → 本地确定性兜底（不丢步骤）
+ * - LLM JSON 解析失败时：本地确定性兜底（不丢步骤）
  * - 生成供下游 AI Agent 消费的纯文本测试用例
  */
 
@@ -15,8 +15,6 @@ import { parseJsonFromLlmReply } from '../ai-client.js';
 import {
   buildAgentTxtSystemPrompt,
   buildAgentTxtUserPrompt,
-  buildAgentTxtRepairSystemPrompt,
-  buildAgentTxtRepairUserPrompt,
 } from '../prompts/agent-txt.js';
 
 /** 默认滑动窗口大小 */
@@ -77,64 +75,6 @@ function deriveUseCaseNameFromSteps(steps) {
 }
 
 /**
- * 尝试调用 LLM 修复非法 JSON 输出
- *
- * @param {string} rawReply
- * @param {ReturnType<import('../llm-audit.js').createLlmAudit>} llmAudit
- * @param {Object} meta
- * @returns {Promise<Object|null>}
- */
-async function tryRepairAgentTxtJson(rawReply, llmAudit, meta) {
-  const messages = [
-    { role: 'system', content: buildAgentTxtRepairSystemPrompt() },
-    { role: 'user', content: buildAgentTxtRepairUserPrompt(rawReply) },
-  ];
-
-  try {
-    const { callId, raw: repaired } = await llmAudit.call(
-      {
-        phase: 'phase4-repair',
-        label: meta.label,
-        extra: meta.extra,
-      },
-      messages,
-      { temperature: 0, maxTokens: 2000 },
-    );
-    try {
-      const parsed = parseJsonFromLlmReply(repaired);
-      llmAudit.markOutcome(callId, { ok: true, problems: [], details: { kind: 'json-repair' } });
-      return parsed;
-    } catch (parseError) {
-      llmAudit.markOutcome(callId, {
-        ok: false,
-        problems: [`修复后仍无法解析 JSON: ${parseError.message}`],
-      });
-      return null;
-    }
-  } catch (_) {
-    return null;
-  }
-}
-
-/**
- * 解析 LLM 返回的 Agent TXT JSON（含修复重试）
- *
- * @param {string} rawReply
- * @param {ReturnType<import('../llm-audit.js').createLlmAudit>} llmAudit
- * @param {Object} meta
- * @returns {Promise<Object>}
- */
-async function parseAgentTxtReply(rawReply, llmAudit, meta) {
-  try {
-    return parseJsonFromLlmReply(rawReply);
-  } catch (firstError) {
-    const repaired = await tryRepairAgentTxtJson(rawReply, llmAudit, meta);
-    if (repaired) return repaired;
-    throw firstError;
-  }
-}
-
-/**
  * Phase 4：生成供 Agent 使用的纯文本测试用例
  *
  * @param {string} runDir - 录制输出目录路径
@@ -183,10 +123,7 @@ export async function generateAgentTxt(runDir, structuredSteps, options = {}) {
     const chunkStart = cursor + 1;
     const chunkEnd = cursor + chunk.length;
     const phase4Label = `agent txt chunk steps ${chunkStart}~${chunkEnd}`;
-    const auditMeta = {
-      label: phase4Label,
-      extra: { stepIndices: chunk.map((s) => s.index) },
-    };
+    const auditMeta = { stepIndices: chunk.map((s) => s.index) };
 
     let parsedReply = null;
     let chunkHandledByLocal = false;
@@ -204,16 +141,13 @@ export async function generateAgentTxt(runDir, structuredSteps, options = {}) {
         {
           phase: 'phase4',
           label: phase4Label,
-          extra: auditMeta.extra,
+          extra: auditMeta,
         },
         messages,
         { temperature: 0.1, maxTokens: 2000 },
       ));
 
-      parsedReply = await parseAgentTxtReply(rawReply, llmAudit, {
-        label: `${phase4Label} json-repair`,
-        extra: auditMeta.extra,
-      });
+      parsedReply = parseJsonFromLlmReply(rawReply);
 
       const agentSteps = Array.isArray(parsedReply.agentSteps) ? parsedReply.agentSteps : [];
       const parseOk = agentSteps.length > 0;
@@ -230,7 +164,7 @@ export async function generateAgentTxt(runDir, structuredSteps, options = {}) {
         llmAudit.markOutcome(callId, {
           ok: false,
           problems: [error.message],
-          details: auditMeta.extra,
+          details: auditMeta,
         });
       }
       if (log)

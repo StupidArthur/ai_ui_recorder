@@ -1,8 +1,8 @@
 /**
  * agent-txt.js - Phase 4 Agent TXT Prompt 入口
  *
- * Prompt 正文：prompts/md/phase4-agent-txt-*.md
- * 输出 JSON 契约已合并进 phase4-agent-txt-system.md 的 Output Format 章节。
+ * Skill：prompts/md/case-4-agents-skill.md
+ * User：本文件内嵌（动态数据拼接）
  */
 
 import { loadPromptMd } from './loader.js';
@@ -13,7 +13,7 @@ import { loadPromptMd } from './loader.js';
  * @returns {string}
  */
 export function buildAgentTxtSystemPrompt() {
-  return loadPromptMd('phase4-agent-txt-system.md');
+  return loadPromptMd('case-4-agents-skill.md');
 }
 
 /**
@@ -23,26 +23,7 @@ export function buildAgentTxtSystemPrompt() {
  * @returns {string}
  */
 export function buildAgentTxtUserPrompt(stepsJson) {
-  return loadPromptMd('phase4-agent-txt-user.md', { stepsJson });
-}
+  return `请根据以下按时间顺序排列的结构化步骤数据，进行业务逻辑聚合：
 
-/**
- * 构建 Phase 4 JSON 修复 System Prompt
- *
- * @returns {string}
- */
-export function buildAgentTxtRepairSystemPrompt() {
-  return loadPromptMd('phase4-agent-txt-repair-system.md');
-}
-
-/**
- * 构建 Phase 4 JSON 修复 User Prompt
- *
- * @param {string} rawReply - LLM 原始输出
- * @returns {string}
- */
-export function buildAgentTxtRepairUserPrompt(rawReply) {
-  return loadPromptMd('phase4-agent-txt-repair-user.md', {
-    rawReply: String(rawReply || '').slice(0, 6000),
-  });
+${stepsJson}`;
 }

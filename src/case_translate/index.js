@@ -4,7 +4,7 @@
  * 纯入口，只做三件事：
  * 1. 查找 meta.json（自动定位最近一次录制）
  * 2. 调用 preprocessor 进行数据预处理
- * 3. 调用 workflow 执行 AI 翻译工作流（结构化步骤 + Case 归纳 + Midscene YAML）
+ * 3. 调用 workflow 执行 AI 翻译工作流（结构化步骤 + Case 归纳 + Agent TXT）
  *
  * 与录制模块完全解耦：
  * - 录制器负责生产 meta.json + actions/ + snapshots/（数据生产者）

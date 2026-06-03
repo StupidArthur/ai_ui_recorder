@@ -203,7 +203,7 @@ export const GENERATE_LOG_FILENAME = 'generate.log';
 export const LLM_AUTO_HEAL_ENABLED = false;
 
 /**
- * LLM 审计目录名（相对 run 目录，完整路径 run_*/llm_audit/）
+ * LLM 审计目录名（相对 run 目录，例如 run_2026-06-03T07-11-48/llm_audit/）
  */
 export const LLM_AUDIT_DIRNAME = 'llm_audit';
 
@@ -241,16 +241,25 @@ export const EXIT_DELAY_MS = 1000;
 
 /**
  * 是否在录制过程中增量写出 Selenium 草稿，并在 AI Phase1 后生成终稿 Python
- * - false：保持历史行为，不写 py
- * - true：写 step_0_selenium_draft.py（原始 action，不完整）+ Phase1 后 step_0_selenium_from_recording.py
+ * 当前默认关闭（项目未使用 Selenium / Midscene 导出）。
  */
-export const SELENIUM_EXPORT_ENABLED = true;
+export const SELENIUM_EXPORT_ENABLED = false;
 
 /** 录制过程中追加的草稿文件名（位于 run 目录根下） */
 export const SELENIUM_DRAFT_FILENAME = 'step_0_selenium_draft.py';
 
 /** 依赖 enriched + step_2 的终稿 Python 文件名 */
 export const SELENIUM_FINAL_FILENAME = 'step_0_selenium_from_recording.py';
+
+/**
+ * Dashboard「录制历史」文件预览白名单（仅给人阅读的产物，按展示顺序）
+ */
+export const DASHBOARD_PREVIEW_FILES = [
+  AI_CASES_FILENAME,
+  'case_4_agents.txt',
+  AI_STEPS_STRUCTURED_FILENAME,
+  META_FILENAME,
+];
 
 /** 生成脚本中 chromedriver 路径占位变量名（Python 侧） */
 export const SELENIUM_CHROMEDRIVER_VAR_NAME = 'CHROMEDRIVER_PATH';

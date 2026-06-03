@@ -1,16 +1,24 @@
 /**
- * loader.js - Prompt Markdown 加载与占位符替换
+ * loader.js - 加载 Skill Prompt Markdown（User 消息由各 *.js 内嵌拼接）
  *
- * 所有 LLM 提示词正文存放在 prompts/md/*.md，代码只负责读取与插值。
- * JSON Schema 存放在 prompts/schema/*.json。
+ * 所有 LLM Skill 提示词存放在 prompts/md/*-skill.md；User 消息由各 prompts/*.js 内嵌拼接。
  */
 
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+/**
+ * 模块所在目录（ESM 开发环境）；pkg CJS bundle 下为 null，改由 execPath 解析 prompts/
+ */
+let moduleDir = null;
+try {
+  if (import.meta.url) {
+    moduleDir = path.dirname(fileURLToPath(import.meta.url));
+  }
+} catch (_) {
+  // pkg 打包后 import.meta.url 不可用
+}
 
 /** 运行时 Markdown 缓存（避免重复读盘） */
 const markdownCache = new Map();
@@ -21,11 +29,14 @@ const markdownCache = new Map();
  * @returns {string}
  */
 function resolveMdDir() {
-  const candidates = [
-    path.join(__dirname, 'md'),
-    path.join(process.cwd(), 'src/case_translate/prompts/md'),
+  const candidates = [];
+  if (moduleDir) {
+    candidates.push(path.join(moduleDir, 'md'));
+  }
+  candidates.push(
     path.join(path.dirname(process.execPath), 'prompts/md'),
-  ];
+    path.join(process.cwd(), 'src/case_translate/prompts/md'),
+  );
   for (const dir of candidates) {
     if (fs.existsSync(dir)) return dir;
   }
@@ -33,24 +44,7 @@ function resolveMdDir() {
 }
 
 /**
- * 解析 Prompt Schema 目录
- *
- * @returns {string}
- */
-function resolveSchemaDir() {
-  const candidates = [
-    path.join(__dirname, 'schema'),
-    path.join(process.cwd(), 'src/case_translate/prompts/schema'),
-    path.join(path.dirname(process.execPath), 'prompts/schema'),
-  ];
-  for (const dir of candidates) {
-    if (fs.existsSync(dir)) return dir;
-  }
-  throw new Error(`找不到 Prompt Schema 目录，已尝试: ${candidates.join(' | ')}`);
-}
-
-/**
- * 读取 Markdown Prompt 并替换 {{key}} 占位符
+ * 读取 Skill Prompt Markdown 文件
  *
  * @param {string} relativePath - 相对 prompts/md/ 的路径
  * @param {Record<string, string|number>} [vars] - 占位符键值
@@ -69,18 +63,6 @@ export function loadPromptMd(relativePath, vars = {}) {
     result = result.split(`{{${key}}}`).join(String(value ?? ''));
   }
   return result.trim();
-}
-
-/**
- * 读取 JSON Schema 文件
- *
- * @param {string} relativePath - 相对 prompts/schema/ 的路径
- * @returns {Object}
- */
-export function loadPromptSchema(relativePath) {
-  const fullPath = path.join(resolveSchemaDir(), relativePath);
-  const raw = fs.readFileSync(fullPath, 'utf-8').replace(/^\uFEFF/, '');
-  return JSON.parse(raw);
 }
 
 /**

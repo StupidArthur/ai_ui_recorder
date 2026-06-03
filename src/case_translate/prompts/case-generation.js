@@ -1,7 +1,8 @@
 /**
  * case-generation.js - Phase 2 固定窗口 Case 归纳 Prompt 入口
  *
- * Prompt 正文：prompts/md/phase2-case-window-*.md
+ * Skill：prompts/md/steps-2-cases-skill.md
+ * User：本文件内嵌（动态数据拼接）
  */
 
 import { loadPromptMd } from './loader.js';
@@ -12,7 +13,7 @@ import { loadPromptMd } from './loader.js';
  * @returns {string}
  */
 export function buildPhase2WindowSystemPrompt() {
-  return loadPromptMd('phase2-case-window-system.md');
+  return loadPromptMd('steps-2-cases-skill.md');
 }
 
 /**
@@ -23,8 +24,10 @@ export function buildPhase2WindowSystemPrompt() {
  * @returns {string}
  */
 export function buildPhase2WindowUserPrompt(windowStepsJson, indexListText) {
-  return loadPromptMd('phase2-case-window-user.md', {
-    windowStepsJson,
-    indexListText,
-  });
+  return `本窗口瘦身步骤（JSON 数组）：
+${windowStepsJson}
+
+本窗口可用 index 列表（必须从这里取前缀连续子数组）：${indexListText}
+
+请归纳成 1 个 Case，并只输出符合 system 要求的 JSON 对象。`;
 }

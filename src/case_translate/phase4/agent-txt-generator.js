@@ -11,8 +11,13 @@
 
 import fs from 'fs';
 import path from 'path';
-import { callChat, parseJsonFromLlmReply } from '../ai-client.js';
-import { buildAgentTxtSystemPrompt, buildAgentTxtUserPrompt } from '../prompts/agent-txt.js';
+import { parseJsonFromLlmReply } from '../ai-client.js';
+import {
+  buildAgentTxtSystemPrompt,
+  buildAgentTxtUserPrompt,
+  buildAgentTxtRepairSystemPrompt,
+  buildAgentTxtRepairUserPrompt,
+} from '../prompts/agent-txt.js';
 
 /** 默认滑动窗口大小 */
 const DEFAULT_CHUNK_SIZE = 20;
@@ -75,26 +80,37 @@ function deriveUseCaseNameFromSteps(steps) {
  * 尝试调用 LLM 修复非法 JSON 输出
  *
  * @param {string} rawReply
+ * @param {ReturnType<import('../llm-audit.js').createLlmAudit>} llmAudit
+ * @param {Object} meta
  * @returns {Promise<Object|null>}
  */
-async function tryRepairAgentTxtJson(rawReply) {
+async function tryRepairAgentTxtJson(rawReply, llmAudit, meta) {
   const messages = [
-    {
-      role: 'system',
-      content:
-        '你是 JSON 修复器。只输出一个合法 JSON 对象，不要任何解释、思考过程或 Markdown。\n' +
-        '对象必须包含字段：useCaseName(string), useCasePurpose(string), agentSteps(array)。\n' +
-        'agentSteps 每项含 logicalName, microActions(string[]), consumeStepCount(number)。',
-    },
-    {
-      role: 'user',
-      content: `请把下面文本修正为合法 JSON 对象：\n\n${rawReply.slice(0, 6000)}`,
-    },
+    { role: 'system', content: buildAgentTxtRepairSystemPrompt() },
+    { role: 'user', content: buildAgentTxtRepairUserPrompt(rawReply) },
   ];
 
   try {
-    const repaired = await callChat(messages, { temperature: 0, maxTokens: 2000 });
-    return parseJsonFromLlmReply(repaired);
+    const { callId, raw: repaired } = await llmAudit.call(
+      {
+        phase: 'phase4-repair',
+        label: meta.label,
+        extra: meta.extra,
+      },
+      messages,
+      { temperature: 0, maxTokens: 2000 },
+    );
+    try {
+      const parsed = parseJsonFromLlmReply(repaired);
+      llmAudit.markOutcome(callId, { ok: true, problems: [], details: { kind: 'json-repair' } });
+      return parsed;
+    } catch (parseError) {
+      llmAudit.markOutcome(callId, {
+        ok: false,
+        problems: [`修复后仍无法解析 JSON: ${parseError.message}`],
+      });
+      return null;
+    }
   } catch (_) {
     return null;
   }
@@ -104,13 +120,15 @@ async function tryRepairAgentTxtJson(rawReply) {
  * 解析 LLM 返回的 Agent TXT JSON（含修复重试）
  *
  * @param {string} rawReply
+ * @param {ReturnType<import('../llm-audit.js').createLlmAudit>} llmAudit
+ * @param {Object} meta
  * @returns {Promise<Object>}
  */
-async function parseAgentTxtReply(rawReply) {
+async function parseAgentTxtReply(rawReply, llmAudit, meta) {
   try {
     return parseJsonFromLlmReply(rawReply);
   } catch (firstError) {
-    const repaired = await tryRepairAgentTxtJson(rawReply);
+    const repaired = await tryRepairAgentTxtJson(rawReply, llmAudit, meta);
     if (repaired) return repaired;
     throw firstError;
   }
@@ -127,7 +145,7 @@ async function parseAgentTxtReply(rawReply) {
  * @returns {Promise<string>} 生成的 TXT 文件路径
  */
 export async function generateAgentTxt(runDir, structuredSteps, options = {}) {
-  const { log } = options;
+  const { log, llmAudit } = options;
   const phaseWindowSize = options.phaseWindowSize || DEFAULT_CHUNK_SIZE;
   if (log) log.info(`[Agent TXT] 开始生成 Agent 专用测试用例 (窗口大小=${phaseWindowSize})...`);
 
@@ -162,19 +180,59 @@ export async function generateAgentTxt(runDir, structuredSteps, options = {}) {
       { role: 'user', content: buildAgentTxtUserPrompt(JSON.stringify(slimChunk, null, 2)) },
     ];
 
+    const chunkStart = cursor + 1;
+    const chunkEnd = cursor + chunk.length;
+    const phase4Label = `agent txt chunk steps ${chunkStart}~${chunkEnd}`;
+    const auditMeta = {
+      label: phase4Label,
+      extra: { stepIndices: chunk.map((s) => s.index) },
+    };
+
     let parsedReply = null;
     let chunkHandledByLocal = false;
+    let callId = null;
+    let rawReply;
 
     try {
-      if (log) log.info(`[Agent TXT] 正在处理步骤 ${cursor + 1}~${cursor + chunk.length}...`);
+      if (log) log.info(`[Agent TXT] 正在处理步骤 ${chunkStart}~${chunkEnd}...`);
 
-      const rawReply = await callChat(messages, {
-        temperature: 0.1,
-        maxTokens: 2000,
+      if (!llmAudit) {
+        throw new Error('llmAudit 未注入，无法审计 Phase 4 调用');
+      }
+
+      ({ callId, raw: rawReply } = await llmAudit.call(
+        {
+          phase: 'phase4',
+          label: phase4Label,
+          extra: auditMeta.extra,
+        },
+        messages,
+        { temperature: 0.1, maxTokens: 2000 },
+      ));
+
+      parsedReply = await parseAgentTxtReply(rawReply, llmAudit, {
+        label: `${phase4Label} json-repair`,
+        extra: auditMeta.extra,
       });
 
-      parsedReply = await parseAgentTxtReply(rawReply);
+      const agentSteps = Array.isArray(parsedReply.agentSteps) ? parsedReply.agentSteps : [];
+      const parseOk = agentSteps.length > 0;
+      llmAudit.markOutcome(callId, {
+        ok: parseOk,
+        problems: parseOk ? [] : ['agentSteps 为空或 JSON 结构无效'],
+        details: {
+          useCaseName: parsedReply.useCaseName,
+          agentStepCount: agentSteps.length,
+        },
+      });
     } catch (error) {
+      if (callId) {
+        llmAudit.markOutcome(callId, {
+          ok: false,
+          problems: [error.message],
+          details: auditMeta.extra,
+        });
+      }
       if (log)
         log.warn(
           `[Agent TXT] LLM 解析失败 (${error.message})，使用本地确定性兜底渲染 ${chunk.length} 步`,

@@ -28,6 +28,10 @@ if ($pkgExitCode -ne 0 -or -not (Test-Path $outputExe)) {
   exit 1
 }
 
+Copy-Item -Path "src/case_translate/prompts/md" -Destination "release/prompts/md" -Recurse -Force
+Copy-Item -Path "src/case_translate/prompts/schema" -Destination "release/prompts/schema" -Recurse -Force
+Copy-Item -Path "src/case_translate/prompts/README.md" -Destination "release/prompts/README.md" -Force
+
 Write-Host "Build done: $outputExe" -ForegroundColor Green
 Write-Host "Usage example:" -ForegroundColor Yellow
 Write-Host "  .\release\translate-standalone.exe" -ForegroundColor Yellow

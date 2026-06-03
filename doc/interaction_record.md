@@ -1194,6 +1194,15 @@
 
 ---
 
+## 2026-06-03 — Prompt 独立为 Markdown
+
+- 所有 LLM Prompt 正文迁至 `src/case_translate/prompts/md/*.md`
+- JSON Schema 迁至 `src/case_translate/prompts/schema/*.json`
+- 新增 `prompts/loader.js` 负责读取与 `{{占位符}}` 替换
+- `*.js` 入口改为薄封装；EXE 打包时复制 `prompts/` 到 `release/prompts/`
+
+---
+
 ## 2026-06-03 交互 — Phase 1 confidence 自愈 + 批次 JSON 容错
 
 ### 问题
@@ -1209,3 +1218,24 @@
 ### 验证（run_2026-06-03T07-11-48）
 - Phase 1：`normal: 19, noise: 1, errors: 0`（修复前 fallback: 19）
 - Phase 2/3/4 均成功；Agent TXT 8 个逻辑步骤
+
+---
+
+## 2026-06-03 — System Prompt LangGPT 9 维重构 + Schema 合并
+
+### 变更
+- 全部 **System** md（Phase 1/2/4 主调用 + repair + 遗留 step-analysis）按 `langgpt_standard.md` 重写为 9 维度：Role / Profile / Background / Goals / Constraints / Skills / Workflows / Output Format / Initialization
+- Phase 1、Phase 4 的 JSON 字段表与示例合并进各 System 的 **Output Format** 章节
+- **`workflow.js`**：移除 Phase 1 的 `response_format.json_schema` 传参（MiniMax 等模型不支持或效果差）
+- **`step-structured.js` / `agent-txt.js`**：移除 Schema 导出；`prompts/schema/*.json` 保留为参考副本
+- 更新 `prompts/总纲.md`、`prompts/README.md`
+
+---
+
+## 2026-06-03 — 关闭 LLM 自愈 + 全量审计落盘
+
+### 变更
+- **`LLM_AUTO_HEAL_ENABLED = false`**（`config.js`）：关闭 `applyPartialAutoHeal` 及 normalize 阶段的证据补全
+- 新增 **`llm-audit.js`**：每次 LLM 调用写入 `run_*/llm_audit/call_XXXX.json`（完整 messages + raw 回复 + outcome）
+- 跑完生成 **`llm_audit/index.json`**、**`problems.json`**、**`summary.json`**，便于定位有问题的输入输出对
+- Phase 1/2/4 及 repair 调用均接入审计

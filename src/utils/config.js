@@ -197,6 +197,17 @@ export const MIDSCENE_INTERVAL_SLEEP_MAX_MS = 5000;
 export const GENERATE_LOG_FILENAME = 'generate.log';
 
 /**
+ * Phase 1 局部字段自愈（description/uiChange/basis/confidence 等）
+ * false：严格使用 LLM 原始输出，缺失字段由校验捕获并记入 llm_audit
+ */
+export const LLM_AUTO_HEAL_ENABLED = false;
+
+/**
+ * LLM 审计目录名（相对 run 目录，完整路径 run_*/llm_audit/）
+ */
+export const LLM_AUDIT_DIRNAME = 'llm_audit';
+
+/**
  * Phase 2：固定窗口内参与归纳的有效步数（仅统计 status=normal 的步骤）
  * 窗口在过滤后的有效步骤数组上滑动；可通过调大该值覆盖更长业务流程片段。
  */

@@ -129,6 +129,9 @@ if (Test-Path $localChromeZipPath) {
 
 Write-Host "[5/5] Copy static + config template..." -ForegroundColor Cyan
 Copy-Item -Path "src/dashboard/static" -Destination "release/static" -Recurse -Force
+Copy-Item -Path "src/case_translate/prompts/md" -Destination "release/prompts/md" -Recurse -Force
+Copy-Item -Path "src/case_translate/prompts/schema" -Destination "release/prompts/schema" -Recurse -Force
+Copy-Item -Path "src/case_translate/prompts/README.md" -Destination "release/prompts/README.md" -Force
 New-Item -ItemType Directory -Path "release/config" -Force | Out-Null
 $defaultAiConfigJson = @'
 {

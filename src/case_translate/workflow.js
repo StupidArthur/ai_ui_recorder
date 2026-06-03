@@ -23,11 +23,13 @@ import {
   PHASE2_CASE_WINDOW_STEPS,
   PHASE2_CASE_WINDOW_MAX_TOKENS,
   SELENIUM_EXPORT_ENABLED,
+  LLM_AUTO_HEAL_ENABLED,
 } from '../utils/config.js';
 
 import { regenerateFromStructured } from '../selenium_export/regenerate-from-structured.js';
 
-import { callChat, cleanMarkdownFence, parseJsonFromLlmReply } from './ai-client.js';
+import { cleanMarkdownFence, parseJsonFromLlmReply, callChat } from './ai-client.js';
+import { createLlmAudit } from './llm-audit.js';
 import { generateMidsceneYaml } from './midscene/index.js';
 import { generateAgentTxt } from './phase4/agent-txt-generator.js';
 
@@ -44,7 +46,8 @@ import {
 import {
   buildSystemPrompt as buildStructuredStepSystemPrompt,
   buildUserPrompt as buildStructuredStepUserPrompt,
-  stepStructuredBatchSchema,
+  buildBatchRepairSystemPrompt,
+  buildBatchRepairUserPrompt,
 } from './prompts/step-structured.js';
 
 // ==================== 核心入口函数 ====================
@@ -61,6 +64,8 @@ import {
 export async function runWorkflow(runDir, enrichedActions, options = {}) {
   const { log } = options;
 
+  const llmAudit = createLlmAudit(runDir, log);
+
   // Micro-batching 配置
   const phase1BatchSize = options.phase1BatchSize || 3;
   const phaseWindowSize = options.phaseWindowSize || PHASE2_CASE_WINDOW_STEPS;
@@ -76,13 +81,14 @@ export async function runWorkflow(runDir, enrichedActions, options = {}) {
   const { steps, errors } = await runPhase1Structured(stepsFile, stepErrorsFile, enrichedActions, {
     log,
     phase1BatchSize,
+    llmAudit,
   });
 
   const phase1Elapsed = ((Date.now() - phase1Start) / 1000).toFixed(1);
   if (log) log.info(`[Phase 1] 完成，共 ${steps.length} 条结构化步骤，耗时 ${phase1Elapsed}s`);
   if (log) log.info(`[Phase 1] 文件已保存: ${stepsFile}`);
   if (log && errors.length > 0) {
-    log.warn(`[Phase 1] 存在 ${errors.length} 条模型输出异常，已自动修复或兜底: ${stepErrorsFile}`);
+    log.warn(`[Phase 1] 存在 ${errors.length} 条 LLM 输出异常（自愈已关闭，详见 llm_audit）: ${stepErrorsFile}`);
   }
 
   if (SELENIUM_EXPORT_ENABLED) {
@@ -97,7 +103,7 @@ export async function runWorkflow(runDir, enrichedActions, options = {}) {
   if (log) log.info(`[Phase 2] 正在归纳测试用例 (窗口大小=${phaseWindowSize})...`);
   const phase2Start = Date.now();
 
-  await runPhase2FromStructured(steps, casesFile, { log, phaseWindowSize });
+  await runPhase2FromStructured(steps, casesFile, { log, phaseWindowSize, llmAudit });
 
   const phase2Elapsed = ((Date.now() - phase2Start) / 1000).toFixed(1);
   if (log) log.info(`[Phase 2] 完成，耗时 ${phase2Elapsed}s`);
@@ -110,7 +116,7 @@ export async function runWorkflow(runDir, enrichedActions, options = {}) {
   // ========== Phase 4：Agent TXT 生成 ==========
   let agentTxtFile = null;
   try {
-    agentTxtFile = await generateAgentTxt(runDir, steps, { log, phaseWindowSize });
+    agentTxtFile = await generateAgentTxt(runDir, steps, { log, phaseWindowSize, llmAudit });
   } catch (err) {
     if (log) log.error(`[Workflow] Agent TXT 生成失败: ${err.message}`);
   }
@@ -118,6 +124,8 @@ export async function runWorkflow(runDir, enrichedActions, options = {}) {
   // ========== 总结 ==========
   const totalElapsed = ((Date.now() - phase1Start) / 1000).toFixed(1);
   if (log) log.info(`AI 翻译总耗时: ${totalElapsed}s`);
+
+  llmAudit.finalize();
 
   return {
     stepsFile,
@@ -141,7 +149,7 @@ export async function runWorkflow(runDir, enrichedActions, options = {}) {
  * @returns {Promise<{ steps: Array<Object>, errors: Array<Object> }>}
  */
 async function runPhase1Structured(stepsFile, stepErrorsFile, enrichedActions, options = {}) {
-  const { log } = options;
+  const { log, llmAudit } = options;
   const phase1BatchSize = options.phase1BatchSize || 3;
 
   const steps = [];
@@ -209,31 +217,69 @@ async function runPhase1Structured(stepsFile, stepErrorsFile, enrichedActions, o
       );
 
     try {
-      let rawReply = await callChat(messages, {
-        temperature: 0,
-        maxTokens: 2000,
-        response_format: {
-          type: 'json_schema',
-          json_schema: {
-            name: 'step_structured_batch',
-            schema: stepStructuredBatchSchema,
-            strict: true,
-          },
+      const batchLabel = `structured batch index ${startIdx}~${endIdx}`;
+      const { callId, raw: rawReply } = await llmAudit.call(
+        {
+          phase: 'phase1',
+          label: batchLabel,
+          extra: { actionIndices: actionBatch.map((a) => a.index) },
         },
-      });
+        messages,
+        { temperature: 0, maxTokens: 2000 },
+      );
 
       // 解析批量返回（失败时尝试 JSON 修复重试）
       let batchResult = parseBatchStructuredSteps(rawReply, actionBatch, skipNoiseIndices, log);
+      let repairCallId = null;
+
       if (
         batchResult.parsedSteps.length === 0
         && batchResult.errors.some((e) => e.type === 'batch-parse-error' || e.type === 'batch-structure-error')
       ) {
         if (log) log.warn(`[Phase 1] 批次 ${startIdx}~${endIdx} JSON 解析失败，尝试修复重试...`);
-        const repairedRaw = await tryRepairBatchStructuredReply(rawReply);
-        if (repairedRaw) {
-          batchResult = parseBatchStructuredSteps(repairedRaw, actionBatch, skipNoiseIndices, log);
+        const repairResult = await tryRepairBatchStructuredReply(rawReply, llmAudit, {
+          batchStartIndex: startIdx,
+          batchEndIndex: endIdx,
+        });
+        if (repairResult) {
+          repairCallId = repairResult.callId;
+          batchResult = parseBatchStructuredSteps(repairResult.raw, actionBatch, skipNoiseIndices, log);
+          const repairOk =
+            batchResult.parsedSteps.length === actionBatch.length
+            && batchResult.failedIndices.length === 0;
+          llmAudit.markOutcome(repairCallId, {
+            ok: repairOk,
+            problems: repairOk
+              ? []
+              : batchResult.errors.map((e) => `[${e.type}] index=${e.index}: ${e.reason}`),
+            details: {
+              kind: 'json-repair',
+              parsedCount: batchResult.parsedSteps.length,
+              expectedCount: actionBatch.length,
+            },
+          });
         }
       }
+
+      const batchProblems = batchResult.errors.map(
+        (e) => `[${e.type}] index=${e.index ?? 'batch'}: ${e.reason}`,
+      );
+      const batchOk =
+        batchResult.parsedSteps.length === actionBatch.length
+        && batchResult.failedIndices.length === 0
+        && batchProblems.length === 0;
+
+      llmAudit.markOutcome(callId, {
+        ok: batchOk,
+        problems: batchOk ? [] : batchProblems,
+        details: {
+          parsedCount: batchResult.parsedSteps.length,
+          expectedCount: actionBatch.length,
+          failedIndices: batchResult.failedIndices,
+          usedRepair: Boolean(repairCallId),
+          repairCallId,
+        },
+      });
 
       // 处理解析结果
       for (const parsedStep of batchResult.parsedSteps) {
@@ -302,6 +348,7 @@ async function runPhase1Structured(stepsFile, stepErrorsFile, enrichedActions, o
       }
     } catch (error) {
       if (log) log.error(`[Phase 1] 批次 ${startIdx}~${endIdx} 处理失败: ${error.message}`);
+      // markOutcome 已在 llmAudit.call 的 API 失败分支写入；此处为解析后业务异常
 
       // 整批 fallback
       for (const enrichedAction of actionBatch) {
@@ -383,24 +430,26 @@ function parseBatchLlmJson(rawReply) {
  * 批次 JSON 修复：要求模型将非法输出修正为 { parsedSteps: [...] }
  *
  * @param {string} rawReply
- * @returns {Promise<string|null>}
+ * @param {ReturnType<typeof createLlmAudit>} llmAudit
+ * @param {{ batchStartIndex: number, batchEndIndex: number }} meta
+ * @returns {Promise<{ callId: string, raw: string }|null>}
  */
-async function tryRepairBatchStructuredReply(rawReply) {
+async function tryRepairBatchStructuredReply(rawReply, llmAudit, meta) {
   const messages = [
-    {
-      role: 'system',
-      content:
-        '你是 JSON 修复器。只输出一个合法 JSON 对象，不要任何解释或 Markdown。\n' +
-        '对象必须包含 parsedSteps 数组；数组每项含 index, description, uiChange, page, basis, actionKind, target, inputText, key, assertText, confidence。',
-    },
-    {
-      role: 'user',
-      content: `请把下面文本修正为合法 JSON 对象：\n\n${rawReply.slice(0, 8000)}`,
-    },
+    { role: 'system', content: buildBatchRepairSystemPrompt() },
+    { role: 'user', content: buildBatchRepairUserPrompt(rawReply) },
   ];
 
   try {
-    return await callChat(messages, { temperature: 0, maxTokens: 2500 });
+    return await llmAudit.call(
+      {
+        phase: 'phase1-repair',
+        label: `json repair batch index ${meta.batchStartIndex}~${meta.batchEndIndex}`,
+        extra: meta,
+      },
+      messages,
+      { temperature: 0, maxTokens: 2500 },
+    );
   } catch (_) {
     return null;
   }
@@ -468,9 +517,11 @@ function parseBatchStructuredSteps(rawReply, actionBatch, skipNoiseIndices, log)
     // 获取对应的原始 action，用于补全
     const matchedAction = actionBatch.find((a) => a.index === parsedStep.index);
 
-    applyPartialAutoHeal(parsedStep, matchedAction, log);
+    if (LLM_AUTO_HEAL_ENABLED) {
+      applyPartialAutoHeal(parsedStep, matchedAction, log);
+    }
 
-    // 验证必需字段 (现在通过了自愈，基本不会再因为 description/uiChange/page 为空而拦截了)
+    // 验证必需字段（自愈关闭时严格校验 LLM 原始输出）
     const validationError = validateStructuredStep(parsedStep);
     if (validationError) {
       if (log)
@@ -586,7 +637,7 @@ function applyPartialAutoHeal(parsedStep, matchedAction, log) {
  * @param {Object} [options.log] - 日志器
  */
 async function runPhase2FromStructured(steps, casesFile, options = {}) {
-  const { log } = options;
+  const { log, llmAudit } = options;
   const phaseWindowSize = options.phaseWindowSize || PHASE2_CASE_WINDOW_STEPS;
 
   const effectiveSteps = filterEffectiveStepsForPhase2(steps);
@@ -623,29 +674,62 @@ async function runPhase2FromStructured(steps, casesFile, options = {}) {
       { role: 'user', content: buildPhase2WindowUserPrompt(windowStepsJson, indexListText) },
     ];
 
-    const rawReply = await callChat(messages, {
-      temperature: 0.3,
-      maxTokens: PHASE2_CASE_WINDOW_MAX_TOKENS,
-    });
+    const phase2Label = `case window round ${round} index ${expectedIndices[0]}~${expectedIndices[expectedIndices.length - 1]}`;
+    let callId;
+    let rawReply;
 
-    if (!rawReply) {
-      throw new Error(`[Phase 2] 轮次 ${round} AI 返回空结果`);
+    try {
+      ({ callId, raw: rawReply } = await llmAudit.call(
+        {
+          phase: 'phase2',
+          label: phase2Label,
+          extra: { round, expectedIndices },
+        },
+        messages,
+        { temperature: 0.3, maxTokens: PHASE2_CASE_WINDOW_MAX_TOKENS },
+      ));
+
+      if (!rawReply) {
+        throw new Error(`[Phase 2] 轮次 ${round} AI 返回空结果`);
+      }
+
+      const cleaned = cleanMarkdownFence(rawReply);
+      const parsed = parseSingleCaseJsonResponse(cleaned, expectedIndices, windowSlim);
+
+      llmAudit.markOutcome(callId, {
+        ok: true,
+        problems: [],
+        details: {
+          title: parsed.title,
+          consumeStepCount: parsed.consumeStepCount,
+          coveredActionIndices: parsed.coveredActionIndices,
+        },
+      });
+
+      caseBlocks.push({
+        title: parsed.title,
+        summary: parsed.summary,
+        rows: parsed.rows,
+      });
+
+      const consumed = Math.max(
+        1,
+        Math.min(parsed.consumeStepCount || parsed.coveredActionIndices?.length || 1, windowSlim.length),
+      );
+      if (log) {
+        log.info(`[Phase 2] 轮次 ${round} 消费 ${consumed} 步（${expectedIndices[0]}..${expectedIndices[consumed - 1]}）`);
+      }
+      cursor += consumed;
+    } catch (error) {
+      if (callId) {
+        llmAudit.markOutcome(callId, {
+          ok: false,
+          problems: [error.message],
+          details: { round, expectedIndices },
+        });
+      }
+      throw error;
     }
-
-    const cleaned = cleanMarkdownFence(rawReply);
-    const parsed = parseSingleCaseJsonResponse(cleaned, expectedIndices, windowSlim);
-    caseBlocks.push({
-      title: parsed.title,
-      summary: parsed.summary,
-      rows: parsed.rows,
-    });
-
-    // 关键：仅消费本轮 case 覆盖的前缀步数，再滑入新步继续归纳
-    const consumed = Math.max(1, Math.min(parsed.consumeStepCount || parsed.coveredActionIndices?.length || 1, windowSlim.length));
-    if (log) {
-      log.info(`[Phase 2] 轮次 ${round} 消费 ${consumed} 步（${expectedIndices[0]}..${expectedIndices[consumed - 1]}）`);
-    }
-    cursor += consumed;
   }
 
   const casesText = renderCasesMarkdownDocument(caseBlocks, {
@@ -751,19 +835,21 @@ function normalizeSourceActionIndices(raw, actionIndex) {
 
 function normalizeStructuredStep(parsed, enrichedAction, actionIndex, intervalFromPreviousMs) {
   const actionKind = normalizeActionKind(parsed.actionKind);
+  const strict = !LLM_AUTO_HEAL_ENABLED;
+
   return {
     index: actionIndex,
     status: 'normal',
     description: toSingleLine(parsed.description),
-    uiChange: toSingleLine(parsed.uiChange) || '无可见变化',
-    page: toSingleLine(parsed.page) || (enrichedAction.title || '未知'),
-    basis: normalizeBasisArray(parsed.basis, enrichedAction),
+    uiChange: strict ? toSingleLine(parsed.uiChange) : (toSingleLine(parsed.uiChange) || '无可见变化'),
+    page: strict ? toSingleLine(parsed.page) : (toSingleLine(parsed.page) || (enrichedAction.title || '未知')),
+    basis: strict ? strictBasisArray(parsed.basis) : normalizeBasisArray(parsed.basis, enrichedAction),
     actionKind,
     target: toSingleLine(parsed.target),
     inputText: toSingleLine(parsed.inputText),
     key: toSingleLine(parsed.key),
     assertText: toSingleLine(parsed.assertText),
-    confidence: normalizeConfidence(parsed.confidence),
+    confidence: strict ? Number(parsed.confidence) : normalizeConfidence(parsed.confidence),
     intervalFromPreviousMs,
     url: enrichedAction.url || '',
     sourceType: enrichedAction.type || 'unknown',
@@ -782,9 +868,30 @@ function validateStructuredStep(step) {
   if (!step.uiChange) return 'uiChange 为空';
   if (!step.page) return 'page 为空';
   if (!Array.isArray(step.basis)) return 'basis 必须为数组';
+  if (!LLM_AUTO_HEAL_ENABLED && step.basis.length === 0) return 'basis 为空数组';
   if (!step.actionKind) return 'actionKind 为空';
+  if (!step.target) return 'target 为空';
   if (!Number.isFinite(step.confidence)) return 'confidence 必须为数字';
+  if (!LLM_AUTO_HEAL_ENABLED && (step.confidence < 0 || step.confidence > 1)) {
+    return 'confidence 超出 0~1 范围';
+  }
   return null;
+}
+
+/**
+ * 严格模式：仅保留 LLM 返回的 basis，不从证据推导
+ *
+ * @param {unknown} raw
+ * @returns {string[]}
+ */
+function strictBasisArray(raw) {
+  if (Array.isArray(raw)) {
+    return raw.map(toSingleLine).filter(Boolean);
+  }
+  if (typeof raw === 'string' && raw.trim()) {
+    return [toSingleLine(raw)];
+  }
+  return [];
 }
 
 /**

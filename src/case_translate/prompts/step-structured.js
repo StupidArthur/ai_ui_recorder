@@ -28,7 +28,7 @@ export const stepStructuredBatchSchema = {
           description: {
             type: 'string',
             description:
-              "一句话描述该动作（例如：点击了左侧的'系统设置'菜单）",
+              "【必填，绝不能为空】一句话清晰描述该动作（例如：点击了左侧的'系统设置'菜单）。如果目标元素没有名字，请描述为'点击了未知元素'，严禁输出空字符串！",
           },
           actionKind: {
             type: 'string',
@@ -52,7 +52,7 @@ export const stepStructuredBatchSchema = {
           uiChange: {
             type: 'string',
             description:
-              "动作发生后，UI 产生了什么具体变化（例如：'弹出了确认对话框'，'无可见变化'）",
+              "【必填，绝不能为空】动作发生后，UI 产生了什么具体变化（例如：'弹出了确认对话框'，'无可见变化'）。严禁输出空字符串！",
           },
           page: {
             type: 'string',
@@ -110,6 +110,7 @@ export function buildSystemPrompt() {
 1. **严格的一一对应**：你将收到一个包含 N 个动作的数组。你必须输出一个包含严格 N 个对象的 JSON 数组。
 2. **严禁合并**：即使两个动作看起来逻辑连贯（例如：先点击输入框，再敲击回车），你也**绝对不能**把它们合并成一条。每一个输入的 \`index\` 都必须在输出中有一条对应的独立解析。
 3. **基于硬证据**：你的翻译必须建立在 \`snapshotDiff\`（操作前后 DOM 的差异）、\`localContext\`（目标元素周边源码）和表单增量之上，不能瞎猜。
+4. **严禁空值**：输出的 \`description\` 和 \`uiChange\` 必须有具体的文本描述，绝不能为 ""（空字符串）！
 
 【输出要求】
 你必须返回符合提供的 JSON Schema 的数据结构，将结果放入 \`parsedSteps\` 数组中。

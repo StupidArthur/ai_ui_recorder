@@ -198,7 +198,7 @@ async function runPhase1Structured(stepsFile, stepErrorsFile, enrichedActions, o
 
     const messages = [
       { role: 'system', content: buildStructuredStepSystemPrompt() },
-      { role: 'user', content: buildUserPrompt(actionBatch, recentSteps) },
+      { role: 'user', content: buildStructuredStepUserPrompt(actionBatch, recentSteps) },
     ];
 
     const startIdx = actionBatch[0].index;
@@ -399,7 +399,23 @@ function parseBatchStructuredSteps(rawReply, actionBatch, skipNoiseIndices, log)
       continue;
     }
 
-    // 验证必需字段
+    // 获取对应的原始 action，用于补全
+    const matchedAction = actionBatch.find((a) => a.index === parsedStep.index);
+
+    // ▼▼▼ 新增：局部字段自动修复 (Partial Auto-Heal) ▼▼▼
+    if (matchedAction) {
+      if (!parsedStep.description || String(parsedStep.description).trim() === '') {
+        parsedStep.description = deriveFallbackDescription(matchedAction);
+        if (log) log.warn(`[Phase 1] index=${parsedStep.index} description 为空，已通过局部自愈修复为: "${parsedStep.description}"`);
+      }
+      if (!parsedStep.uiChange || String(parsedStep.uiChange).trim() === '') {
+        parsedStep.uiChange = deriveUiChangeFromDiff(matchedAction.snapshotDiff);
+        if (log) log.warn(`[Phase 1] index=${parsedStep.index} uiChange 为空，已通过局部自愈修复为: "${parsedStep.uiChange}"`);
+      }
+    }
+    // ▲▲▲ 新增结束 ▲▲▲
+
+    // 验证必需字段 (现在通过了自愈，基本不会再因为 description 为空而拦截了)
     const validationError = validateStructuredStep(parsedStep);
     if (validationError) {
       if (log)

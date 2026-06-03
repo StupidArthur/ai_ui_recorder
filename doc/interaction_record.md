@@ -1177,3 +1177,35 @@
 - **`src/case_translate/phase2/case-markdown-renderer.js`**：
   - `parseSingleCaseJsonResponse` 支持并返回 `consumeStepCount`。
   - 校验 `coveredActionIndices` 必须为当前窗口 `expectedIndices` 的前缀；不合法时回退到 `consumeStepCount`/`steps.length` 推导。
+
+---
+
+## 2026-06-03 交互 — Phase 1 basis 自愈 + Phase 4 本地兜底
+
+### 问题
+- Phase 1：LLM 返回 `basis: ""`（空字符串）导致字段验证失败，触发整批 fallback
+- Phase 4：MiniMax 输出含思考过程/Markdown，JSON 解析失败，Agent TXT 几乎为空
+
+### 修复
+- **`workflow.js`**：新增 `deriveBasisFromEvidence()`，在局部自愈阶段用 snapshotDiff / formState / hints 补全 basis
+- **`ai-client.js`**：增强 `cleanMarkdownFence`，新增 `parseJsonFromLlmReply()` 统一 JSON 提取
+- **`agent-txt-generator.js`**：LLM 失败 → JSON 修复重试 → 本地 1:1 确定性渲染兜底（不丢步骤）
+- **`prompts/agent-txt.js`**：System Prompt 明确要求只输出 JSON、禁止思考过程
+
+---
+
+## 2026-06-03 交互 — Phase 1 confidence 自愈 + 批次 JSON 容错
+
+### 问题
+- MiniMax 在 JSON Schema 模式下常省略 `confidence`（undefined），导致字段验证失败 → 整批 fallback
+- 部分批次 JSON 解析失败
+
+### 修复
+- **`applyPartialAutoHeal()`**：抽取统一自愈；补全 `confidence`（`deriveConfidenceFromEvidence`）、`inputText`/`key`
+- **`parseBatchLlmJson()`**：复用 `parseJsonFromLlmReply`，兼容思考标签/Markdown 包裹
+- **`tryRepairBatchStructuredReply()`**：批次 JSON 解析失败时 LLM 修复重试
+- 批次遗漏 index 检测；错误日志去重
+
+### 验证（run_2026-06-03T07-11-48）
+- Phase 1：`normal: 19, noise: 1, errors: 0`（修复前 fallback: 19）
+- Phase 2/3/4 均成功；Agent TXT 8 个逻辑步骤

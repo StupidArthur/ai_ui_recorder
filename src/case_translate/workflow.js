@@ -27,7 +27,7 @@ import {
 
 import { regenerateFromStructured } from '../selenium_export/regenerate-from-structured.js';
 
-import { callChat, cleanMarkdownFence } from './ai-client.js';
+import { callChat, cleanMarkdownFence, parseJsonFromLlmReply } from './ai-client.js';
 import { generateMidsceneYaml } from './midscene/index.js';
 import { generateAgentTxt } from './phase4/agent-txt-generator.js';
 
@@ -209,7 +209,7 @@ async function runPhase1Structured(stepsFile, stepErrorsFile, enrichedActions, o
       );
 
     try {
-      const rawReply = await callChat(messages, {
+      let rawReply = await callChat(messages, {
         temperature: 0,
         maxTokens: 2000,
         response_format: {
@@ -222,8 +222,18 @@ async function runPhase1Structured(stepsFile, stepErrorsFile, enrichedActions, o
         },
       });
 
-      // 解析批量返回
-      const batchResult = parseBatchStructuredSteps(rawReply, actionBatch, skipNoiseIndices, log);
+      // 解析批量返回（失败时尝试 JSON 修复重试）
+      let batchResult = parseBatchStructuredSteps(rawReply, actionBatch, skipNoiseIndices, log);
+      if (
+        batchResult.parsedSteps.length === 0
+        && batchResult.errors.some((e) => e.type === 'batch-parse-error' || e.type === 'batch-structure-error')
+      ) {
+        if (log) log.warn(`[Phase 1] 批次 ${startIdx}~${endIdx} JSON 解析失败，尝试修复重试...`);
+        const repairedRaw = await tryRepairBatchStructuredReply(rawReply);
+        if (repairedRaw) {
+          batchResult = parseBatchStructuredSteps(repairedRaw, actionBatch, skipNoiseIndices, log);
+        }
+      }
 
       // 处理解析结果
       for (const parsedStep of batchResult.parsedSteps) {
@@ -249,32 +259,46 @@ async function runPhase1Structured(stepsFile, stepErrorsFile, enrichedActions, o
         previousTimestamp = normalizeTimestamp(matchedAction.timestamp, previousTimestamp);
       }
 
-      // 处理无法解析的条目（整批 fallback）
+      // 处理无法解析的条目（逐条 fallback，原因取自具体错误）
+      const failedIdxSeen = new Set();
       for (const failedIdx of batchResult.failedIndices) {
+        if (failedIdxSeen.has(failedIdx)) continue;
+        failedIdxSeen.add(failedIdx);
+
         const matchedAction = actionBatch.find((a) => a.index === failedIdx);
         if (matchedAction) {
           const intervalFromPreviousMs = computeIntervalFromPreviousMs(
             matchedAction.timestamp,
             previousTimestamp,
           );
+          const specificError = batchResult.errors.find((e) => e.index === failedIdx);
+          const fallbackReason =
+            specificError?.reason || '批次 JSON 解析失败或结构不匹配';
+
           const fallbackStep = buildFallbackStructuredStep(
             matchedAction,
             failedIdx,
-            '批次解析失败',
+            fallbackReason,
             intervalFromPreviousMs,
           );
           steps.push(fallbackStep);
           errors.push({
             index: failedIdx,
-            type: 'batch-fallback',
-            reason: '批次 JSON 解析失败或结构不匹配',
+            type:
+              specificError?.type === 'field-validation-error'
+                ? 'field-validation-fallback'
+                : 'batch-fallback',
+            reason: fallbackReason,
           });
           previousTimestamp = normalizeTimestamp(matchedAction.timestamp, previousTimestamp);
         }
       }
 
-      if (batchResult.errors.length > 0) {
-        errors.push(...batchResult.errors);
+      const batchLevelErrors = batchResult.errors.filter(
+        (e) => e.type === 'batch-parse-error' || e.type === 'batch-structure-error',
+      );
+      if (batchLevelErrors.length > 0) {
+        errors.push(...batchLevelErrors);
       }
     } catch (error) {
       if (log) log.error(`[Phase 1] 批次 ${startIdx}~${endIdx} 处理失败: ${error.message}`);
@@ -318,50 +342,92 @@ async function runPhase1Structured(stepsFile, stepErrorsFile, enrichedActions, o
  * @param {Array<number>} skipNoiseIndices - 当前批次中 skip/noise 的 indices
  * @returns {{ parsedSteps: Array<Object>, failedIndices: Array<number>, errors: Array<Object> }}
  */
+/**
+ * 归一化 Phase 1 批次 LLM 返回结构（兼容数组 / steps 别名）
+ *
+ * @param {unknown} parsed
+ * @returns {{ parsedSteps?: Array<Object> }|null}
+ */
+function normalizeBatchLlmPayload(parsed) {
+  if (!parsed) return null;
+  if (Array.isArray(parsed)) {
+    return { parsedSteps: parsed };
+  }
+  if (typeof parsed === 'object') {
+    if (Array.isArray(parsed.parsedSteps)) return parsed;
+    if (Array.isArray(parsed.steps)) return { parsedSteps: parsed.steps };
+  }
+  return parsed;
+}
+
+/**
+ * 解析 Phase 1 批次 LLM 原始输出为 JSON 对象
+ *
+ * @param {string} rawReply
+ * @returns {Object|null}
+ */
+function parseBatchLlmJson(rawReply) {
+  try {
+    return parseJsonFromLlmReply(rawReply);
+  } catch (_) {
+    const cleaned = cleanMarkdownFence(rawReply);
+    try {
+      return JSON.parse(cleaned);
+    } catch (__) {
+      return null;
+    }
+  }
+}
+
+/**
+ * 批次 JSON 修复：要求模型将非法输出修正为 { parsedSteps: [...] }
+ *
+ * @param {string} rawReply
+ * @returns {Promise<string|null>}
+ */
+async function tryRepairBatchStructuredReply(rawReply) {
+  const messages = [
+    {
+      role: 'system',
+      content:
+        '你是 JSON 修复器。只输出一个合法 JSON 对象，不要任何解释或 Markdown。\n' +
+        '对象必须包含 parsedSteps 数组；数组每项含 index, description, uiChange, page, basis, actionKind, target, inputText, key, assertText, confidence。',
+    },
+    {
+      role: 'user',
+      content: `请把下面文本修正为合法 JSON 对象：\n\n${rawReply.slice(0, 8000)}`,
+    },
+  ];
+
+  try {
+    return await callChat(messages, { temperature: 0, maxTokens: 2500 });
+  } catch (_) {
+    return null;
+  }
+}
+
 function parseBatchStructuredSteps(rawReply, actionBatch, skipNoiseIndices, log) {
   const parsedSteps = [];
   const failedIndices = [];
   const errors = [];
 
-  let normalized = rawReply.trim();
-  let parsed;
+  const parsedRaw = parseBatchLlmJson(rawReply);
+  const parsed = normalizeBatchLlmPayload(parsedRaw);
 
-  try {
-    parsed = JSON.parse(normalized);
-  } catch (_) {
-    // 尝试提取 JSON 对象
-    const start = normalized.indexOf('{');
-    const end = normalized.lastIndexOf('}');
-    if (start >= 0 && end > start) {
-      try {
-        parsed = JSON.parse(normalized.slice(start, end + 1));
-      } catch (__) {
-        // 完全失败，整批标记为失败
-        for (const action of actionBatch) {
-          failedIndices.push(action.index);
-        }
-        errors.push({
-          index: actionBatch[0].index,
-          type: 'batch-parse-error',
-          reason: 'JSON 解析失败',
-        });
-        return { parsedSteps, failedIndices, errors };
-      }
-    } else {
-      for (const action of actionBatch) {
-        failedIndices.push(action.index);
-      }
-      errors.push({
-        index: actionBatch[0].index,
-        type: 'batch-parse-error',
-        reason: '无法提取 JSON 对象',
-      });
-      return { parsedSteps, failedIndices, errors };
+  if (!parsed) {
+    for (const action of actionBatch) {
+      failedIndices.push(action.index);
     }
+    errors.push({
+      index: actionBatch[0].index,
+      type: 'batch-parse-error',
+      reason: 'JSON 解析失败',
+    });
+    return { parsedSteps, failedIndices, errors };
   }
 
   // 检查是否有 parsedSteps 数组
-  if (!parsed || !parsed.parsedSteps || !Array.isArray(parsed.parsedSteps)) {
+  if (!parsed.parsedSteps || !Array.isArray(parsed.parsedSteps)) {
     for (const action of actionBatch) {
       failedIndices.push(action.index);
     }
@@ -402,20 +468,9 @@ function parseBatchStructuredSteps(rawReply, actionBatch, skipNoiseIndices, log)
     // 获取对应的原始 action，用于补全
     const matchedAction = actionBatch.find((a) => a.index === parsedStep.index);
 
-    // ▼▼▼ 新增：局部字段自动修复 (Partial Auto-Heal) ▼▼▼
-    if (matchedAction) {
-      if (!parsedStep.description || String(parsedStep.description).trim() === '') {
-        parsedStep.description = deriveFallbackDescription(matchedAction);
-        if (log) log.warn(`[Phase 1] index=${parsedStep.index} description 为空，已通过局部自愈修复为: "${parsedStep.description}"`);
-      }
-      if (!parsedStep.uiChange || String(parsedStep.uiChange).trim() === '') {
-        parsedStep.uiChange = deriveUiChangeFromDiff(matchedAction.snapshotDiff);
-        if (log) log.warn(`[Phase 1] index=${parsedStep.index} uiChange 为空，已通过局部自愈修复为: "${parsedStep.uiChange}"`);
-      }
-    }
-    // ▲▲▲ 新增结束 ▲▲▲
+    applyPartialAutoHeal(parsedStep, matchedAction, log);
 
-    // 验证必需字段 (现在通过了自愈，基本不会再因为 description 为空而拦截了)
+    // 验证必需字段 (现在通过了自愈，基本不会再因为 description/uiChange/page 为空而拦截了)
     const validationError = validateStructuredStep(parsedStep);
     if (validationError) {
       if (log)
@@ -432,7 +487,92 @@ function parseBatchStructuredSteps(rawReply, actionBatch, skipNoiseIndices, log)
     parsedSteps.push(parsedStep);
   }
 
+  // 批次遗漏：LLM 未返回某些 index
+  const handledIndices = new Set([
+    ...parsedSteps.map((s) => s.index),
+    ...failedIndices,
+  ]);
+  for (const action of actionBatch) {
+    if (!handledIndices.has(action.index)) {
+      failedIndices.push(action.index);
+      errors.push({
+        index: action.index,
+        type: 'batch-missing-index',
+        reason: 'LLM 批次输出未包含该 index',
+      });
+      if (log) log.warn(`[Phase 1] 批次遗漏 index=${action.index}，将使用兜底步骤`);
+    }
+  }
+
   return { parsedSteps, failedIndices, errors };
+}
+
+/**
+ * Phase 1 局部字段自动修复（在 validate 之前调用）
+ *
+ * @param {Object} parsedStep
+ * @param {Object|undefined} matchedAction
+ * @param {Object|undefined} log
+ */
+function applyPartialAutoHeal(parsedStep, matchedAction, log) {
+  if (!matchedAction) return;
+
+  if (!parsedStep.description || String(parsedStep.description).trim() === '') {
+    parsedStep.description = deriveFallbackDescription(matchedAction);
+    if (log)
+      log.warn(
+        `[Phase 1] index=${parsedStep.index} description 为空，已通过局部自愈修复为: "${parsedStep.description}"`,
+      );
+  }
+  if (!parsedStep.uiChange || String(parsedStep.uiChange).trim() === '') {
+    parsedStep.uiChange = deriveUiChangeFromDiff(matchedAction.snapshotDiff);
+    if (log)
+      log.warn(
+        `[Phase 1] index=${parsedStep.index} uiChange 为空，已通过局部自愈修复为: "${parsedStep.uiChange}"`,
+      );
+  }
+  if (!parsedStep.page || String(parsedStep.page).trim() === '') {
+    parsedStep.page = matchedAction.title || '未知页面';
+    if (log)
+      log.warn(`[Phase 1] index=${parsedStep.index} page 为空，已通过局部自愈修复为: "${parsedStep.page}"`);
+  }
+  if (!parsedStep.actionKind || String(parsedStep.actionKind).trim() === '') {
+    parsedStep.actionKind = deriveFallbackActionKind(matchedAction);
+    if (log)
+      log.warn(
+        `[Phase 1] index=${parsedStep.index} actionKind 为空，已通过局部自愈修复为: "${parsedStep.actionKind}"`,
+      );
+  } else {
+    parsedStep.actionKind = normalizeActionKind(parsedStep.actionKind);
+  }
+  if (!parsedStep.target || String(parsedStep.target).trim() === '') {
+    parsedStep.target = deriveTarget(matchedAction);
+    if (log)
+      log.warn(`[Phase 1] index=${parsedStep.index} target 为空，已通过局部自愈修复为: "${parsedStep.target}"`);
+  }
+  if (!isValidBasisArray(parsedStep.basis)) {
+    parsedStep.basis = deriveBasisFromEvidence(matchedAction);
+    if (log)
+      log.warn(
+        `[Phase 1] index=${parsedStep.index} basis 无效，已通过局部自愈补全 (${parsedStep.basis.length} 条证据)`,
+      );
+  }
+  if (!Number.isFinite(Number(parsedStep.confidence))) {
+    const healed = deriveConfidenceFromEvidence(matchedAction);
+    if (log)
+      log.warn(
+        `[Phase 1] index=${parsedStep.index} confidence 无效(${parsedStep.confidence})，已修复为 ${healed}`,
+      );
+    parsedStep.confidence = healed;
+  } else {
+    parsedStep.confidence = normalizeConfidence(parsedStep.confidence);
+  }
+  if (!parsedStep.inputText && matchedAction.inputValue) {
+    parsedStep.inputText = matchedAction.inputValue;
+  }
+  if (!parsedStep.key && matchedAction.key) {
+    parsedStep.key = matchedAction.key;
+  }
 }
 
 // ==================== Phase 2：归纳用例 ====================
@@ -617,7 +757,7 @@ function normalizeStructuredStep(parsed, enrichedAction, actionIndex, intervalFr
     description: toSingleLine(parsed.description),
     uiChange: toSingleLine(parsed.uiChange) || '无可见变化',
     page: toSingleLine(parsed.page) || (enrichedAction.title || '未知'),
-    basis: Array.isArray(parsed.basis) ? parsed.basis.map(toSingleLine).filter(Boolean) : [],
+    basis: normalizeBasisArray(parsed.basis, enrichedAction),
     actionKind,
     target: toSingleLine(parsed.target),
     inputText: toSingleLine(parsed.inputText),
@@ -859,4 +999,138 @@ function deriveUiChangeFromDiff(snapshotDiff) {
 function deriveTarget(action) {
   const element = action.element || {};
   return element.label || element.text || element.placeholder || element.name || element.id || element.tag || '';
+}
+
+/**
+ * 判断 basis 是否为有效非空数组
+ *
+ * @param {unknown} value
+ * @returns {boolean}
+ */
+function isValidBasisArray(value) {
+  return Array.isArray(value) && value.some((item) => toSingleLine(item));
+}
+
+/**
+ * 归一化 basis 字段；无效时从 enriched 证据推导
+ *
+ * @param {unknown} raw
+ * @param {Object} action
+ * @returns {string[]}
+ */
+function normalizeBasisArray(raw, action) {
+  if (Array.isArray(raw)) {
+    const items = raw.map(toSingleLine).filter(Boolean);
+    if (items.length > 0) return items;
+  } else if (typeof raw === 'string' && raw.trim()) {
+    return [toSingleLine(raw)];
+  }
+  return deriveBasisFromEvidence(action);
+}
+
+/**
+ * 从 snapshotDiff / formState / hints 等证据推导 basis
+ *
+ * @param {Object} action - enrichedAction
+ * @returns {string[]}
+ */
+function deriveBasisFromEvidence(action) {
+  const basis = [];
+
+  const hints = action.classification?.hints;
+  if (Array.isArray(hints)) {
+    for (const hint of hints) {
+      const line = toSingleLine(hint);
+      if (line) basis.push(line);
+    }
+  }
+
+  const diffText = String(action.snapshotDiff || '').trim();
+  if (diffText && !diffText.includes('完全相同') && !diffText.includes('无变化')) {
+    const diffSnippet = diffText
+      .split('\n')
+      .map((line) => line.trim())
+      .filter(Boolean)
+      .slice(0, 3)
+      .join(' | ');
+    if (diffSnippet) {
+      basis.push(`snapshotDiff: ${diffSnippet}`);
+    }
+  }
+
+  const formChanges = action.formStateChanges;
+  if (formChanges?.changed && typeof formChanges.changed === 'object') {
+    for (const [xpath, change] of Object.entries(formChanges.changed)) {
+      const toVal = formatFormStateValue(change?.to);
+      if (toVal) {
+        basis.push(`formState变化: ${xpath} → ${toVal}`);
+      }
+    }
+  } else if (action.formStateChangeText) {
+    const formSnippet = toSingleLine(action.formStateChangeText).slice(0, 200);
+    if (formSnippet) basis.push(`formState: ${formSnippet}`);
+  }
+
+  if (action.inputValue) {
+    basis.push(
+      action.inputValue === '[MASKED]'
+        ? 'inputValue: 密码已脱敏'
+        : `inputValue: ${action.inputValue}`,
+    );
+  }
+
+  if (action.originalType && action.originalType !== action.type) {
+    basis.push(`语义归并: ${action.originalType} → ${action.type}`);
+  }
+
+  const contextSnippet = toSingleLine(action.contextExcerpt || '').slice(0, 150);
+  if (contextSnippet) {
+    basis.push(`context: ${contextSnippet}`);
+  }
+
+  if (basis.length === 0) {
+    basis.push(`物理动作: ${action.type || 'unknown'}`);
+  }
+
+  return basis;
+}
+
+/**
+ * 格式化 formState 字段值为可读字符串
+ *
+ * @param {unknown} value
+ * @returns {string}
+ */
+function formatFormStateValue(value) {
+  if (value == null) return '';
+  if (typeof value === 'object') {
+    if ('value' in value) return toSingleLine(value.value);
+    if ('checked' in value) return value.checked ? 'checked' : 'unchecked';
+    return toSingleLine(JSON.stringify(value));
+  }
+  return toSingleLine(value);
+}
+
+/**
+ * 从证据强度推导默认 confidence（LLM 未返回有效值时使用）
+ *
+ * @param {Object} action - enrichedAction
+ * @returns {number}
+ */
+function deriveConfidenceFromEvidence(action) {
+  let score = 0.45;
+  if (Array.isArray(action.classification?.hints) && action.classification.hints.length > 0) {
+    score += 0.15;
+  }
+  if (action.inputValue && action.inputValue !== '[MASKED]') {
+    score += 0.1;
+  }
+  const diff = String(action.snapshotDiff || '');
+  if (diff && !diff.includes('完全相同') && !diff.includes('无变化')) {
+    score += 0.1;
+  }
+  if (isValidBasisArray(action.basis)) {
+    score += 0.05;
+  }
+  return Math.min(0.85, Math.round(score * 100) / 100);
 }

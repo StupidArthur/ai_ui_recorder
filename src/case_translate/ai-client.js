@@ -102,6 +102,7 @@ export async function callChat(messages, options = {}) {
  * AI 有时会把整个回答用 ```markdown ... ``` 包裹起来，
  * 尽管 prompt 中已要求不要这样做。此函数将这层多余的围栏剥除，
  * 保留内部的纯内容。
+ * 同时剥离 <thinking>...</thinking> 思考标签。
  *
  * @param {string} text - AI 原始输出文本
  * @returns {string} 清理后的文本
@@ -109,13 +110,69 @@ export async function callChat(messages, options = {}) {
 export function cleanMarkdownFence(text) {
   if (!text) return '';
 
-  const trimmed = text.trim();
+  let trimmed = text.trim();
 
-  // 检测是否以 ```markdown 或 ``` 开头，且以 ``` 结尾
-  if (/^```(?:markdown)?\s*\n/.test(trimmed) && trimmed.endsWith('```')) {
+  // 剥离常见思考/推理标签（MiniMax 等模型）
+  trimmed = trimmed.replace(/<thinking>[\s\S]*?<\/thinking>/gi, '');
+  trimmed = trimmed.replace(/[\s\S]*?<\/think>/gi, '');
+
+  // 剥离完整 markdown 代码块包裹（```json / ```markdown / ```）
+  const fenced = trimmed.match(/^```(?:json|markdown)?\s*\n([\s\S]*?)\n```\s*$/i);
+  if (fenced) {
+    return fenced[1].trim();
+  }
+
+  // 兼容旧逻辑：首尾 ``` 但中间无闭合换行
+  if (/^```(?:markdown|json)?\s*\n/.test(trimmed) && trimmed.endsWith('```')) {
     const firstNewline = trimmed.indexOf('\n');
     return trimmed.slice(firstNewline + 1, trimmed.length - 3).trim();
   }
 
   return trimmed;
+}
+
+/**
+ * 从 LLM 原始输出中提取首个 JSON 对象片段
+ *
+ * @param {string} text
+ * @returns {string|null}
+ */
+export function extractFirstJsonObject(text) {
+  const start = text.indexOf('{');
+  const end = text.lastIndexOf('}');
+  if (start < 0 || end <= start) return null;
+  return text.slice(start, end + 1);
+}
+
+/**
+ * 解析 LLM 输出为 JSON 对象（清理围栏 → 直接 parse → 暴力提取）
+ *
+ * @param {string} text - LLM 原始输出
+ * @returns {Object}
+ * @throws {Error} 无法解析时抛出
+ */
+export function parseJsonFromLlmReply(text) {
+  const cleaned = cleanMarkdownFence(text);
+  try {
+    const parsed = JSON.parse(cleaned);
+    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+      return parsed;
+    }
+  } catch (_) {
+    // fall through
+  }
+
+  const extracted = extractFirstJsonObject(cleaned);
+  if (extracted) {
+    try {
+      const parsed = JSON.parse(extracted);
+      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+        return parsed;
+      }
+    } catch (_) {
+      // fall through
+    }
+  }
+
+  throw new Error('无法从 LLM 输出解析 JSON 对象');
 }

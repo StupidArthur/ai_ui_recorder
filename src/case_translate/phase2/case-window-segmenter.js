@@ -7,13 +7,15 @@
 
 /**
  * 判断是否为参与 Phase 2 窗口计数的有效步骤
+ * 注意：fallback 状态也包含有效动作信息（经过局部自愈后可能已补全字段），
+ * 因此允许进入 Phase 2 归纳流程，避免大量步骤被过滤导致空用例。
  *
  * @param {Object} step
  * @returns {boolean}
  */
 export function isPhase2EffectiveStep(step) {
   if (!step || typeof step !== 'object') return false;
-  return step.status === 'normal';
+  return step.status === 'normal' || step.status === 'fallback';
 }
 
 /**

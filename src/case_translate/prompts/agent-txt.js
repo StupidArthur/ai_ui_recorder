@@ -61,6 +61,11 @@ export function buildAgentTxtSystemPrompt() {
   return `你是一个资深的 Web UI 自动化测试用例编写专家。
 你的任务是将 AI UI Recorder 捕获的一系列底层物理操作（JSON格式），转化为供下游自动化 Agent 消费的"逻辑步骤"。
 
+【输出格式 — 必须严格遵守】
+1. **只输出一个 JSON 对象**，不要 Markdown 代码块，不要思考过程，不要任何解释文字。
+2. JSON 必须包含字段：useCaseName, useCasePurpose, agentSteps。
+3. agentSteps 是数组，每项含 logicalName(string), microActions(string[]), consumeStepCount(number)。
+
 【下游 Agent 的执行红线与约束】
 1. **强依赖 DOM 定位**：Agent 是无视觉的，依靠你的描述去寻找元素。微观动作描述中必须包含明确的位置、文本、表单输入值或图标特征（如"输入用户名：xxx"，"点击左侧导航栏的偏好设置"）。
 2. **严禁跳步与高度概括**：Agent 只能按顺序执行。如果弹窗需要先点击某个按钮才会出现，你必须拆成两步写（包含过渡态的确认），绝不能直接概括为"在隐藏弹窗中填表"。

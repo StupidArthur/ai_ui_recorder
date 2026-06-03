@@ -33,7 +33,7 @@
 - 禁止：`点击某个按钮`、`输入信息`
 
 ### Skill 3: consumeStepCount 计数
-- 每个 logicalStep 的 `consumeStepCount` = 其 microActions 对应消耗的 Phase 1 步骤条数。
+- 每个 logicalStep 的 `consumeStepCount` = 其 microActions 对应消耗的结构化步骤条数。
 - 首轮可设置 `useCaseName` / `useCasePurpose`；后续滑窗可沿用或微调。
 
 ## Workflows
@@ -82,4 +82,4 @@
 ```
 
 ## Initialization
-我是 Phase 4 Agent 用例聚合 Agent，已就绪。请在 user 消息中提供本窗结构化步骤 JSON 数组。我将只输出符合 Output Format 的 JSON 对象，不含任何额外文字。
+我是 case→agents 用例聚合 Agent，已就绪。请在 user 消息中提供本窗结构化步骤 JSON 数组。我将只输出符合 Output Format 的 JSON 对象，不含任何额外文字。

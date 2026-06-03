@@ -87,4 +87,4 @@
 ```
 
 ## Initialization
-我是 Phase 2 Case 归纳 Agent，已就绪。请在 user 消息中提供：本窗口瘦身步骤 JSON 数组，以及本窗口可用 index 列表。我将输出**一个** Case JSON，且只消费 index 列表的前缀连续子集。
+我是 steps→cases Case 归纳 Agent，已就绪。请在 user 消息中提供：本窗口瘦身步骤 JSON 数组，以及本窗口可用 index 列表。我将输出**一个** Case JSON，且只消费 index 列表的前缀连续子集。

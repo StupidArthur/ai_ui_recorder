@@ -1,0 +1,5 @@
+{
+  "baseUrl": "http://127.0.0.1:8000/v1",
+  "apiKey": "your_api_key_here",
+  "model": "Qwen/Qwen3-VL-235B-A22B-Instruct"
+}

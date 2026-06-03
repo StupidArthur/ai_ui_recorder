@@ -1,0 +1,31 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+build/
+dist/
+release/
+
+# Output generated files
+output/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Logs
+*.log
+npm-debug.log*
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Temporary files
+*.tmp
+*.temp
+.cache/

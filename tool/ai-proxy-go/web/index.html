@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Proxy Chat Verify</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 24px; background: #f7f7f9; color: #222; }
+    .card { max-width: 900px; margin: 0 auto; background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 16px; }
+    h1 { font-size: 20px; margin-top: 0; }
+    label { display: block; margin-top: 12px; font-weight: 600; }
+    input, textarea { width: 100%; box-sizing: border-box; margin-top: 6px; padding: 8px; border: 1px solid #ccc; border-radius: 6px; }
+    textarea { min-height: 120px; resize: vertical; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .actions { margin-top: 14px; display: flex; gap: 10px; }
+    button { padding: 8px 14px; border: 1px solid #bbb; border-radius: 6px; background: #f0f0f0; cursor: pointer; }
+    button.primary { background: #1677ff; color: #fff; border-color: #1677ff; }
+    #status { margin-top: 12px; font-size: 13px; color: #555; }
+    #answer { margin-top: 12px; white-space: pre-wrap; background: #fafafa; border: 1px solid #e5e5e5; border-radius: 6px; padding: 10px; min-height: 140px; }
+    .footer { margin-top: 18px; text-align: right; font-size: 12px; color: #888; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>AI 中转流式验证页</h1>
+    <div class="row">
+      <div>
+        <label for="apiKey">Trial Key</label>
+        <input id="apiKey" placeholder="例如 trial_demo_key" />
+      </div>
+      <div>
+        <label for="model">Model (可选)</label>
+        <input id="model" placeholder="留空则使用服务端默认模型" />
+      </div>
+    </div>
+
+    <label for="systemPrompt">System Prompt (可选)</label>
+    <input id="systemPrompt" placeholder="留空使用默认系统提示词" />
+
+    <label for="prompt">问题</label>
+    <textarea id="prompt" placeholder="请输入要验证的问题"></textarea>
+
+    <div class="actions">
+      <button class="primary" id="sendBtn">发送并流式接收</button>
+      <button id="clearBtn">清空回答</button>
+    </div>
+
+    <div id="status">状态：待发送</div>
+    <div id="answer"></div>
+    <div class="footer">designed by @yuzechao</div>
+  </div>
+
+  <script>
+    const apiKeyEl = document.getElementById('apiKey');
+    const modelEl = document.getElementById('model');
+    const systemPromptEl = document.getElementById('systemPrompt');
+    const promptEl = document.getElementById('prompt');
+    const statusEl = document.getElementById('status');
+    const answerEl = document.getElementById('answer');
+    const sendBtn = document.getElementById('sendBtn');
+    const clearBtn = document.getElementById('clearBtn');
+
+    clearBtn.addEventListener('click', () => {
+      answerEl.textContent = '';
+      statusEl.textContent = '状态：已清空';
+    });
+
+    sendBtn.addEventListener('click', async () => {
+      const apiKey = apiKeyEl.value.trim();
+      const prompt = promptEl.value.trim();
+      const model = modelEl.value.trim();
+      const systemPrompt = systemPromptEl.value.trim();
+
+      if (!apiKey) {
+        statusEl.textContent = '状态：请输入 trial key';
+        return;
+      }
+      if (!prompt) {
+        statusEl.textContent = '状态：请输入问题';
+        return;
+      }
+
+      answerEl.textContent = '';
+      const startedAt = performance.now();
+      statusEl.textContent = '状态：请求中...';
+
+      try {
+        const resp = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ apiKey, prompt, model, systemPrompt }),
+        });
+
+        if (!resp.ok) {
+          const err = await resp.text();
+          statusEl.textContent = `状态：失败 (${resp.status}) ${err}`;
+          return;
+        }
+        if (!resp.body) {
+          statusEl.textContent = '状态：失败（浏览器不支持流式读取）';
+          return;
+        }
+
+        const reader = resp.body.getReader();
+        const decoder = new TextDecoder('utf-8');
+        let buffer = '';
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop() || '';
+
+          for (const line of lines) {
+            const trimmed = line.trim();
+            if (!trimmed.startsWith('data:')) continue;
+            const data = trimmed.slice(5).trim();
+            if (!data || data === '[DONE]') continue;
+
+            try {
+              const payload = JSON.parse(data);
+              const chunk = payload?.choices?.[0]?.delta?.content || '';
+              if (chunk) answerEl.textContent += chunk;
+            } catch (_) {
+              // 非 JSON 块（某些上游兼容实现会混入注释行），忽略即可。
+            }
+          }
+        }
+
+        const elapsed = Math.round(performance.now() - startedAt);
+        statusEl.textContent = `状态：完成 (${elapsed}ms)`;
+      } catch (error) {
+        statusEl.textContent = `状态：异常 ${error.message}`;
+      }
+    });
+  </script>
+</body>
+</html>
+

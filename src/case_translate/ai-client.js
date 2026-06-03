@@ -29,10 +29,15 @@ const client = new OpenAI({
   baseURL: runtimeAIConfig.baseUrl,
 });
 
+// ==================== 重试配置 ====================
+
+const MAX_RETRIES = 3;
+const BASE_DELAY_MS = 2000;
+
 // ==================== 核心 API ====================
 
 /**
- * 调用 OpenAI Chat Completions API
+ * 调用 OpenAI Chat Completions API（带全局重试机制）
  *
  * @param {Array<{role: string, content: string}>} messages - 消息数组（system + user + ...）
  * @param {Object} [options] - 可选参数
@@ -47,22 +52,46 @@ export async function callChat(messages, options = {}) {
     temperature = 0.2,
     maxTokens = 2000,
     model = runtimeAIConfig.model,
+    response_format,
   } = options;
 
-  const completion = await client.chat.completions.create({
-    model,
-    messages,
-    temperature,
-    max_tokens: maxTokens,
-  });
+  let lastError;
 
-  const content = completion.choices?.[0]?.message?.content;
+  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      const requestOptions = {
+        model,
+        messages,
+        temperature,
+        max_tokens: maxTokens,
+      };
 
-  if (!content) {
-    throw new Error('AI 返回空结果');
+      // 如果提供了 response_format，则加入请求中（用于 JSON Schema 模式）
+      if (response_format) {
+        requestOptions.response_format = response_format;
+      }
+
+      const completion = await client.chat.completions.create(requestOptions);
+
+      const content = completion.choices?.[0]?.message?.content;
+
+      if (!content) {
+        throw new Error('AI 返回空结果');
+      }
+
+      return content;
+    } catch (error) {
+      lastError = error;
+
+      if (attempt < MAX_RETRIES) {
+        const delay = BASE_DELAY_MS * Math.pow(2, attempt - 1); // 指数退避: 2s, 4s
+        console.warn(`[LLM 调用失败，第 ${attempt} 次重试] ${error.message}，${delay}ms 后重试...`);
+        await new Promise((resolve) => setTimeout(resolve, delay));
+      }
+    }
   }
 
-  return content;
+  throw new Error(`[LLM 调用彻底失败] 已重试 ${MAX_RETRIES} 次，最终错误: ${lastError.message}`);
 }
 
 // ==================== 工具函数 ====================

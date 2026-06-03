@@ -1,99 +1,163 @@
 /**
- * step-structured.js - Phase 1 提示词模板：逐条操作结构化分析
+ * step-structured.js - Phase 1 微批处理 (Micro-Batching) 专用 Prompt 与 Schema 模块
  *
- * 目标：
- * - 让模型直接输出严格 JSON（单条对象）
- * - 为后续 Midscene YAML 转换提供稳定结构
+ * 核心目标：确保 N个动作输入，必定得到 N条结构化解析输出，严禁遗漏与合并。
  */
 
+// ==================== JSON Schema (强约束) ====================
+
 /**
- * 构建结构化 Step 的 System Prompt
- *
- * @returns {string}
+ * Phase 1 批处理输出的 JSON Schema
+ * 强制要求模型输出包裹在 parsedSteps 数组中，且每一项必须带上输入时的 index
+ */
+export const stepStructuredBatchSchema = {
+  type: 'object',
+  properties: {
+    parsedSteps: {
+      type: 'array',
+      description:
+        '解析后的 UI 动作数组。必须与输入的动作数组一一对应，数量完全一致。',
+      items: {
+        type: 'object',
+        properties: {
+          index: {
+            type: 'number',
+            description:
+              '必须与输入数据的 index 严格保持一致，这是对齐的唯一标识',
+          },
+          description: {
+            type: 'string',
+            description:
+              "一句话描述该动作（例如：点击了左侧的'系统设置'菜单）",
+          },
+          actionKind: {
+            type: 'string',
+            enum: [
+              'click',
+              'doubleClick',
+              'rightClick',
+              'keyPress',
+              'input',
+              'assert',
+              'sleep',
+              'other',
+            ],
+            description: '动作类型归类',
+          },
+          target: {
+            type: 'string',
+            description:
+              "动作的直接作用对象名称或标识（例如：'提交按钮'，'用户名输入框'）",
+          },
+          uiChange: {
+            type: 'string',
+            description:
+              "动作发生后，UI 产生了什么具体变化（例如：'弹出了确认对话框'，'无可见变化'）",
+          },
+          page: {
+            type: 'string',
+            description: '当前发生操作的页面名称或区域',
+          },
+          basis: {
+            type: 'array',
+            items: { type: 'string' },
+            description:
+              '你得出以上结论的证据来源（如：DOM Diff中新增了某节点，Input增量显示输入了xxx）',
+          },
+          inputText: {
+            type: 'string',
+            description: '如果是输入操作，输入了什么内容？若无则留空',
+          },
+          key: {
+            type: 'string',
+            description: '如果是按键操作，按下了什么键？若无则留空',
+          },
+          assertText: {
+            type: 'string',
+            description: '预留断言字段，默认留空',
+          },
+          confidence: {
+            type: 'number',
+            description: '你对这条翻译的置信度 (0.0 到 1.0)',
+          },
+        },
+        required: [
+          'index',
+          'description',
+          'actionKind',
+          'target',
+          'uiChange',
+          'page',
+          'basis',
+          'confidence',
+        ],
+      },
+    },
+  },
+  required: ['parsedSteps'],
+};
+
+// ==================== Prompt 构建 (强契约) ====================
+
+/**
+ * 构建 Phase 1 批处理 System Prompt
  */
 export function buildSystemPrompt() {
-  return `你是资深测试工程师。请基于给定操作证据，输出“单条 JSON 对象”，不得输出任何额外文本。
+  return `你是一个资深的 Web UI 自动化测试数据分析专家。
+你的任务是将一份包含【多个底层浏览器物理动作】的 JSON 数组，精确翻译为人类可读的结构化测试步骤。
 
-必须遵守：
-1) 只输出 JSON 对象，不要 markdown 代码块，不要解释文字。
-2) 字段必须完整，缺失信息用空字符串或空数组，不允许省略必填字段。
-3) 所有结论必须基于输入证据，禁止猜测业务语义。
+【核心执行红线：N进N出，严禁丢步】
+1. **严格的一一对应**：你将收到一个包含 N 个动作的数组。你必须输出一个包含严格 N 个对象的 JSON 数组。
+2. **严禁合并**：即使两个动作看起来逻辑连贯（例如：先点击输入框，再敲击回车），你也**绝对不能**把它们合并成一条。每一个输入的 \`index\` 都必须在输出中有一条对应的独立解析。
+3. **基于硬证据**：你的翻译必须建立在 \`snapshotDiff\`（操作前后 DOM 的差异）、\`localContext\`（目标元素周边源码）和表单增量之上，不能瞎猜。
 
-输出 JSON Schema（必须严格匹配）：
-{
-  "description": "string, 本条操作的简洁描述",
-  "uiChange": "string, 实际观察到的UI变化；无变化写'无可见变化'",
-  "page": "string, 页面标题",
-  "basis": ["string", "string"],
-  "actionKind": "click|doubleClick|rightClick|keyPress|input|assert|other",
-  "target": "string, 操作对象简述",
-  "inputText": "string, 输入值；无则空字符串",
-  "key": "string, 按键名；无则空字符串",
-  "assertText": "string, 可直接用于断言的文本；不适用则空字符串",
-  "confidence": 0.0,
-  "sourceActionIndices": "可选：正整数数组；仅当本条描述需对应多条连续 enriched 操作（同一注释下多行 Selenium）时填写；一般省略"
-}
-
-补充规则：
-- confidence 取值 [0,1]。
-- 若输入值为 [MASKED]，description 需标注“密码（已脱敏）”。
-- basis 至少给 1 条，尽量引用 diff/formState/context 的事实。`;
+【输出要求】
+你必须返回符合提供的 JSON Schema 的数据结构，将结果放入 \`parsedSteps\` 数组中。
+切记：在输出的每个对象中，必须正确填写 \`index\`，使其与你正在解析的输入动作的 \`index\` 一模一样。`;
 }
 
 /**
- * 构建结构化 Step 的 User Prompt
+ * 构建 Phase 1 批处理 User Prompt
  *
- * @param {Object} enrichedAction
- * @param {number} actionIndex
- * @param {Array<Object>} recentSteps
+ * @param {Array<Object>} enrichedActionsBatch - 富化后的动作数组 (如 3~5 条)
+ * @param {Array<Object>} recentSteps - 之前的历史解析结果 (作为上下文)
  * @returns {string}
  */
-export function buildUserPrompt(enrichedAction, actionIndex, recentSteps = []) {
-  const actionInfo = {
-    index: actionIndex,
-    type: enrichedAction.type,
-    originalType: enrichedAction.originalType || undefined,
-    inputValue: enrichedAction.inputValue || undefined,
-    element: enrichedAction.element,
-    key: enrichedAction.key,
-    url: enrichedAction.url,
-    title: enrichedAction.title,
-    timestamp: enrichedAction.timestamp,
-    classification: enrichedAction.classification || undefined,
-  };
+export function buildUserPrompt(enrichedActionsBatch, recentSteps) {
+  let promptText = `【历史上下文参考】\n`;
+  promptText += `以下是发生在本次批处理之前的最近几次动作解析结果，仅供你理解上下文逻辑，**不需要**在你的输出中包含它们：\n`;
 
-  const recentContext = recentSteps.slice(-5).map((s) => ({
-    index: s.index,
-    description: s.description,
-    actionKind: s.actionKind,
-    page: s.page,
-  }));
+  if (recentSteps && recentSteps.length > 0) {
+    const contextSteps = recentSteps
+      .slice(-3)
+      .map((s) => `[Index ${s.index}] ${s.description} -> 变化: ${s.uiChange}`);
+    promptText += contextSteps.join('\n') + `\n\n`;
+  } else {
+    promptText += `(无历史上下文，这是起始操作)\n\n`;
+  }
 
-  return `请分析第 ${actionIndex} 条操作并输出严格 JSON。
+  promptText += `【本次需要解析的动作数组】\n`;
+  promptText += `注意：以下共有 ${enrichedActionsBatch.length} 个动作。你必须输出 ${enrichedActionsBatch.length} 个解析结果。\n\n`;
 
-【最重要证据：Snapshot Diff】
-\`\`\`diff
-${enrichedAction.snapshotDiff || '（diff 不可用）'}
-\`\`\`
+  // 强化视觉隔离：把每个动作包装在明显的边界内，防止模型眼花
+  enrichedActionsBatch.forEach((action, i) => {
+    promptText += `=============【动作 Index: ${action.index} (第 ${i + 1}/${enrichedActionsBatch.length} 个)】=============\n`;
+    promptText +=
+      JSON.stringify(
+        {
+          type: action.type,
+          timestamp: action.timestamp,
+          element: action.element,
+          localContext: action.localContext,
+          formStateDelta: action.formStateDelta,
+          snapshotDiff: action.snapshotDiff,
+        },
+        null,
+        2,
+      ) + `\n\n`;
+  });
 
-【表单状态变化】
-\`\`\`
-${enrichedAction.formStateChangeText || '（无）'}
-\`\`\`
+  promptText += `请立即开始解析，并严格按照 Schema 输出 JSON 对象。`;
 
-【上下文片段】
-\`\`\`
-${enrichedAction.contextExcerpt || '（无）'}
-\`\`\`
-
-【操作基础信息】
-\`\`\`json
-${JSON.stringify(actionInfo, null, 2)}
-\`\`\`
-
-【最近上下文（可选）】
-\`\`\`json
-${JSON.stringify(recentContext, null, 2)}
-\`\`\``;
+  return promptText;
 }
-

@@ -44,6 +44,7 @@ import {
 import {
   buildSystemPrompt as buildStructuredStepSystemPrompt,
   buildUserPrompt as buildStructuredStepUserPrompt,
+  stepStructuredBatchSchema,
 } from './prompts/step-structured.js';
 
 // ==================== 核心入口函数 ====================
@@ -60,15 +61,22 @@ import {
 export async function runWorkflow(runDir, enrichedActions, options = {}) {
   const { log } = options;
 
+  // Micro-batching 配置
+  const phase1BatchSize = options.phase1BatchSize || 3;
+  const phaseWindowSize = options.phaseWindowSize || PHASE2_CASE_WINDOW_STEPS;
+
   const stepsFile = path.join(runDir, AI_STEPS_STRUCTURED_FILENAME);
   const stepErrorsFile = path.join(runDir, AI_STEPS_ERRORS_FILENAME);
   const casesFile = path.join(runDir, AI_CASES_FILENAME);
 
-  // ========== Phase 1：结构化逐条翻译 ==========
-  if (log) log.info('[Phase 1] 正在生成结构化步骤 JSON...');
+  // ========== Phase 1：结构化逐条翻译（微批处理） ==========
+  if (log) log.info(`[Phase 1] 正在生成结构化步骤 JSON (批次大小=${phase1BatchSize})...`);
   const phase1Start = Date.now();
 
-  const { steps, errors } = await runPhase1Structured(stepsFile, stepErrorsFile, enrichedActions, { log });
+  const { steps, errors } = await runPhase1Structured(stepsFile, stepErrorsFile, enrichedActions, {
+    log,
+    phase1BatchSize,
+  });
 
   const phase1Elapsed = ((Date.now() - phase1Start) / 1000).toFixed(1);
   if (log) log.info(`[Phase 1] 完成，共 ${steps.length} 条结构化步骤，耗时 ${phase1Elapsed}s`);
@@ -86,10 +94,10 @@ export async function runWorkflow(runDir, enrichedActions, options = {}) {
   }
 
   // ========== Phase 2：归纳用例 ==========
-  if (log) log.info('[Phase 2] 正在归纳测试用例...');
+  if (log) log.info(`[Phase 2] 正在归纳测试用例 (窗口大小=${phaseWindowSize})...`);
   const phase2Start = Date.now();
 
-  await runPhase2FromStructured(steps, casesFile, { log });
+  await runPhase2FromStructured(steps, casesFile, { log, phaseWindowSize });
 
   const phase2Elapsed = ((Date.now() - phase2Start) / 1000).toFixed(1);
   if (log) log.info(`[Phase 2] 完成，耗时 ${phase2Elapsed}s`);
@@ -102,7 +110,7 @@ export async function runWorkflow(runDir, enrichedActions, options = {}) {
   // ========== Phase 4：Agent TXT 生成 ==========
   let agentTxtFile = null;
   try {
-    agentTxtFile = await generateAgentTxt(runDir, steps, { log });
+    agentTxtFile = await generateAgentTxt(runDir, steps, { log, phaseWindowSize });
   } catch (err) {
     if (log) log.error(`[Workflow] Agent TXT 生成失败: ${err.message}`);
   }
@@ -119,106 +127,296 @@ export async function runWorkflow(runDir, enrichedActions, options = {}) {
   };
 }
 
-// ==================== Phase 1：结构化逐条翻译 ====================
+// ==================== Phase 1：结构化逐条翻译（微批处理） ====================
 
 /**
- * Phase 1：逐条生成结构化步骤
+ * Phase 1：微批处理生成结构化步骤
  *
  * @param {string} stepsFile - 结构化步骤文件路径
  * @param {string} stepErrorsFile - 结构化步骤错误记录文件路径
  * @param {Array<Object>} enrichedActions - 富化后的 action 数据
  * @param {Object} [options] - 可选配置
  * @param {Object} [options.log] - 日志器
+ * @param {number} [options.phase1BatchSize] - 每批发送给 LLM 的最大动作数
  * @returns {Promise<{ steps: Array<Object>, errors: Array<Object> }>}
  */
 async function runPhase1Structured(stepsFile, stepErrorsFile, enrichedActions, options = {}) {
   const { log } = options;
+  const phase1BatchSize = options.phase1BatchSize || 3;
 
   const steps = [];
   const errors = [];
   let previousTimestamp = null;
 
   const totalActions = enrichedActions.length;
+  let cursor = 0;
 
-  for (let idx = 0; idx < totalActions; idx++) {
-    const enrichedAction = enrichedActions[idx];
-    const actionIndex = enrichedAction.index;
+  while (cursor < totalActions) {
+    // 构建当前批次：跳过 skip/noise，用本地函数处理
+    const actionBatch = [];
+    const skipNoiseIndices = [];
 
-    // skip/noise 直接确定性落地
-    if (enrichedAction.skip || enrichedAction.noise) {
-      const intervalFromPreviousMs = computeIntervalFromPreviousMs(enrichedAction.timestamp, previousTimestamp);
-      const fallbackStep = buildFallbackStructuredStep(enrichedAction, actionIndex, null, intervalFromPreviousMs);
-      steps.push(fallbackStep);
+    for (let i = 0; i < phase1BatchSize && cursor + i < totalActions; i++) {
+      const enrichedAction = enrichedActions[cursor + i];
+      const actionIndex = enrichedAction.index;
+
+      if (enrichedAction.skip || enrichedAction.noise) {
+        // skip/noise 直接确定性落地，不发送给 LLM
+        const intervalFromPreviousMs = computeIntervalFromPreviousMs(
+          enrichedAction.timestamp,
+          previousTimestamp,
+        );
+        const fallbackStep = buildFallbackStructuredStep(
+          enrichedAction,
+          actionIndex,
+          null,
+          intervalFromPreviousMs,
+        );
+        steps.push(fallbackStep);
+        skipNoiseIndices.push(actionIndex);
+        if (enrichedAction.skip && log)
+          log.info(`[Phase 1] 操作 ${actionIndex} 已跳过 [${enrichedAction.skip}]`);
+        if (enrichedAction.noise && log)
+          log.info(`[Phase 1] 操作 ${actionIndex} 已标记噪声`);
+        previousTimestamp = normalizeTimestamp(enrichedAction.timestamp, previousTimestamp);
+      } else {
+        actionBatch.push(enrichedAction);
+      }
+    }
+
+    // 如果当前批次没有需要 LLM 处理的动作，直接推进光标
+    if (actionBatch.length === 0) {
+      cursor += skipNoiseIndices.length;
       writeJsonIncremental(stepsFile, steps);
-      if (enrichedAction.skip && log) log.info(`[Phase 1] 操作 ${actionIndex} 已跳过 [${enrichedAction.skip}]`);
-      if (enrichedAction.noise && log) log.info(`[Phase 1] 操作 ${actionIndex} 已标记噪声`);
-      previousTimestamp = normalizeTimestamp(enrichedAction.timestamp, previousTimestamp);
+      writeJsonIncremental(stepErrorsFile, errors);
       continue;
     }
 
+    // 构建上下文
+    const windowStart = Math.max(0, steps.length - EVIDENCE_CONTEXT_WINDOW_SIZE);
+    const recentSteps = steps.slice(windowStart);
+
+    const messages = [
+      { role: 'system', content: buildStructuredStepSystemPrompt() },
+      { role: 'user', content: buildUserPrompt(actionBatch, recentSteps) },
+    ];
+
+    const startIdx = actionBatch[0].index;
+    const endIdx = actionBatch[actionBatch.length - 1].index;
+    if (log)
+      log.info(
+        `[Phase 1] 正在处理批次: 操作 ${startIdx}~${endIdx} (共 ${actionBatch.length} 条，纯 skip/noise=${skipNoiseIndices.length} 条)`,
+      );
+
     try {
-      const windowStart = Math.max(0, steps.length - EVIDENCE_CONTEXT_WINDOW_SIZE);
-      const recentSteps = steps.slice(windowStart);
-      const messages = [
-        { role: 'system', content: buildStructuredStepSystemPrompt() },
-        { role: 'user', content: buildStructuredStepUserPrompt(enrichedAction, actionIndex, recentSteps) },
-      ];
+      const rawReply = await callChat(messages, {
+        temperature: 0,
+        maxTokens: 2000,
+        response_format: {
+          type: 'json_schema',
+          json_schema: {
+            name: 'step_structured_batch',
+            schema: stepStructuredBatchSchema,
+            strict: true,
+          },
+        },
+      });
 
-      if (log) log.info(`[Phase 1] 正在处理操作 ${actionIndex}/${totalActions}...`);
+      // 解析批量返回
+      const batchResult = parseBatchStructuredSteps(rawReply, actionBatch, skipNoiseIndices, log);
 
-      const rawReply = await callChat(messages, { temperature: 0, maxTokens: 1200 });
-      const intervalFromPreviousMs = computeIntervalFromPreviousMs(enrichedAction.timestamp, previousTimestamp);
-      const parseResult = parseAndValidateStructuredStep(rawReply, enrichedAction, actionIndex, intervalFromPreviousMs);
-      if (!parseResult.ok) {
-        const repaired = await tryRepairStructuredStep(rawReply, enrichedAction, actionIndex, intervalFromPreviousMs);
-        if (repaired.ok) {
-          steps.push(repaired.step);
-          errors.push({
-            index: actionIndex,
-            type: 'repair',
-            reason: parseResult.error,
-          });
-        } else {
+      // 处理解析结果
+      for (const parsedStep of batchResult.parsedSteps) {
+        const matchedAction = actionBatch.find((a) => a.index === parsedStep.index);
+        if (!matchedAction) {
+          if (log)
+            log.warn(
+              `[Phase 1] LLM 返回了未知 index=${parsedStep.index}，已忽略`,
+            );
+          continue;
+        }
+        const intervalFromPreviousMs = computeIntervalFromPreviousMs(
+          matchedAction.timestamp,
+          previousTimestamp,
+        );
+        const step = normalizeStructuredStep(
+          parsedStep,
+          matchedAction,
+          parsedStep.index,
+          intervalFromPreviousMs,
+        );
+        steps.push(step);
+        previousTimestamp = normalizeTimestamp(matchedAction.timestamp, previousTimestamp);
+      }
+
+      // 处理无法解析的条目（整批 fallback）
+      for (const failedIdx of batchResult.failedIndices) {
+        const matchedAction = actionBatch.find((a) => a.index === failedIdx);
+        if (matchedAction) {
+          const intervalFromPreviousMs = computeIntervalFromPreviousMs(
+            matchedAction.timestamp,
+            previousTimestamp,
+          );
           const fallbackStep = buildFallbackStructuredStep(
-            enrichedAction,
-            actionIndex,
-            repaired.error || parseResult.error,
+            matchedAction,
+            failedIdx,
+            '批次解析失败',
             intervalFromPreviousMs,
           );
           steps.push(fallbackStep);
           errors.push({
-            index: actionIndex,
-            type: 'fallback',
-            reason: repaired.error || parseResult.error,
+            index: failedIdx,
+            type: 'batch-fallback',
+            reason: '批次 JSON 解析失败或结构不匹配',
           });
+          previousTimestamp = normalizeTimestamp(matchedAction.timestamp, previousTimestamp);
         }
-      } else {
-        steps.push(parseResult.step);
       }
 
-      writeJsonIncremental(stepsFile, steps);
-      writeJsonIncremental(stepErrorsFile, errors);
-      if (log) log.info(`[Phase 1] 操作 ${actionIndex} 结构化结果已保存`);
-      previousTimestamp = normalizeTimestamp(enrichedAction.timestamp, previousTimestamp);
+      if (batchResult.errors.length > 0) {
+        errors.push(...batchResult.errors);
+      }
     } catch (error) {
-      if (log) log.error(`[Phase 1] 操作 ${actionIndex} 结构化生成失败: ${error.message}`);
-      const intervalFromPreviousMs = computeIntervalFromPreviousMs(enrichedAction.timestamp, previousTimestamp);
-      const fallbackStep = buildFallbackStructuredStep(enrichedAction, actionIndex, error.message, intervalFromPreviousMs);
-      steps.push(fallbackStep);
+      if (log) log.error(`[Phase 1] 批次 ${startIdx}~${endIdx} 处理失败: ${error.message}`);
+
+      // 整批 fallback
+      for (const enrichedAction of actionBatch) {
+        const intervalFromPreviousMs = computeIntervalFromPreviousMs(
+          enrichedAction.timestamp,
+          previousTimestamp,
+        );
+        const fallbackStep = buildFallbackStructuredStep(
+          enrichedAction,
+          enrichedAction.index,
+          error.message,
+          intervalFromPreviousMs,
+        );
+        steps.push(fallbackStep);
+        errors.push({
+          index: enrichedAction.index,
+          type: 'batch-exception-fallback',
+          reason: error.message,
+        });
+        previousTimestamp = normalizeTimestamp(enrichedAction.timestamp, previousTimestamp);
+      }
+    }
+
+    // 推进光标
+    cursor += phase1BatchSize;
+    writeJsonIncremental(stepsFile, steps);
+    writeJsonIncremental(stepErrorsFile, errors);
+  }
+
+  return { steps, errors };
+}
+
+/**
+ * 解析批量结构化步骤返回
+ *
+ * @param {string} rawReply - LLM 返回的原始文本
+ * @param {Array<Object>} actionBatch - 当前批次的 action 数组
+ * @param {Array<number>} skipNoiseIndices - 当前批次中 skip/noise 的 indices
+ * @returns {{ parsedSteps: Array<Object>, failedIndices: Array<number>, errors: Array<Object> }}
+ */
+function parseBatchStructuredSteps(rawReply, actionBatch, skipNoiseIndices, log) {
+  const parsedSteps = [];
+  const failedIndices = [];
+  const errors = [];
+
+  let normalized = rawReply.trim();
+  let parsed;
+
+  try {
+    parsed = JSON.parse(normalized);
+  } catch (_) {
+    // 尝试提取 JSON 对象
+    const start = normalized.indexOf('{');
+    const end = normalized.lastIndexOf('}');
+    if (start >= 0 && end > start) {
+      try {
+        parsed = JSON.parse(normalized.slice(start, end + 1));
+      } catch (__) {
+        // 完全失败，整批标记为失败
+        for (const action of actionBatch) {
+          failedIndices.push(action.index);
+        }
+        errors.push({
+          index: actionBatch[0].index,
+          type: 'batch-parse-error',
+          reason: 'JSON 解析失败',
+        });
+        return { parsedSteps, failedIndices, errors };
+      }
+    } else {
+      for (const action of actionBatch) {
+        failedIndices.push(action.index);
+      }
       errors.push({
-        index: actionIndex,
-        type: 'exception-fallback',
-        reason: error.message,
+        index: actionBatch[0].index,
+        type: 'batch-parse-error',
+        reason: '无法提取 JSON 对象',
       });
-      writeJsonIncremental(stepsFile, steps);
-      writeJsonIncremental(stepErrorsFile, errors);
-      previousTimestamp = normalizeTimestamp(enrichedAction.timestamp, previousTimestamp);
+      return { parsedSteps, failedIndices, errors };
     }
   }
 
-  writeJsonIncremental(stepsFile, steps);
-  writeJsonIncremental(stepErrorsFile, errors);
-  return { steps, errors };
+  // 检查是否有 parsedSteps 数组
+  if (!parsed || !parsed.parsedSteps || !Array.isArray(parsed.parsedSteps)) {
+    for (const action of actionBatch) {
+      failedIndices.push(action.index);
+    }
+    errors.push({
+      index: actionBatch[0].index,
+      type: 'batch-structure-error',
+      reason: '缺少 parsedSteps 数组',
+    });
+    return { parsedSteps, failedIndices, errors };
+  }
+
+  // 将 skipNoiseIndices 转为 Set 方便查询
+  const skipNoiseSet = new Set(skipNoiseIndices);
+
+  // 验证数量一致
+  const expectedCount = actionBatch.length + skipNoiseIndices.length;
+  const actualCount = parsed.parsedSteps.length;
+
+  if (actualCount !== actionBatch.length) {
+    if (log)
+      log.warn(
+        `[Phase 1] 批次返回数量不匹配: 期望 ${actionBatch.length} 条实际 ${actualCount} 条，将逐条校验`,
+      );
+  }
+
+  // 遍历 LLM 返回的 parsedSteps，按 index 匹配
+  for (const parsedStep of parsed.parsedSteps) {
+    if (typeof parsedStep.index !== 'number') {
+      continue;
+    }
+
+    // 跳过 skip/noise 的 index（这些应该在本地处理了）
+    if (skipNoiseSet.has(parsedStep.index)) {
+      if (log) log.warn(`[Phase 1] skip/noise index=${parsedStep.index} 出现在 LLM 返回中，已忽略`);
+      continue;
+    }
+
+    // 验证必需字段
+    const validationError = validateStructuredStep(parsedStep);
+    if (validationError) {
+      if (log)
+        log.warn(`[Phase 1] index=${parsedStep.index} 字段验证失败: ${validationError}`);
+      failedIndices.push(parsedStep.index);
+      errors.push({
+        index: parsedStep.index,
+        type: 'field-validation-error',
+        reason: validationError,
+      });
+      continue;
+    }
+
+    parsedSteps.push(parsedStep);
+  }
+
+  return { parsedSteps, failedIndices, errors };
 }
 
 // ==================== Phase 2：归纳用例 ====================
@@ -233,6 +431,7 @@ async function runPhase1Structured(stepsFile, stepErrorsFile, enrichedActions, o
  */
 async function runPhase2FromStructured(steps, casesFile, options = {}) {
   const { log } = options;
+  const phaseWindowSize = options.phaseWindowSize || PHASE2_CASE_WINDOW_STEPS;
 
   const effectiveSteps = filterEffectiveStepsForPhase2(steps);
   const slimAll = slimStepsForPhase2(effectiveSteps);
@@ -252,7 +451,7 @@ async function runPhase2FromStructured(steps, casesFile, options = {}) {
 
   while (cursor < slimAll.length) {
     round++;
-    const windowSlim = slimAll.slice(cursor, cursor + PHASE2_CASE_WINDOW_STEPS);
+    const windowSlim = slimAll.slice(cursor, cursor + phaseWindowSize);
     const expectedIndices = windowSlim.map((s) => s.index);
     const indexListText = JSON.stringify(expectedIndices);
     const windowStepsJson = JSON.stringify(windowSlim, null, 2);

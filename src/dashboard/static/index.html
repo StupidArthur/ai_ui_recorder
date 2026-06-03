@@ -382,7 +382,7 @@
     <input type="text" class="url-input" id="urlInput" placeholder="输入要录制的页面 URL">
     <button class="btn btn-record" id="btnRecord" onclick="startRecording()">开始录制</button>
     <button class="btn btn-stop" id="btnStop" onclick="stopRecording()" disabled>停止录制</button>
-    <button class="btn btn-translate" id="btnTranslate" onclick="startTranslate()">AI 翻译</button>
+    <button class="btn btn-translate" id="btnTranslate" onclick="openTranslateModal()">AI 翻译</button>
     <button class="btn btn-refresh" id="btnRefresh" onclick="refreshRuns()">刷新列表</button>
   </div>
 
@@ -424,6 +424,46 @@
       </div>
     </div>
   </div>
+
+  <!-- AI 翻译高级设置弹窗 -->
+  <dialog id="translateModal" style="border: none; border-radius: 8px; padding: 24px; width: 420px; max-width: 90vw; box-shadow: 0 4px 24px rgba(0,0,0,0.15);">
+    <form id="translateForm" method="dialog" style="display: flex; flex-direction: column; gap: 16px;">
+      <h3 style="margin: 0 0 8px; font-size: 18px; color: #333;">AI 翻译高级设置</h3>
+
+      <div style="display: flex; flex-direction: column; gap: 4px;">
+        <label for="phase1BatchSize" style="font-size: 14px; font-weight: 500; color: #555;">
+          基础动作合并数 (Phase 1)
+        </label>
+        <input type="number" id="phase1BatchSize" name="phase1BatchSize" value="3" min="1" max="10"
+          style="padding: 8px 12px; border: 1px solid #d9d9d9; border-radius: 6px; font-size: 14px; outline: none;"
+          onfocus="this.style.borderColor='#1890ff'; this.style.boxShadow='0 0 0 2px rgba(24,144,255,0.2)'"
+          onblur="this.style.borderColor='#d9d9d9'; this.style.boxShadow='none'">
+        <span style="font-size: 12px; color: #999;">控制翻译速度与精度的平衡。推荐 3-5，值越小越精确但耗时越长，受限于大模型上下文处理能力。</span>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 4px;">
+        <label for="phaseWindowSize" style="font-size: 14px; font-weight: 500; color: #555;">
+          逻辑归纳滑窗大小 (Phase 2 & 4)
+        </label>
+        <input type="number" id="phaseWindowSize" name="phaseWindowSize" value="20" min="5" max="50"
+          style="padding: 8px 12px; border: 1px solid #d9d9d9; border-radius: 6px; font-size: 14px; outline: none;"
+          onfocus="this.style.borderColor='#1890ff'; this.style.boxShadow='0 0 0 2px rgba(24,144,255,0.2)'"
+          onblur="this.style.borderColor='#d9d9d9'; this.style.boxShadow='none'">
+        <span style="font-size: 12px; color: #999;">推荐 15-25，用于控制单次推导多少个步骤生成最终用例。</span>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 8px;">
+        <button type="button" onclick="closeTranslateModal()"
+          style="padding: 8px 20px; border: 1px solid #d9d9d9; border-radius: 6px; background: #fff; color: #666; font-size: 14px; cursor: pointer;">
+          取消
+        </button>
+        <button type="submit"
+          style="padding: 8px 20px; border: none; border-radius: 6px; background: #1890ff; color: #fff; font-size: 14px; cursor: pointer;">
+          确认开始翻译
+        </button>
+      </div>
+    </form>
+  </dialog>
 
   <!-- 底部 -->
   <div class="footer">designed by @yuzechao</div>
@@ -623,10 +663,31 @@
 
     // ==================== AI 翻译 ====================
 
-    async function startTranslate() {
+    const translateModal = document.getElementById('translateModal');
+    const translateForm = document.getElementById('translateForm');
+
+    function openTranslateModal() {
+      translateModal.showModal();
+    }
+
+    function closeTranslateModal() {
+      translateModal.close();
+    }
+
+    translateForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      closeTranslateModal();
+
+      const phase1BatchSize = parseInt(document.getElementById('phase1BatchSize').value) || 3;
+      const phaseWindowSize = parseInt(document.getElementById('phaseWindowSize').value) || 20;
+
       try {
         updateState('translating');
-        const body = selectedRunId ? { runId: selectedRunId } : {};
+        const body = {
+          ...(selectedRunId ? { runId: selectedRunId } : {}),
+          phase1BatchSize,
+          phaseWindowSize,
+        };
 
         const resp = await fetch('/api/translate/start', {
           method: 'POST',
@@ -641,12 +702,12 @@
           return;
         }
 
-        appendLog('STATE', `[系统] AI 翻译已开始${selectedRunId ? ` (${selectedRunId})` : ' (最近一次录制)'}`);
+        appendLog('STATE', `[系统] AI 翻译已开始 (Phase1批次=${phase1BatchSize}, 窗口=${phaseWindowSize})${selectedRunId ? ` (${selectedRunId})` : ' (最近一次录制)'}`);
       } catch (error) {
         updateState('idle');
         appendLog('ERROR', `翻译启动失败: ${error.message}`);
       }
-    }
+    });
 
     // ==================== 录制历史 ====================
 

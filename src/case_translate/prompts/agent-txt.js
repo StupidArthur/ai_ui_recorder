@@ -69,7 +69,7 @@ export function buildAgentTxtSystemPrompt() {
 你不需要自己编写 TXT 文本，而是将传入的微观操作数组，按照"业务逻辑"进行聚合，输出 JSON 数据。
 - logicalName：高度概括这几个操作在做什么（如：设置系统配置）。
 - microActions：属于该逻辑的动作细节数组。
-- consumeStepCount：你这一个 logicalName 聚合了传入数据中的几条底层步骤。请务必计算准确，这关系到系统的滑窗推进。`;
+- consumeStepCount：你这一个 logicalName 聚合了传入数据中的几条底层步骤。请务必计算准确。**注意：如果你发现传入数据的最后几个微观动作不足以形成一个完整的业务逻辑闭环，请不要强行归纳它们（直接丢弃并在 consumeStepCount 中减去它们的数量），剩余的未处理动作会由系统在下一批次滑窗中处理。**`;
 }
 
 /**

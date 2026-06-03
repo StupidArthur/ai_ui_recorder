@@ -14,8 +14,8 @@ import path from 'path';
 import { callChat } from '../ai-client.js';
 import { buildAgentTxtSystemPrompt, buildAgentTxtUserPrompt, agentTxtOutputSchema } from '../prompts/agent-txt.js';
 
-/** 每次喂给 LLM 的最大微观步骤数 */
-const CHUNK_SIZE = 20;
+/** 默认滑动窗口大小 */
+const DEFAULT_CHUNK_SIZE = 20;
 
 /**
  * Phase 4：生成供 Agent 使用的纯文本测试用例
@@ -24,11 +24,13 @@ const CHUNK_SIZE = 20;
  * @param {Array<Object>} structuredSteps - Phase 1 输出的结构化步骤数组
  * @param {Object} [options] - 可选配置
  * @param {Object} [options.log] - 日志器实例
+ * @param {number} [options.phaseWindowSize] - 滑动窗口大小，默认 20
  * @returns {Promise<string>} 生成的 TXT 文件路径
  */
 export async function generateAgentTxt(runDir, structuredSteps, options = {}) {
   const { log } = options;
-  if (log) log.info('[Agent TXT] 开始生成 Agent 专用测试用例...');
+  const phaseWindowSize = options.phaseWindowSize || DEFAULT_CHUNK_SIZE;
+  if (log) log.info(`[Agent TXT] 开始生成 Agent 专用测试用例 (窗口大小=${phaseWindowSize})...`);
 
   // 1. 过滤掉无效操作，保留正常步骤
   const effectiveSteps = structuredSteps.filter(
@@ -47,7 +49,7 @@ export async function generateAgentTxt(runDir, structuredSteps, options = {}) {
 
   // 2. 滑动窗口处理
   while (cursor < effectiveSteps.length) {
-    const chunk = effectiveSteps.slice(cursor, cursor + CHUNK_SIZE);
+    const chunk = effectiveSteps.slice(cursor, cursor + phaseWindowSize);
 
     // 精简数据丢给大模型，避免 Token 浪费
     const slimChunk = chunk.map((s) => ({
@@ -99,9 +101,9 @@ export async function generateAgentTxt(runDir, structuredSteps, options = {}) {
           ? consumedInThisChunk
           : chunk.length;
     } catch (error) {
-      if (log) log.error(`[Agent TXT] Chunk 处理失败: ${error.message}`);
+      if (log) log.error(`[Agent TXT] Chunk 处理彻底失败 (已用尽重试): ${error.message}`);
       // 容错：失败则强制跳过当前块，继续下一块
-      cursor += CHUNK_SIZE;
+      cursor += phaseWindowSize;
     }
   }
 

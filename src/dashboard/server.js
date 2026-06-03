@@ -380,6 +380,10 @@ async function handleTranslateStart(req, res) {
     }
     // 不传 runId 则由 generate 自动查找最近一次
 
+    // Micro-batching 配置参数
+    const phase1BatchSize = parseInt(body.phase1BatchSize) || 3;
+    const phaseWindowSize = parseInt(body.phaseWindowSize) || 20;
+
     currentState = AppState.TRANSLATING;
     broadcastStateChange(AppState.TRANSLATING);
 
@@ -389,7 +393,11 @@ async function handleTranslateStart(req, res) {
     // 异步执行翻译
     try {
       await ensureTranslateModuleLoaded();
-      const result = await generateFn(metaFilePath, { onLog: broadcastLog });
+      const result = await generateFn(metaFilePath, {
+        onLog: broadcastLog,
+        phase1BatchSize,
+        phaseWindowSize,
+      });
       currentState = AppState.IDLE;
       broadcastStateChange(AppState.IDLE, {
         message: 'AI 翻译完成',

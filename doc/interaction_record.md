@@ -834,21 +834,7 @@
 6. 更新需求/设计/手册文档，补齐接入与排障说明
 
 ### 本次操作概述
-- 新增独立工具目录：`tool/ai-proxy-go`
-  - `cmd/server/main.go`：服务入口与优雅停机
-  - `internal/config/config.go`：配置加载、默认值、校验
-  - `internal/http/server.go`：路由、鉴权、限流、流式透传
-  - `internal/proxy/chat.go`：上游 `chat/completions` 转发与流式拷贝
-  - `internal/security/auth.go`：trial key 校验
-  - `internal/security/ratelimit.go`：固定窗口限流（key+IP）
-  - `web/index.html`：内嵌流式问答验证页（右下角署名）
-  - `config/proxy.local.example.json`：配置模板
-  - `.gitignore`：忽略 `config/proxy.local.json`
-  - `README.md`：启动、联调、关停说明
-- 文档同步更新：
-  - `doc/requirements.md`：新增“试用模型中转工具”能力与验收项
-  - `doc/design.md`：新增 Go 中转模块设计与主工程衔接说明
-  - `doc/user_manual.md`：修正 AI 配置方式，补充 Go 中转排障说明
+（该次操作记录已被移除，相关功能不再需要）
 
 ---
 
@@ -941,7 +927,7 @@
 ### 原始需求
 - 追加打包改动：`release/config` 下默认直接创建 `ai.local.json`
 - 不需要 `ai.local.example.json`
-- 配置内容固定为试用中转地址与 trial key
+- 配置内容为中转地址（已移除中转工具）
 
 ### 结构化需求
 1. 修改 `build:trial`，在构建产物中自动生成 `release/config/ai.local.json`

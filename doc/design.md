@@ -250,39 +250,7 @@ Dashboard 的目标：不依赖命令行也能完成全流程：
 
 ---
 
-## 8. 试用中转工具设计（Go 独立模块）
-
-试用场景下，很多目标用户没有可用模型，因此增加独立工具：
-
-- 目录：`tool/ai-proxy-go`
-- 目标：让主工程只改 `baseUrl/apiKey` 即可使用试用模型，不改业务代码
-- 启停：可独立开关，不影响主工程录制链路
-
-### 8.1 接口与职责
-
-- `POST /v1/chat/completions`
-  - 对外 OpenAI 兼容接口（供主工程调用）
-  - 服务端注入上游 API key，客户端只持有 trial key
-- `POST /api/chat`
-  - 前端验证页专用简化接口，固定走流式回复
-- `GET /`
-  - 返回内嵌验证页面
-- `GET /health`
-  - 健康检查与运行状态
-
-### 8.2 管控策略
-
-- **总开关**：`enabled=false` 时统一拒绝
-- **鉴权**：trial key 白名单校验
-- **限流**：按 `key + IP` 的分钟固定窗口限流
-
-### 8.3 与主工程衔接
-
-主工程无需改调用代码，保持 `src/utils/ai-config.js` + `src/case_translate/ai-client.js` 现有逻辑；只需把 `config/ai.local.json` 的 `baseUrl` 指向中转地址（如 `http://127.0.0.1:8787/v1`）。
-
----
-
-## 9. 运行与排障（强烈建议按证据链自底向上）
+## 8. 运行与排障（强烈建议按证据链自底向上）
 
 ### 8.1 运行入口（Windows / PowerShell）
 
@@ -303,7 +271,7 @@ npm run translate
 
 ---
 
-## 10. 已知限制与路线图（系统级）
+## 9. 已知限制与路线图（系统级）
 
 - 被动变化检测（等待期间 UI 变化）：下一阶段实现（避免“变化归属到下一次动作”）
 - hover / drag：下一阶段按需实现
@@ -321,7 +289,6 @@ npm run translate
 - 工作流：`src/case_translate/workflow.js`
 - Prompt：`src/case_translate/prompts/step-analysis.js`、`src/case_translate/prompts/case-generation.js`
 - Dashboard：`src/dashboard/server.js`、`src/dashboard/static/index.html`
-- Go 中转：`tool/ai-proxy-go/cmd/server/main.go`、`tool/ai-proxy-go/internal/http/server.go`
 
 ---
 

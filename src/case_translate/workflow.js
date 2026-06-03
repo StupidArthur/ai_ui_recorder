@@ -29,6 +29,7 @@ import { regenerateFromStructured } from '../selenium_export/regenerate-from-str
 
 import { callChat, cleanMarkdownFence } from './ai-client.js';
 import { generateMidsceneYaml } from './midscene/index.js';
+import { generateAgentTxt } from './phase4/agent-txt-generator.js';
 
 import {
   buildPhase2WindowSystemPrompt,
@@ -54,7 +55,7 @@ import {
  * @param {Array<Object>} enrichedActions - 预处理后的富化 action 数据数组
  * @param {Object} [options] - 可选配置
  * @param {Object} [options.log] - 日志器实例
- * @returns {Promise<{ stepsFile: string, casesFile: string, midsceneNoAssertFile: string }>}
+ * @returns {Promise<{ stepsFile: string, casesFile: string, midsceneNoAssertFile: string, agentTxtFile: string|null }>}
  */
 export async function runWorkflow(runDir, enrichedActions, options = {}) {
   const { log } = options;
@@ -98,6 +99,14 @@ export async function runWorkflow(runDir, enrichedActions, options = {}) {
   if (log) log.info('[Phase 3] 正在生成 Midscene YAML（no_assert）...');
   const { noAssertFile } = generateMidsceneYaml(runDir, steps, { log });
 
+  // ========== Phase 4：Agent TXT 生成 ==========
+  let agentTxtFile = null;
+  try {
+    agentTxtFile = await generateAgentTxt(runDir, steps, { log });
+  } catch (err) {
+    if (log) log.error(`[Workflow] Agent TXT 生成失败: ${err.message}`);
+  }
+
   // ========== 总结 ==========
   const totalElapsed = ((Date.now() - phase1Start) / 1000).toFixed(1);
   if (log) log.info(`AI 翻译总耗时: ${totalElapsed}s`);
@@ -106,6 +115,7 @@ export async function runWorkflow(runDir, enrichedActions, options = {}) {
     stepsFile,
     casesFile,
     midsceneNoAssertFile: noAssertFile,
+    agentTxtFile,
   };
 }
 

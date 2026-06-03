@@ -86,26 +86,6 @@ npm run build:trial
 > `config/ai.local.json` 已加入 `.gitignore`，不会进入代码仓库。  
 > 录制功能不依赖 AI；只有生成 `AI_steps.md` / `AI_cases.md` 时才需要可用的 OpenAI 兼容 API。
 
-## Go 试用中转工具（可选）
-
-为“试用用户没有模型账号”的场景，仓库内提供独立中转工具：
-
-- 目录：`tool/ai-proxy-go`
-- 能力：`/v1/chat/completions` 转发 + 内嵌流式问答验证页（`/`）
-- 管控：总开关、trial key 白名单、key+IP 限流
-
-快速使用（PowerShell）：
-
-```powershell
-cd tool/ai-proxy-go
-Copy-Item config/proxy.local.example.json config/proxy.local.json
-go run ./cmd/server
-```
-
-主工程接入时，将 `config/ai.local.json` 的 `baseUrl` 指向：
-
-- `http://127.0.0.1:8787/v1`
-
 ## 产物与目录结构（每次录制一个 run 目录）
 
 ```

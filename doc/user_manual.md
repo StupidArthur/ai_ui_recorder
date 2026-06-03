@@ -394,19 +394,9 @@ output/
 
 1. 检查 `config/ai.local.json` 的 `baseUrl/apiKey/model` 是否正确
 2. 确认 AI 服务可访问（网络/权限/配额）
-3. 如果使用试用中转，先访问中转 `GET /health`，确认 `enabled=true`
-4. 看 `generate.log` 获取错误栈与失败位置
+3. 看 `generate.log` 获取错误栈与失败位置
 
-### 7.4 Go 中转工具排障（可选）
-
-若你使用 `tool/ai-proxy-go`：
-
-1. 在 `tool/ai-proxy-go` 下确认存在 `config/proxy.local.json`
-2. 执行 `go run ./cmd/server`，检查启动日志是否显示监听地址
-3. 访问 `http://127.0.0.1:8787/`，在验证页输入 trial key 做流式问答
-4. 若主工程接入失败，检查主工程 `config/ai.local.json` 的 `baseUrl` 是否为 `http://127.0.0.1:8787/v1`
-
-### 7.5 AI 输出质量不理想（最常见）
+### 7.4 AI 输出质量不理想（最常见）
 
 强烈建议按证据链自底向上排查：
 

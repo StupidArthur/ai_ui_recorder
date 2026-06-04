@@ -17,7 +17,7 @@
 
 本次目标聚焦以下业务决策：
 
-1. 支持将录制产物（`step_2_structured_steps.json` / `step_4_midscene_no_assert.yaml`）直接用于执行。
+1. 支持将录制产物（主输入 `step_2_structured_steps.json`）直接用于执行。
 2. 首次可用时允许“全语义执行”（冷启动建档）。
 3. 常规执行“属性定位优先”，失败时“语义托底”。
 4. 执行过程自动沉淀定位资产（Locator Cache）并可手动全量刷新。
@@ -29,7 +29,7 @@
 当前系统已具备：
 
 - 录制：生成 `actions/`、`snapshots/`、`meta.json`
-- 翻译：生成结构化步骤与 Midscene YAML
+- 翻译：生成结构化步骤、归纳用例与 Agent 文本用例
 
 当前缺口：
 
@@ -49,7 +49,7 @@
 
 FR-01 用例执行入口  
 - 系统提供统一执行入口，支持指定 `runId` 启动执行。  
-- 执行输入优先使用 `step_2_structured_steps.json`，可兼容 `step_4_midscene_no_assert.yaml`。
+- 执行输入使用 `step_2_structured_steps.json`。
 
 FR-02 两种执行模式  
 - `semantic_full`：全语义执行（用于冷启动建档或人工全量刷新）。  
@@ -161,10 +161,9 @@ flowchart LR
 
 ### 5.3 输入优先级
 
-1. `step_2_structured_steps.json`（主输入，字段稳定）  
-2. `step_4_midscene_no_assert.yaml`（兼容输入）
+1. `step_2_structured_steps.json`（主输入，字段稳定）
 
-说明：结构化步骤对执行器更友好，建议作为长期主输入。
+说明：项目已移除 Midscene YAML 导出；执行器以结构化步骤为唯一输入契约。
 
 ---
 

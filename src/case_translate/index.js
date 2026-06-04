@@ -4,7 +4,7 @@
  * 纯入口，只做三件事：
  * 1. 查找 meta.json（自动定位最近一次录制）
  * 2. 调用 preprocessor 进行数据预处理
- * 3. 调用 workflow 执行 AI 翻译工作流（结构化步骤 + Case 归纳 + Agent TXT）
+ * 3. 调用 workflow 执行 AI 翻译工作流（Phase 1 结构化步骤 + Phase 2 Case + Phase 4 Agent TXT）
  *
  * 与录制模块完全解耦：
  * - 录制器负责生产 meta.json + actions/ + snapshots/（数据生产者）
@@ -67,7 +67,7 @@ function findLatestMetaFile() {
 /**
  * 从录制数据生成 AI 测试用例（完整流水线）
  *
- * 流程：查找 meta → 预处理 → AI 工作流（Phase 1 + Phase 2 + Phase 3）
+ * 流程：查找 meta → 预处理 → AI 工作流（Phase 1 + Phase 2 + Phase 4）
  *
  * @param {string} [metaFilePath] - meta.json 的路径，不传则自动查找最近一次录制
  * @param {Object} [options] - 可选配置

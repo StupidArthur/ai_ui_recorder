@@ -175,24 +175,6 @@ export const AI_STEPS_ERRORS_FILENAME = 'step_2_structured_steps.errors.json';
 /** AI 生成的归纳测试用例文件名（原 AI_steps.md） */
 export const AI_CASES_FILENAME = 'AI_cases.md';
 
-/** Midscene YAML（0 assert 版本）文件名 */
-export const MIDSCENE_NO_ASSERT_FILENAME = 'step_4_midscene_no_assert.yaml';
-
-/** Midscene 默认任务名 */
-export const MIDSCENE_TASK_NAME = '自动生成用例';
-
-/** Midscene 默认等待毫秒数 */
-export const MIDSCENE_DEFAULT_SLEEP_MS = 1000;
-
-/** 是否根据相邻 step 的时间间隔自动插入 sleep */
-export const MIDSCENE_ENABLE_INTERVAL_SLEEP = true;
-
-/** 自动插入 sleep 的最小阈值（毫秒），过小间隔不插入 */
-export const MIDSCENE_INTERVAL_SLEEP_MIN_MS = 300;
-
-/** 自动插入 sleep 的最大阈值（毫秒），避免极端长等待 */
-export const MIDSCENE_INTERVAL_SLEEP_MAX_MS = 5000;
-
 /** AI 生成日志文件名 */
 export const GENERATE_LOG_FILENAME = 'generate.log';
 
@@ -246,20 +228,6 @@ export const STOP_TIMEOUT_MS = 60000;
 /** 进程退出前延迟（毫秒），确保日志写入完成 */
 export const EXIT_DELAY_MS = 1000;
 
-// ==================== Selenium 导出（Driver4 + XPath） ====================
-
-/**
- * 是否在录制过程中增量写出 Selenium 草稿，并在 AI Phase1 后生成终稿 Python
- * 当前默认关闭（项目未使用 Selenium / Midscene 导出）。
- */
-export const SELENIUM_EXPORT_ENABLED = false;
-
-/** 录制过程中追加的草稿文件名（位于 run 目录根下） */
-export const SELENIUM_DRAFT_FILENAME = 'step_0_selenium_draft.py';
-
-/** 依赖 enriched + step_2 的终稿 Python 文件名 */
-export const SELENIUM_FINAL_FILENAME = 'step_0_selenium_from_recording.py';
-
 /**
  * Dashboard「录制历史」文件预览白名单（仅给人阅读的产物，按展示顺序）
  */
@@ -269,12 +237,3 @@ export const DASHBOARD_PREVIEW_FILES = [
   AI_STEPS_STRUCTURED_FILENAME,
   META_FILENAME,
 ];
-
-/** 生成脚本中 chromedriver 路径占位变量名（Python 侧） */
-export const SELENIUM_CHROMEDRIVER_VAR_NAME = 'CHROMEDRIVER_PATH';
-
-/**
- * 生成 Python 中 import Driver4 的语句（用户需配置 PYTHONPATH 使该 import 可解析）
- * 例如项目根在 PYTHONPATH 且包名为 utils 时可用下方默认值。
- */
-export const SELENIUM_DRIVER4_IMPORT_LINE = 'from utils.driver4 import Driver4';

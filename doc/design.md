@@ -53,10 +53,10 @@ flowchart LR
   R --> FS["output/run_*/<br/>meta.json + actions/ + snapshots/"]
   FS --> P["Preprocessor<br/>构建证据包"]
   P --> E["preprocessed/<br/>merged/ diffs/ enriched/"]
-  E --> W["Workflow<br/>Phase 1(JSON) + Phase 2 + Phase 3"]
+  E --> W["Workflow<br/>Phase 1(JSON) + Phase 2 + Phase 4"]
   W --> O1["step_2_structured_steps.json"]
   W --> O2["AI_cases.md"]
-  W --> O3["step_4_midscene_no_assert.yaml"]
+  W --> O3["case_4_agents.txt"]
 ```
 
 ### 3.2 模块边界（系统级）
@@ -67,8 +67,7 @@ flowchart LR
 | 翻译入口 | `src/case_translate/index.js` | 定位 meta、串联预处理与工作流 | 具体算法细节 |
 | 预处理器 | `src/case_translate/preprocessor/` | 语义归并、diff、上下文、表单增量、分类、噪声标记、落盘 | AI 调用 |
 | Prompt 模板 | `src/case_translate/prompts/` | Prompt 文本与输出约束 | 数据计算 |
-| 工作流 | `src/case_translate/workflow.js` | Phase 1(JSON)/Phase 2/Phase 3 编排、异常兜底、增量保存、上下文窗口 | 预处理实现 |
-| Selenium 导出 | `src/selenium_export/` | 录制增量写 `step_0_selenium_draft.py`；Phase1 后按 `step_2` + `enriched/` 生成 `step_0_selenium_from_recording.py`；**仅 XPath + `Driver4`** | 替代 Playwright 回放；不扩展 Tab 专项 merge |
+| 工作流 | `src/case_translate/workflow.js` | Phase 1(JSON)/Phase 2/Phase 4 编排、异常兜底、增量保存、上下文窗口 | 预处理实现 |
 | Dashboard | `src/dashboard/` | 录制/翻译控制、SSE 日志、文件浏览 | 核心算法（复用上述模块） |
 
 > 翻译子系统的详细设计（含 enrichedAction 结构、预处理算法、Prompt 规则、工作流细节）统一放在 `doc/translate_design.md`。
@@ -99,10 +98,8 @@ output/
     step_2_structured_steps.json
     step_2_structured_steps.errors.json
     AI_cases.md
-    step_4_midscene_no_assert.yaml
+    case_4_agents.txt
     generate.log
-    step_0_selenium_draft.py              # 可选：SELENIUM_EXPORT_ENABLED 且录制时增量生成（草稿，无 merge 输入）
-    step_0_selenium_from_recording.py     # 可选：同上开关且翻译 Phase1 完成后生成（终稿，enriched）
 ```
 
 ### 4.2 关键命名约定（必须一致）
@@ -212,14 +209,13 @@ output/
 - 分类 hints（告诉模型应该看哪里）
 - 语义归并（click→input、双击去重、噪声过滤）
 
-### 6.2 三阶段工作流（最终形态）
+### 6.2 翻译工作流（最终形态）
 
 - **Phase 1**：逐条生成结构化步骤（JSON）→ `step_2_structured_steps.json`
   - 模型输出非严格 JSON 时，执行修复与兜底，不阻塞流程
-  - 每条步骤携带 `intervalFromPreviousMs`（相邻步骤完成间隔）
+  - 每条步骤携带 `intervalFromPreviousMs`（相邻步骤完成间隔，供 Phase 2 窗口边界信号）
 - **Phase 2**：有效步骤瘦身后按固定窗口（默认 20 步）多次归纳，每窗 1 个 Case，合并为 `AI_cases.md`
-- **Phase 3**：基于结构化步骤生成 Midscene（默认不写 assert）→ `step_4_midscene_no_assert.yaml`
-  - 转换时可按 `intervalFromPreviousMs` 自动插入 `sleep`，表达上一步操作后的产品响应时长
+- **Phase 4**：基于结构化步骤生成 Agent 文本用例 → `case_4_agents.txt`
 
 ### 6.2.1 独立翻译启动器（standalone）
 

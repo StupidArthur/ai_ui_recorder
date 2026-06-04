@@ -175,31 +175,6 @@ export const TARGET_URL = 'http://your-target-website.com';
 
 > 录制阶段不依赖 AI；只有翻译阶段依赖可用的 OpenAI 兼容接口。
 
-### 3.4 Selenium（Driver4 + XPath）脚本导出（可选）
-
-在 `src/utils/config.js` 中设置：
-
-- `SELENIUM_EXPORT_ENABLED = true`：开启后
-  - **录制中**增量写入 `output/run_*/step_0_selenium_draft.py`（基于**原始** action，**不含** merge 后的输入推断，可能不完整）
-  - 运行 **`node src/case_translate`（或 Dashboard「AI 翻译」）** 完成 **Phase 1** 后，自动生成 **`step_0_selenium_from_recording.py`（终稿）**：按 `step_2_structured_steps.json` 注释块 + `preprocessed/enriched/enriched_NNN.json` 生成 **Driver4** 调用，定位均为 **`element.xpath`**
-
-默认 `SELENIUM_EXPORT_ENABLED = false`，不改变历史行为。
-
-**使用前请自行：**
-
-1. 在生成的 `.py` 中填写 `CHROMEDRIVER_PATH`（chromedriver 可执行文件路径）。
-2. 配置 **PYTHONPATH**（或修改 `SELENIUM_DRIVER4_IMPORT_LINE`），使 `from utils.driver4 import Driver4` 能解析到本仓库的 [`src/utils/driver4.py`](../src/utils/driver4.py)。
-
-**说明：**
-
-- **不做 Tab 专项**：仅靠 Tab 切到下一输入框再输入时，merge 可能仍缺 `input` 行；请尽量**点击聚焦**输入框，详见设计文档。
-- `Driver4.set_value` 内含业务站点的清除按钮 XPath 后缀，与通用页面混用时请注意。
-- `keypress` 类动作若 Driver4 无对应封装，终稿中为 **TODO 注释**，需手工补全。
-
-构造 `Recorder` 时也可传 `seleniumExportEnabled: true` **覆盖**全局配置（与 Dashboard 集成时可用）。
-
----
-
 ## 4. 使用方式一：Dashboard（与命令行同等支持）
 
 ### 4.1 启动 Dashboard
@@ -241,9 +216,8 @@ npm run dashboard
 - `step_2_structured_steps.json`（Phase 1：结构化步骤主文件）
 - `step_2_structured_steps.errors.json`（Phase 1：JSON 修复/兜底记录）
 - `AI_cases.md`（Phase 2：归纳后的用例表格）
-- `step_4_midscene_no_assert.yaml`（Phase 3：Midscene YAML，默认不写 assert）
+- `case_4_agents.txt`（Phase 4：Agent 文本用例）
 - `preprocessed/`（预处理过程证据：diff/enriched/merge_report）
-- `step_0_selenium_draft.py` / `step_0_selenium_from_recording.py`（可选，见 3.4）
 - `recorder.log` / `generate.log` / `preprocess.log`（日志）
 
 ---
@@ -278,11 +252,10 @@ npm run translate
 
 - 自动查找 `output/` 下最新的 `run_*` 目录里的 `meta.json`
 - 先做预处理，产出 `preprocessed/`
-- 再执行 AI 三阶段流水线：
+- 再执行 AI 翻译流水线：
   - Phase 1：生成 `step_2_structured_steps.json`
   - Phase 2：生成 `AI_cases.md`（按固定窗口多次归纳后合并；窗口大小等见 `src/utils/config.js` 中 `PHASE2_*`）
-  - Phase 3：生成 `step_4_midscene_no_assert.yaml`（默认不写 assert）
-  - Phase 3 会根据相邻步骤时间间隔自动插入 `sleep`（阈值可在 `src/utils/config.js` 调整）
+  - Phase 4：生成 `case_4_agents.txt`
 
 独立入口（无需 Node 的 EXE 对应源码入口）：
 
@@ -329,7 +302,7 @@ node src/recorder/electron-cli.js "C:\path\app.exe" -- "--arg1" "--arg2=value"
   - `step_2_structured_steps.json`
   - `step_2_structured_steps.errors.json`
   - `AI_cases.md`
-  - `step_4_midscene_no_assert.yaml`
+  - `case_4_agents.txt`
 
 ---
 
@@ -357,7 +330,7 @@ output/
     step_2_structured_steps.json
     step_2_structured_steps.errors.json
     AI_cases.md
-    step_4_midscene_no_assert.yaml
+    case_4_agents.txt
     generate.log
 ```
 

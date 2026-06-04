@@ -34,7 +34,7 @@ export function buildInjectedScript() {
   if (window.__recorderInjected) return;
   window.__recorderInjected = true;
 
-  // ========== 工具函数：XPath（与 Selenium Driver4.identity 一致） ==========
+  // ========== 工具函数：XPath（写入 element.xpath，供证据与后续定位参考） ==========
 
   /**
    * XPath 1.0 属性字面量（可含单引号时用 concat）
@@ -266,7 +266,7 @@ export function buildInjectedScript() {
    * 只保留必要字段，冗余 DOM 上下文信息（domContext、checkedState、classes、ariaLabel、role）
    * 由整页 AX 快照取代。
    *
-   * 保留字段：tag, id, name, type, text, label, placeholder, title, href, xpath（唯一主定位，供 Selenium Driver4）
+   * 保留字段：tag, id, name, type, text, label, placeholder, title, href, xpath（主定位字段，写入 action JSON）
    */
   function getElementInfo(el) {
     try {
@@ -414,7 +414,6 @@ export function buildInjectedScript() {
     sendAction({
       type: 'click',
       element: getElementInfo(e.target),
-      position: { x: e.clientX, y: e.clientY },
       url: window.location.href,
       title: document.title,
       timestamp: Date.now(),
@@ -428,7 +427,6 @@ export function buildInjectedScript() {
     sendAction({
       type: 'dblclick',
       element: getElementInfo(e.target),
-      position: { x: e.clientX, y: e.clientY },
       url: window.location.href,
       title: document.title,
       timestamp: Date.now(),
@@ -442,7 +440,6 @@ export function buildInjectedScript() {
     sendAction({
       type: 'rightclick',
       element: getElementInfo(e.target),
-      position: { x: e.clientX, y: e.clientY },
       url: window.location.href,
       title: document.title,
       timestamp: Date.now(),

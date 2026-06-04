@@ -152,7 +152,6 @@
 每个被捕获的操作记录包含以下结构化信息：
 - 操作类型（type）
 - 目标元素的轻量描述（tag、id、name、type、text、label、placeholder、selector）
-- 操作坐标（position）
 - 页面 URL 和标题
 - 时间戳（timestamp）
 - 表单状态快照（formStateDelta，详见 6.2.3）

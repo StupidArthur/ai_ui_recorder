@@ -56,11 +56,9 @@ import {
   META_FILENAME,
   SNAPSHOT_POLL_INTERVAL_MS,
   RECORDER_POST_NAV_INJECT_CHECK_DELAY_MS,
-  SELENIUM_EXPORT_ENABLED,
 } from '../utils/config.js';
 
 import { createLogger } from '../utils/logger.js';
-import { SeleniumIncrementalWriter } from '../selenium_export/selenium-incremental-writer.js';
 import { buildInjectedScript } from './inject-script.js';
 import { pruneSnapshot, snapshotToText } from './snapshot-utils.js';
 
@@ -181,7 +179,6 @@ export class Recorder {
    * @param {string} [options.outputBaseDir] - 输出根目录覆盖（可选）
    * @param {Function} [options.onLog] - 日志消息回调（可选，Dashboard 模式使用）
    *   签名: ({ level, message, timestamp, logLine }) => void
-   * @param {boolean} [options.seleniumExportEnabled] - 是否增量写 Selenium 草稿；默认取 config.SELENIUM_EXPORT_ENABLED
    */
   constructor(options = {}) {
     /** @type {string} 输出根目录 */
@@ -249,52 +246,6 @@ export class Recorder {
     /** @type {boolean} 是否正在执行 stop 流程（防止重入） */
     this._stopping = false;
 
-    /**
-     * 是否启用 Selenium（Driver4）草稿导出
-     * @type {boolean}
-     */
-    this._seleniumExportEnabled =
-      options.seleniumExportEnabled !== undefined
-        ? Boolean(options.seleniumExportEnabled)
-        : SELENIUM_EXPORT_ENABLED;
-
-    /**
-     * 草稿 Writer（start 时创建，stop/断开 时 finalize）
-     * @type {SeleniumIncrementalWriter|null}
-     */
-    this._seleniumWriter = null;
-  }
-
-  /**
-   * 若开启 Selenium 导出，则初始化草稿文件
-   *
-   * @param {string} initialUrl - 起始 URL（写入 d.open 占位）
-   * @private
-   */
-  _initSeleniumExportIfNeeded(initialUrl) {
-    if (!this._seleniumExportEnabled || !this.outputPaths) return;
-    try {
-      this._seleniumWriter = new SeleniumIncrementalWriter(this.outputPaths.runDir, { log: this.log });
-      this._seleniumWriter.initDraft(initialUrl || '');
-    } catch (error) {
-      this.log.warn(`Selenium 草稿初始化失败（已忽略）: ${error.message}`);
-      this._seleniumWriter = null;
-    }
-  }
-
-  /**
-   * 结束 Selenium 草稿（写 footer）
-   *
-   * @private
-   */
-  _finalizeSeleniumExportDraft() {
-    if (!this._seleniumWriter) return;
-    try {
-      this._seleniumWriter.finalize();
-    } catch (error) {
-      if (this.log) this.log.warn(`Selenium 草稿收尾失败（已忽略）: ${error.message}`);
-    }
-    this._seleniumWriter = null;
   }
 
   // ==================== 公共方法 ====================
@@ -452,8 +403,6 @@ export class Recorder {
         this.log.warn(`录制就绪诊断失败: ${e.message}`);
       }
 
-      this._initSeleniumExportIfNeeded(url);
-
     } catch (error) {
       // #region agent log
       fetch('http://127.0.0.1:7437/ingest/b6f22578-0783-4760-bc6b-7d2c7bfce5db',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'fb16c5'},body:JSON.stringify({sessionId:'fb16c5',runId:'pre-fix',hypothesisId:'H4',location:'src/recorder/recorder.js:start:catch',message:'recorder start failed',data:{errorName:error?.name||'',errorMessage:error?.message||'',stackHead:(error?.stack||'').split('\\n').slice(0,6).join('\\n')},timestamp:Date.now()})}).catch(()=>{});
@@ -565,8 +514,6 @@ export class Recorder {
         this.log.warn(`录制就绪诊断失败: ${e.message}`);
       }
 
-      const electronStartUrl = page.url();
-      this._initSeleniumExportIfNeeded(electronStartUrl);
     } catch (error) {
       this.log.error('启动失败', error);
       await this._cleanup();
@@ -620,8 +567,6 @@ export class Recorder {
     if (this._actionIndex === 0) {
       this._logZeroActionsHint();
     }
-
-    this._finalizeSeleniumExportDraft();
 
     // 4. 保存 meta.json
     this._saveMeta();
@@ -736,7 +681,6 @@ export class Recorder {
       index: actionIndex,
       type: action.type,
       element: action.element,
-      position: action.position,
       key: action.key || undefined,
       url: action.url,
       title: action.title,
@@ -830,14 +774,6 @@ export class Recorder {
       this._saveAction(action, actionIndex);
       this.log.info(`[操作 #${actionIndex}] action_${String(actionIndex).padStart(3, '0')}.json 已保存`);
 
-      if (this._seleniumWriter) {
-        try {
-          this._seleniumWriter.appendAction(actionIndex, action);
-        } catch (error) {
-          this.log.warn(`Selenium 草稿追加失败（已忽略）: ${error.message}`);
-        }
-      }
-
       // 记录操作摘要（用于 meta.json）
       this._actionSummaryList.push({
         index: actionIndex,
@@ -901,8 +837,6 @@ export class Recorder {
     if (this._actionIndex === 0) {
       this._logZeroActionsHint();
     }
-
-    this._finalizeSeleniumExportDraft();
 
     // 保存 meta
     this._saveMeta();

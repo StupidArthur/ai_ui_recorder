@@ -1299,3 +1299,40 @@
 - 新增 **`llm-audit.js`**：每次 LLM 调用写入 `run_*/llm_audit/call_XXXX.json`（完整 messages + raw 回复 + outcome）
 - 跑完生成 **`llm_audit/index.json`**、**`problems.json`**、**`summary.json`**，便于定位有问题的输入输出对
 - Phase 1/2/4 及 repair 调用均接入审计
+
+---
+
+## 2026-06-04 — 移除 Selenium / Midscene 导出模块
+
+### 背景
+- `src/selenium_export/`、`src/case_translate/midscene/` 已无调用方；`workflow.js` 未接入；默认长期关闭。
+
+### 删除
+- 目录 `src/selenium_export/`（6 个 JS 文件）
+- 目录 `src/case_translate/midscene/`（3 个 JS 文件）
+- `src/utils/driver4.py`、`src/utils/step_0_selenium_from_recording.py`
+- `doc/todo.txt`（仅含 Selenium 优化待办）
+
+### 代码清理
+- `config.js`：移除 `MIDSCENE_*`、`SELENIUM_*` 常量
+- `recorder.js`：移除 Selenium 草稿增量写入逻辑
+- `workflow.js`：移除仅服务于 Selenium 终稿的 `sourceActionIndices` 字段
+
+### 保留
+- 录制侧 `inject-script.js` 仍采集 `element.xpath`（证据字段，与导出无关）
+
+### 文档
+- 同步更新 `design.md`、`user_manual.md`、`requirements.md`
+
+---
+
+## 2026-06-04 — 移除 action.position（点击坐标）
+
+### 背景
+- `position: { x, y }` 主要为已删除的 Selenium `click_xy` 服务；Phase1 LLM 输入与主证据链不依赖。
+
+### 变更
+- `inject-script.js`：click/dblclick/rightclick 不再上报坐标
+- `recorder.js`：`action_*.json` 不再写入 `position`
+- `preprocessor/index.js`：enriched 不再携带 `position`
+- 文档：`requirements.md`、`translate_design.md`

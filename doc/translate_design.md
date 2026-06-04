@@ -94,7 +94,6 @@ src/case_translate/
 - `index`（1-based）
 - `type`（click/dblclick/contextmenu/keypress...）
 - `element`（轻量字段：tag/id/name/type/text/label/placeholder/title/href/**xpath**；`formStateDelta` 的键与各字段 xpath 一致）
-- `position`（鼠标类）
 - `key`（键盘类）
 - `url`、`title`
 - `timestamp`
@@ -121,7 +120,6 @@ src/case_translate/
   originalType: "click",       // 被归并时记录
   inputValue: "abc",           // input 类型时存在（密码为 [MASKED]）
   element: { ... },
-  position: { x, y },
   key: "Enter",
   url: "https://...",
   title: "页面标题",
@@ -818,7 +816,6 @@ flowchart TB
   originalType: "click",             // 归并前的原始类型（仅归并过的 action 有此字段）
   inputValue: "15700078644",         // 语义归并识别出的输入值（仅 input 类型）
   element: { tag, id, text, ... },   // 元素信息
-  position: { x, y },               // 点击位置
   key: "Enter",                      // 按键名（keypress 时）
   url: "https://...",                // 操作时的 URL
   title: "登录页",                   // 操作时的页面标题

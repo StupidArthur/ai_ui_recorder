@@ -173,7 +173,6 @@ export async function preprocess(runDir, options = {}) {
         originalType: action.originalType || undefined,
         inputValue: action.inputValue || undefined,
         element: action.element,
-        position: action.position,
         key: action.key || undefined,
         url: action.url,
         title: action.title,

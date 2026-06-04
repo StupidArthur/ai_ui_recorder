@@ -673,21 +673,9 @@ async function runPhase2FromStructured(steps, casesFile, options = {}) {
  * @param {Object} parsed
  * @param {Object} enrichedAction
  * @param {number} actionIndex
+ * @param {number|null} intervalFromPreviousMs
  * @returns {Object}
  */
-/**
- * 可选：多条 enriched 序号共用一个语义注释（Selenium 终稿按序展开多行代码）
- *
- * @param {unknown} raw
- * @param {number} actionIndex
- * @returns {number[]}
- */
-function normalizeSourceActionIndices(raw, actionIndex) {
-  if (!Array.isArray(raw) || raw.length === 0) return [actionIndex];
-  const nums = raw.map((x) => Number(x)).filter((n) => Number.isInteger(n) && n > 0);
-  return nums.length > 0 ? nums : [actionIndex];
-}
-
 function normalizeStructuredStep(parsed, enrichedAction, actionIndex, intervalFromPreviousMs) {
   const actionKind = normalizeActionKind(parsed.actionKind);
   const strict = !LLM_AUTO_HEAL_ENABLED;
@@ -708,7 +696,6 @@ function normalizeStructuredStep(parsed, enrichedAction, actionIndex, intervalFr
     intervalFromPreviousMs,
     url: enrichedAction.url || '',
     sourceType: enrichedAction.type || 'unknown',
-    sourceActionIndices: normalizeSourceActionIndices(parsed.sourceActionIndices, actionIndex),
   };
 }
 
@@ -784,7 +771,6 @@ function buildFallbackStructuredStep(enrichedAction, actionIndex, reason, interv
     intervalFromPreviousMs,
     url: enrichedAction.url || '',
     sourceType: enrichedAction.type || 'unknown',
-    sourceActionIndices: [actionIndex],
   };
 }
 

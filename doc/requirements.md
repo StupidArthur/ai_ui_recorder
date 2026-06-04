@@ -37,11 +37,9 @@
 
 - **录制（Recorder）**：采集原始数据（actions + snapshots + meta）。
 - **预处理（Preprocessor）**：把原始数据变成 LLM 最容易消费的“证据包”（diff / 上下文 / 表单增量 / 分类 / 语义归并）。
-- **翻译（Workflow）**：两阶段 AI 流水线（逐条分析 → 归纳用例）。
+- **翻译（Workflow）**：Phase 1 结构化步骤 → Phase 2 归纳用例 → Phase 4 Agent 文本用例。
 
 并提供 **Dashboard** 用于免命令行操作（录制/翻译/日志/结果查阅）。
-
-可选能力（配置开启）：**Selenium 脚本导出**（Python 调用项目内 `Driver4`，定位统一为录制侧 **`element.xpath`**；草稿在录制中增量落盘，终稿在翻译 Phase1 后依赖 `enriched/` + `step_2` 生成）。
 
 ### 2.2 out-of-scope（明确不做/当前不承诺）
 
@@ -67,10 +65,8 @@ output/run_<timestamp>/
   step_2_structured_steps.json
   step_2_structured_steps.errors.json
   AI_cases.md           # 翻译阶段产出
-  step_4_midscene_no_assert.yaml
+  case_4_agents.txt     # 翻译阶段产出（Phase 4）
   generate.log          # 翻译阶段产出
-  step_0_selenium_draft.py           # 可选：Selenium 草稿（录制）
-  step_0_selenium_from_recording.py  # 可选：Selenium 终稿（Phase1 后）
 ```
 
 ### 3.2 关键命名约定（验收必须通过）
@@ -134,7 +130,7 @@ output/run_<timestamp>/
 ### 4.3 录制：可捕获的物理动作（稳定采集层）
 
 - **能力**：捕获鼠标动作：单击、双击、右键点击。
-  - **验收**：每次动作产生一个 `actions/action_NNN.json`；action 中包含 `type`、`element`、`position`、`timestamp`、`url/title`。
+  - **验收**：每次动作产生一个 `actions/action_NNN.json`；action 中包含 `type`、`element`、`timestamp`、`url/title`。
 
 - **能力**：捕获关键按键：Enter / Tab / Escape / Space。
   - **验收**：按键动作产生 action，`type` 为键盘类，且 `key` 字段包含按键名。
@@ -174,7 +170,7 @@ output/run_<timestamp>/
 - **能力**：操作分类与 hints（把“该关注什么”显式告诉 LLM）。
   - **验收**：enriched 数据包含 `classification`（含 `category/elementType/hints`）。
 
-### 4.6 翻译：AI 三阶段流水线（结构化最终形态）
+### 4.6 翻译：AI 流水线（结构化最终形态）
 
 - **能力**：Phase 1 逐条生成结构化步骤 `step_2_structured_steps.json`，并记录异常修复轨迹 `step_2_structured_steps.errors.json`。
   - **验收**：即使单条模型输出非严格 JSON，也能通过修复/兜底继续流程，不阻塞整批翻译。
@@ -184,11 +180,8 @@ output/run_<timestamp>/
   - **验收**：`AI_cases.md` 存在并包含一个或多个 Case；表格列至少包含“步骤/操作/UI 变化”。
   - **验收**：Phase 2 按配置固定窗口（默认 20 条有效步骤）分窗调用；`noise/skip` 等不占窗口额度；`step_2_structured_steps.json` 原始内容不因 Phase 2 被改写。
 
-- **能力**：Phase 3 生成 Midscene 可执行 YAML（默认不写 assert）。
-  - **验收**：
-    - 产出 `step_4_midscene_no_assert.yaml`
-    - YAML 关键字仅使用动作执行相关项（如 `ai`、`aiDoubleClick`、`aiKeyboardPress`、`sleep`），不生成 `aiAssert`
-    - 根据相邻步骤间隔自动插入 `sleep`（受最小/最大阈值约束）。
+- **能力**：Phase 4 基于结构化步骤生成 Agent 文本用例 `case_4_agents.txt`。
+  - **验收**：文件存在且包含测试用例名称、目的与分步操作描述。
 
 - **能力**：严禁猜测（Evidence-Driven 输出约束）。
   - **验收**：当 diff/formState/context 都不足以支持业务语义时，文本必须明确标注“信息不足”，不得从 selector/class 反推业务含义。

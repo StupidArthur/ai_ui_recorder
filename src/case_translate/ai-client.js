@@ -18,6 +18,13 @@
 
 import OpenAI from 'openai';
 import { loadAIClientConfig } from '../utils/ai-config.js';
+import {
+  LLM_PING_FAIL_MESSAGE,
+  LLM_PING_TIMEOUT_MS,
+  LLM_PING_USER_MESSAGE,
+} from '../utils/config.js';
+
+export { LLM_PING_FAIL_MESSAGE };
 
 // ==================== API 配置 ====================
 
@@ -92,6 +99,50 @@ export async function callChat(messages, options = {}) {
   }
 
   throw new Error(`[LLM 调用彻底失败] 已重试 ${MAX_RETRIES} 次，最终错误: ${lastError.message}`);
+}
+
+/**
+ * 翻译开始前探活：发送极简 user 消息，在限定时间内等待回复
+ *
+ * @param {Object} [options]
+ * @param {number} [options.timeoutMs] - 超时毫秒，默认 LLM_PING_TIMEOUT_MS
+ * @returns {Promise<string>} 模型回复正文（已 trim）
+ * @throws {Error} 超时或调用失败时抛出 LLM_PING_FAIL_MESSAGE
+ */
+export async function pingLlm(options = {}) {
+  const timeoutMs = options.timeoutMs ?? LLM_PING_TIMEOUT_MS;
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const completion = await client.chat.completions.create(
+      {
+        model: runtimeAIConfig.model,
+        messages: [{ role: 'user', content: LLM_PING_USER_MESSAGE }],
+        max_tokens: 32,
+        temperature: 0,
+      },
+      { signal: controller.signal },
+    );
+
+    const content = completion.choices?.[0]?.message?.content?.trim();
+    if (!content) {
+      throw new Error('AI 返回空结果');
+    }
+    return content;
+  } catch (error) {
+    const isAbort =
+      error?.name === 'AbortError' ||
+      (typeof error?.message === 'string' && /aborted|abort/i.test(error.message));
+
+    const detail = isAbort
+      ? `探活超时（${timeoutMs}ms）`
+      : (error?.message || String(error));
+
+    throw Object.assign(new Error(LLM_PING_FAIL_MESSAGE), { detail });
+  } finally {
+    clearTimeout(timeoutId);
+  }
 }
 
 // ==================== 工具函数 ====================

@@ -207,6 +207,15 @@ export const LLM_AUTO_HEAL_ENABLED = false;
  */
 export const LLM_AUDIT_DIRNAME = 'llm_audit';
 
+/** 翻译开始前 LLM 探活超时（毫秒） */
+export const LLM_PING_TIMEOUT_MS = 3000;
+
+/** 探活 user 消息（极简，用于连通性检测） */
+export const LLM_PING_USER_MESSAGE = '你好';
+
+/** 探活失败时展示给用户的提示（超时、网络、config 错误等统一文案） */
+export const LLM_PING_FAIL_MESSAGE = 'LLM 调用出错，请确认 config 或者网络。';
+
 /**
  * Phase 2：固定窗口内参与归纳的有效步数（仅统计 status=normal 的步骤）
  * 窗口在过滤后的有效步骤数组上滑动；可通过调大该值覆盖更长业务流程片段。

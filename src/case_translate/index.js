@@ -30,6 +30,7 @@ import {
 
 import { preprocess } from './preprocessor/index.js';
 import { runWorkflow } from './workflow.js';
+import { pingLlm } from './ai-client.js';
 
 // ==================== 工具函数 ====================
 
@@ -71,11 +72,12 @@ function findLatestMetaFile() {
  * @param {string} [metaFilePath] - meta.json 的路径，不传则自动查找最近一次录制
  * @param {Object} [options] - 可选配置
  * @param {Function} [options.onLog] - 日志消息回调（可选，Dashboard 模式使用）
+ * @param {boolean} [options.skipLlmPing=false] - 为 true 时跳过开始前 LLM 探活（Dashboard 已在 HTTP 层探活）
  * @returns {Promise<{ stepsFile: string, casesFile: string }>} 生成的文件路径
  * @throws {Error} 找不到文件或 AI 返回空结果时抛出错误
  */
 export async function generate(metaFilePath, options = {}) {
-  const { onLog } = options;
+  const { onLog, skipLlmPing = false } = options;
 
   // ---------- 确定 meta.json 路径 ----------
   const targetFile = metaFilePath || findLatestMetaFile();
@@ -95,6 +97,21 @@ export async function generate(metaFilePath, options = {}) {
 
   log.info('========== AI 测试用例生成 ==========');
   log.info(`录制数据目录: ${runDir}`);
+
+  if (!skipLlmPing) {
+    log.info('正在检测 LLM 连通性（探活）...');
+    try {
+      const pingReply = await pingLlm();
+      const preview = pingReply.length > 40 ? `${pingReply.slice(0, 40)}...` : pingReply;
+      log.info(`LLM 探活成功: ${preview}`);
+    } catch (error) {
+      if (error.detail) {
+        log.warn(`LLM 探活详情: ${error.detail}`);
+      }
+      log.error(error.message);
+      throw error;
+    }
+  }
 
   // ---------- 第1步：数据预处理 ----------
   const { enrichedActions, meta } = await preprocess(runDir, { log });

@@ -387,19 +387,52 @@ async function handleTranslateStart(req, res) {
     const phase1BatchSize = parseInt(body.phase1BatchSize) || 3;
     const phaseWindowSize = parseInt(body.phaseWindowSize) || 20;
 
+    await ensureTranslateModuleLoaded();
+
+    const { pingLlm, LLM_PING_FAIL_MESSAGE } = await import('../case_translate/ai-client.js');
+    const pingTs = new Date().toISOString();
+    broadcastLog({
+      level: 'INFO',
+      message: '正在检测 LLM 连通性...',
+      timestamp: pingTs,
+      logLine: `[${pingTs}] [INFO] 正在检测 LLM 连通性...`,
+    });
+
+    try {
+      await pingLlm();
+    } catch (pingError) {
+      const failMsg = pingError?.message || LLM_PING_FAIL_MESSAGE;
+      const failTs = new Date().toISOString();
+      broadcastLog({
+        level: 'ERROR',
+        message: failMsg,
+        timestamp: failTs,
+        logLine: `[${failTs}] [ERROR] ${failMsg}`,
+      });
+      if (pingError?.detail) {
+        const detailTs = new Date().toISOString();
+        broadcastLog({
+          level: 'WARN',
+          message: `探活详情: ${pingError.detail}`,
+          timestamp: detailTs,
+          logLine: `[${detailTs}] [WARN] 探活详情: ${pingError.detail}`,
+        });
+      }
+      return sendError(res, 503, failMsg);
+    }
+
     currentState = AppState.TRANSLATING;
     broadcastStateChange(AppState.TRANSLATING);
 
-    // 立即响应，翻译在后台执行
     sendJSON(res, 200, { message: 'AI 翻译已开始' });
 
-    // 异步执行翻译
+    // 异步执行翻译（探活已在上方完成）
     try {
-      await ensureTranslateModuleLoaded();
       const result = await generateFn(metaFilePath, {
         onLog: broadcastLog,
         phase1BatchSize,
         phaseWindowSize,
+        skipLlmPing: true,
       });
       currentState = AppState.IDLE;
       broadcastStateChange(AppState.IDLE, {

@@ -1247,6 +1247,22 @@
 
 ---
 
+## 2026-06-03 — 翻译开始前 LLM 探活
+
+- `ai-client.js` 新增 `pingLlm()`：user 发送「你好」，`LLM_PING_TIMEOUT_MS`（默认 3s）内无有效回复则失败
+- `config.js`：`LLM_PING_FAIL_MESSAGE` =「LLM 调用出错，请确认 config 或者网络。」
+- Dashboard：`/api/translate/start` 探活通过后再进入 `TRANSLATING` 并返回 200；失败返回 503，界面不卡住
+- CLI / `generate()`：预处理前先探活；Dashboard 传 `skipLlmPing: true` 避免重复
+
+---
+
+## 2026-06-03 — build:trial 打包
+
+- 执行 `npm run build:trial` → **`release/`** 为唯一分发目录（exe + chrome-win64 + prompts + config）
+- **约定**：仅使用 `release/`；`release1/` 为历史本地目录，不参与打包、Agent 不再自动同步
+
+---
+
 ## 2026-06-03 — Skill Prompt 重命名（3 份精华）
 
 | 旧名 | 新名 |

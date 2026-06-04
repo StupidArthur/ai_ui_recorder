@@ -5,6 +5,7 @@ node_modules/
 build/
 dist/
 release/
+release1/
 
 # Output generated files (录制产物)
 output/

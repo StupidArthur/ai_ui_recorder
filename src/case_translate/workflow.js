@@ -43,10 +43,12 @@ import {
 } from './phase2/case-markdown-renderer.js';
 import {
   appendFinalSupplementalCase,
+  extractMentionedStepIndices,
   findWindowCoverageGaps,
   isRedundantCaseBlock,
   normalizeCaseMarkdownToGlobalIndices,
   renderCaseCoverageAppendix,
+  renderSupplementalCaseFromSteps,
 } from './phase2/cases-document-appendix.js';
 import {
   buildSystemPrompt as buildStructuredStepSystemPrompt,
@@ -108,11 +110,20 @@ export async function runWorkflow(runDir, enrichedActions, options = {}) {
   if (log) log.info(`[Phase 2] 正在归纳测试用例 (窗口大小=${phaseWindowSize})...`);
   const phase2Start = Date.now();
 
-  await runPhase2FromStructured(steps, casesFile, { log, phaseWindowSize, llmAudit });
+  const phase2Result = await runPhase2FromStructured(steps, casesFile, { log, phaseWindowSize, llmAudit });
 
   const phase2Elapsed = ((Date.now() - phase2Start) / 1000).toFixed(1);
   if (log) log.info(`[Phase 2] 完成，耗时 ${phase2Elapsed}s`);
   if (log) log.info(`[Phase 2] 文件已保存: ${casesFile}`);
+
+  // 提取兜底元信息
+  const fallbackApplied = phase2Result?.fallbackApplied || false;
+  const fallbackIndices = phase2Result?.fallbackIndices || [];
+  const casesFallbackFile = phase2Result?.fallbackFile || null;
+
+  if (fallbackApplied && log) {
+    log.warn(`[Phase 2] 兜底已介入，缺失 ${fallbackIndices.length} 步`);
+  }
 
   // ========== Phase 4：Agent TXT 生成 ==========
   let agentTxtFile = null;
@@ -132,6 +143,9 @@ export async function runWorkflow(runDir, enrichedActions, options = {}) {
     stepsFile,
     casesFile,
     agentTxtFile,
+    fallbackApplied,
+    fallbackIndices,
+    casesFallbackFile,
   };
 }
 
@@ -595,32 +609,84 @@ async function runPhase2FromStructured(steps, casesFile, options = {}) {
     }
   }
 
-  const supplementedIndices = appendFinalSupplementalCase(caseBlocks, slimAll);
-  if (supplementedIndices.length > 0 && log) {
-    log.warn(
-      `[Phase 2] 终局补全 index ${supplementedIndices.join(', ')}（此前各窗 LLM 均未引用）`,
-    );
-  }
-
-  const casesText = renderCasesMarkdownDocument(caseBlocks, {
+  // ========== 严格模式兜底判定 ==========
+  // 收集主流程中所有被引用的 index
+  const mainCaseBlocks = [...caseBlocks]; // 保存主流程结果
+  const mainCasesText = renderCasesMarkdownDocument(mainCaseBlocks, {
     documentTitle: '录制流程测试用例归纳',
   });
 
-  fs.writeFileSync(casesFile, casesText, 'utf-8');
+  // 提取主流程正文中被引用的步骤 index
+  const mentionedInMain = extractMentionedStepIndices(mainCasesText);
 
+  // 找出未覆盖的 normal 步骤
+  const allNormalSteps = (slimAll || []).filter((s) => s.status === 'normal' || !s.status);
+  const uncoveredSteps = allNormalSteps.filter((s) => !mentionedInMain.has(s.index));
+
+  // 兜底判定
+  const fallbackApplied = uncoveredSteps.length > 0;
+  let fallbackIndices = [];
+  let fallbackText = '';
+
+  if (fallbackApplied) {
+    // 生成兜底内容（不混入主流程）
+    fallbackIndices = uncoveredSteps.map((s) => s.index);
+    fallbackText = renderSupplementalCaseFromSteps(
+      uncoveredSteps,
+      `未覆盖步骤（程序补全，共 ${uncoveredSteps.length} 步）`,
+    );
+
+    if (log) {
+      log.warn(
+        `[Phase 2] 主流程未完整覆盖，兜底介入：缺失 index ${fallbackIndices.join(',')}（共 ${fallbackIndices.length} 步）`,
+      );
+    }
+  }
+
+  // ========== 写出主结果（仅主流程，不含兜底段） ==========
+  fs.writeFileSync(casesFile, mainCasesText, 'utf-8');
+  if (log) log.info(`[Phase 2] 主结果: ${casesFile}`);
+
+  // ========== 写出兜底结果（仅当有兜底时） ==========
+  const casesFallbackFile = path.join(path.dirname(casesFile), 'cases_fallback.md');
+  if (fallbackApplied && fallbackText) {
+    const fallbackDoc =
+      `# Phase 2 兜底补全\n\n` +
+      `> ⚠️ 本次翻译触发了兜底补全：以下步骤未被 LLM 主流程覆盖，由程序自动补全。\n\n` +
+      `**缺失 index**：${fallbackIndices.join(', ')}（共 ${fallbackIndices.length} 步）\n\n` +
+      `---\n\n` +
+      fallbackText;
+    fs.writeFileSync(casesFallbackFile, fallbackDoc, 'utf-8');
+    if (log) log.warn(`[Phase 2] 兜底结果: ${casesFallbackFile}`);
+  } else {
+    // 无兜底时，清空或删除兜底文件
+    if (fs.existsSync(casesFallbackFile)) {
+      fs.writeFileSync(casesFallbackFile, '# Phase 2 兜底补全\n\n> 本次翻译未触发兜底。\n', 'utf-8');
+    }
+  }
+
+  // ========== 覆盖核对表 ==========
   const coverageFile = path.join(path.dirname(casesFile), 'coverage.md');
   const coverageText =
     `# Case 覆盖核对\n\n` +
     `> 用例正文见 \`translate/phase2/cases.md\`；Phase 1 全量步骤见 \`translate/phase1/structured_steps.json\`（及 .xml）。\n\n` +
-    renderCaseCoverageAppendix(steps, casesText);
+    renderCaseCoverageAppendix(steps, mainCasesText);
   fs.writeFileSync(coverageFile, coverageText, 'utf-8');
   if (log) log.info(`[Phase 2] 覆盖核对表: ${coverageFile}`);
 
+  // ========== 控制台预览 ==========
   console.log('\n' + '='.repeat(60));
   console.log('AI 测试用例预览 (AI_cases.md):');
   console.log('='.repeat(60));
-  console.log(casesText.length > 1500 ? casesText.slice(0, 1500) + '\n...(更多内容请查看文件)' : casesText);
+  console.log(mainCasesText.length > 1500 ? mainCasesText.slice(0, 1500) + '\n...(更多内容请查看文件)' : mainCasesText);
   console.log('='.repeat(60));
+
+  // 返回兜底元信息
+  return {
+    fallbackApplied,
+    fallbackIndices,
+    fallbackFile: fallbackApplied ? casesFallbackFile : null,
+  };
 }
 
 // ==================== 工具函数 ====================

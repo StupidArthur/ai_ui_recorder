@@ -357,7 +357,7 @@
   <!-- 标题栏 -->
   <div class="header">
     <h1>AI UI Recorder</h1>
-    <span class="header-version">V0.91 designed by @yuzechao</span>
+    <span class="header-version" id="appVersion">V-- designed by @yuzechao</span>
   </div>
 
   <!-- 操作栏 -->
@@ -498,6 +498,13 @@
             // 翻译完成或录制完成后刷新列表
             if (data.state === 'idle') {
               refreshRuns();
+              // 显示兜底提示（如果有）
+              if (data.fallbackApplied) {
+                const missingCount = (data.fallbackMissingIndices || []).length;
+                appendLog('WARN', `[兜底] 本次翻译触发了兜底补全：${missingCount} 个步骤未被 LLM 主流程覆盖`);
+                appendLog('WARN', `[兜底] 主结果: ${data.casesFile || 'cases.md'}`);
+                appendLog('WARN', `[兜底] 兜底结果: ${data.casesFallbackFile || 'cases_fallback.md'}`);
+              }
             }
             return;
           }
@@ -890,6 +897,14 @@
         const status = await resp.json();
         updateState(status.state);
         urlInput.value = status.defaultUrl || '';
+
+        // 显示版本号
+        if (status.version) {
+          const versionEl = document.getElementById('appVersion');
+          if (versionEl) {
+            versionEl.textContent = `V${status.version} designed by @yuzechao`;
+          }
+        }
       } catch (_) {
         appendLog('ERROR', '[系统] 获取初始状态失败');
       }

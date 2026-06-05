@@ -46,14 +46,16 @@ export function parsePhase2MarkdownResponse(rawReply, expectedIndices) {
 
   if (Number.isInteger(rawLastIndex) && rawLastIndex > 0 && winLen > 0) {
     const pos = indices.indexOf(rawLastIndex);
-    if (pos >= 0) {
-      const anchoredConsume = pos + 1;
-      const tailAtConsume = indices[safeConsume - 1];
-      if (tailAtConsume !== rawLastIndex) {
-        safeConsume = anchoredConsume;
-        const detail = `consume/lastIndex 不一致: consume→index ${tailAtConsume ?? '?'}, lastIndex=${rawLastIndex}, 已按 lastIndex 锚定为 ${anchoredConsume} 步`;
-        clampReason = clampReason ? `${clampReason}; ${detail}` : detail;
-      }
+    const tailAtConsume = indices[safeConsume - 1];
+    if (pos < 0) {
+      // lastIndex 不在本窗范围，记录警告，consume 不变
+      const detail = `lastIndex=${rawLastIndex} 不在本窗 index 列表，忽略`;
+      clampReason = clampReason ? `${clampReason}; ${detail}` : detail;
+    } else if (tailAtConsume !== rawLastIndex) {
+      // 不一致：仅记录 warning，以 consumeStepCount 为准
+      const detail = `lastIndex=${rawLastIndex} 与 consumeStepCount=${safeConsume}(→index ${tailAtConsume ?? '?'}) 不一致，以 consumeStepCount 为准`;
+      clampReason = clampReason ? `${clampReason}; ${detail}` : detail;
+      // 不再执行 safeConsume = anchoredConsume
     }
   }
 

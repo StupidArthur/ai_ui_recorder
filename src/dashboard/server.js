@@ -63,6 +63,27 @@ try {
   STATIC_DIR = path.join(path.dirname(process.execPath), 'static');
 }
 
+/** 应用版本号（从 package.json 读取） */
+let APP_VERSION = '0.0.0';
+try {
+  // 尝试多个路径：开发环境 vs EXE 打包环境
+  const versionCandidates = [
+    path.resolve(process.cwd(), 'package.json'),
+    path.join(path.dirname(process.execPath || ''), 'package.json'),
+  ];
+  for (const pkgPath of versionCandidates) {
+    if (fs.existsSync(pkgPath)) {
+      const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'));
+      if (pkg.version) {
+        APP_VERSION = pkg.version;
+        break;
+      }
+    }
+  }
+} catch (_) {
+  // 读取失败使用默认版本
+}
+
 /** MIME 类型映射 */
 const MIME_TYPES = {
   '.html': 'text/html; charset=utf-8',
@@ -276,6 +297,7 @@ function handleStatus(req, res) {
     state: currentState,
     defaultUrl: TARGET_URL,
     lastRunDir: lastRunDir ? path.basename(lastRunDir) : null,
+    version: APP_VERSION,
   });
 }
 
@@ -433,10 +455,20 @@ async function handleTranslateStart(req, res) {
         skipLlmPing: true,
       });
       currentState = AppState.IDLE;
+
+      // 构建状态消息（包含兜底提示）
+      const fallbackApplied = result.fallbackApplied || false;
+      const statusMessage = fallbackApplied
+        ? 'AI 翻译完成（⚠ 本次触发 Phase 2 兜底补全）'
+        : 'AI 翻译完成';
+
       broadcastStateChange(AppState.IDLE, {
-        message: 'AI 翻译完成',
+        message: statusMessage,
         stepsFile: result.stepsFile,
         casesFile: result.casesFile,
+        casesFallbackFile: result.casesFallbackFile || null,
+        fallbackApplied,
+        fallbackMissingIndices: result.fallbackIndices || [],
       });
     } catch (error) {
       currentState = AppState.IDLE;

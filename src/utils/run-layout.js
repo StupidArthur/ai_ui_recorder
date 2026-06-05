@@ -13,7 +13,9 @@
  *       logs/generate.log
  *       preprocess/{diffs,enriched,merged}
  *       phase1/{structured_steps.json,.xml,llm_raw_batches.xml,errors.json}
- *       phase2/cases.md
+ *       phase2/cases.md         # 主流程 LLM 归纳结果
+ *       phase2/cases_fallback.md # 兜底补全内容（仅当有遗漏时生成）
+ *       phase2/coverage.md      # 覆盖核对表
  *       phase4/agents.txt
  *       llm_audit/
  */
@@ -66,8 +68,11 @@ export const TRANSLATE_PHASE1_LLM_RAW_XML_REL = `${TRANSLATE_PHASE1_REL}/llm_raw
 /** 翻译：Phase 1 错误记录（相对 runDir） */
 export const TRANSLATE_PHASE1_ERRORS_JSON_REL = `${TRANSLATE_PHASE1_REL}/errors.json`;
 
-/** 翻译：Phase 2 用例 Markdown（相对 runDir，仅 LLM/程序补全 Case 正文） */
+/** 翻译：Phase 2 用例 Markdown（相对 runDir，仅 LLM 主流程 Case 正文） */
 export const TRANSLATE_PHASE2_CASES_MD_REL = `${RUN_TRANSLATE_SUBDIR}/phase2/cases.md`;
+
+/** 翻译：Phase 2 兜底用例 Markdown（相对 runDir，仅程序补全内容） */
+export const TRANSLATE_PHASE2_CASES_FALLBACK_MD_REL = `${RUN_TRANSLATE_SUBDIR}/phase2/cases_fallback.md`;
 
 /** 翻译：Phase 2 Case 覆盖核对表（相对 runDir，审计用，非 cases 正文） */
 export const TRANSLATE_PHASE2_COVERAGE_MD_REL = `${RUN_TRANSLATE_SUBDIR}/phase2/coverage.md`;
@@ -151,6 +156,7 @@ export function getTranslatePaths(runDir) {
     errorsJson: path.join(phase1Dir, 'errors.json'),
     phase2Dir: path.join(translateDir, 'phase2'),
     casesMd: path.join(translateDir, 'phase2', 'cases.md'),
+    casesFallbackMd: path.join(translateDir, 'phase2', 'cases_fallback.md'),
     casesCoverageMd: path.join(translateDir, 'phase2', 'coverage.md'),
     phase4Dir: path.join(translateDir, 'phase4'),
     agentsTxt: path.join(translateDir, 'phase4', 'agents.txt'),
@@ -203,6 +209,7 @@ export const DASHBOARD_PREVIEW_REL_PATHS = [
   TRANSLATE_PHASE1_STEPS_XML_REL,
   TRANSLATE_PHASE1_LLM_RAW_XML_REL,
   TRANSLATE_PHASE2_CASES_MD_REL,
+  TRANSLATE_PHASE2_CASES_FALLBACK_MD_REL,
   TRANSLATE_PHASE2_COVERAGE_MD_REL,
   TRANSLATE_PHASE4_AGENTS_TXT_REL,
 ];

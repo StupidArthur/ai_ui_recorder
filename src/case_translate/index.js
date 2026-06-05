@@ -130,6 +130,11 @@ export async function generate(metaFilePath, options = {}) {
   console.log(`\n测试用例: ${result.casesFile}`);
   console.log(`步骤分析: ${result.stepsFile}`);
 
+  // 输出兜底信息
+  if (result.fallbackApplied) {
+    console.log(`兜底补全: ${result.casesFallbackFile}（缺失 ${result.fallbackIndices.length} 步）`);
+  }
+
   return result;
 }
 

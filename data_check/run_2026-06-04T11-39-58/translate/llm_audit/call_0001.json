@@ -1,0 +1,41 @@
+{
+  "id": "call_0001",
+  "phase": "phase1",
+  "label": "structured batch index 1~3",
+  "extra": {
+    "actionIndices": [
+      1,
+      2,
+      3
+    ]
+  },
+  "startedAt": "2026-06-04T15:01:44.509Z",
+  "finishedAt": "2026-06-04T15:01:53.519Z",
+  "request": {
+    "model": "MiniMax-M2.7-highspeed",
+    "temperature": 0,
+    "maxTokens": 2000,
+    "messages": [
+      {
+        "role": "system",
+        "content": "# Role: AI 自动化测试步骤提炼专家 (UI Automation Step Extractor)\r\n\r\n## Profile\r\n- **Author**: @yuzechao\r\n- **Version**: 2.0\r\n- **Language**: 中文\r\n- **Description**: 将 AI UI Recorder 录制的底层物理操作（含 snapshotDiff、formStateDelta 等证据）翻译为标准化、客观的测试步骤（动作 + 界面响应）。\r\n- **核心原则**: 你只需**客观描述**「用户做了什么」和「页面发生了什么改变」，**绝对不要揣测测试意图，也不要生成主观断言 (Assertion)**。\r\n\r\n## Background\r\n录制器采集 click/input 等物理动作与 AX 快照。本 Skill 运行于 **snapshots → steps** 段：输入为一批 enriched action，输出为 **XML**（非 JSON）。\r\n\r\n## Goals\r\n- 对本批输入的**每一条** action 生成**一个且仅一个** `<step>`，`id` 必须与输入 action 的 `index` **完全一致**。\r\n- 基于 snapshotDiff、localContext、formStateDelta 等**硬证据**撰写 `<action>` 与 `<observation>`。\r\n- **禁止 JSON**；禁止 Markdown 代码围栏。\r\n\r\n## Constraints\r\n- **N 进 N 出**：输入 N 条 action，输出 N 个 `<step>`，**严禁合并、严禁丢步**。\r\n- **`id` 对齐**：每个 `<step id=\"...\">` 的数字必须等于 user 消息中对应 action 的 `index`。\r\n- **严禁猜测**：无证据支撑的业务含义不得编写；信息不足时在 `<action>` 中如实说明。\r\n- **机器只读标签内内容**：请将核心分析**全部包裹**在 XML 标签内；标签外的开场白、解释、思考过程、Markdown 围栏将被**直接丢弃**，对评估**无任何价值**。\r\n- **输出载体**：仅输出 `<steps>...</steps>` 包裹的 XML，不要任何 JSON，不要 \\`\\`\\`xml 围栏。\r\n\r\n## Rules\r\n1. **动作提炼 (action)**：根据 click/input 等事件，结合元素可见文本、placeholder、label，写一句简短中文动作描述。\r\n2. **界面响应提炼 (observation)**：根据 snapshotDiff / formStateDelta，写关键 UI 或状态变化；无可见变化写「无可见变化」；忽略无关广告加载等噪声。\r\n3. **不得仅凭 xpath/class** 推测业务名称（可参考 localContext 定位区域）。\r\n\r\n## Workflows\r\n1. 阅读 user 消息中的**历史上下文**（仅理解连贯性，勿写入输出）。\r\n2. 确认本批 action 数量 N 与各 `index` 列表。\r\n3. 对每条 action 分析证据，填写对应 `<step id=\"index\">`。\r\n4. 自检：`<step>` 数量 === N；每个 id 均在输入中出现。\r\n5. **仅输出**符合 Output Format 的 XML，立即结束。\r\n\r\n## Output Format\r\n\r\n根节点 `<steps>`，内含 N 个 `<step>`：\r\n\r\n```xml\r\n<steps>\r\n  <step id=\"1\">\r\n    <action>在「用户名」输入框中输入手机号</action>\r\n    <observation>输入框显示已填内容，表单状态已更新</observation>\r\n  </step>\r\n  <step id=\"2\">\r\n    <action>点击可见文本为「立即登录」的按钮</action>\r\n    <observation>页面发生跳转，主区域出现工作台内容</observation>\r\n  </step>\r\n</steps>\r\n```\r\n\r\n| 节点 | 必填 | 说明 |\r\n|------|------|------|\r\n| `step@id` | 是 | 与输入 action.index 一致 |\r\n| `action` | 是 | 一句话中文操作描述，禁止空 |\r\n| `observation` | 是 | 操作后界面/状态变化；无变化写「无可见变化」 |\r\n\r\n## Initialization\r\n我是 snapshots→steps 步骤提炼 Agent。请在 user 消息中提供本批 enriched action。我将只输出 `<steps>` XML，不含 JSON 与标签外废话。"
+      },
+      {
+        "role": "user",
+        "content": "【历史上下文参考】\n以下是发生在本次批处理之前的最近几次动作解析结果，仅供你理解上下文逻辑，**不需要**在你的输出中包含它们：\n(无历史上下文，这是起始操作)\n\n【本次需要解析的动作数组】\n注意：以下共有 3 个动作。你必须输出 3 个解析结果。\n\n=============【动作 Index: 1 (第 1/3 个)】=============\n{\n  \"type\": \"input\",\n  \"timestamp\": 1780573206937,\n  \"element\": {\n    \"tag\": \"input\",\n    \"id\": \"username\",\n    \"name\": null,\n    \"type\": \"text\",\n    \"text\": \"\",\n    \"placeholder\": \"请输入用户名\",\n    \"title\": null,\n    \"href\": null,\n    \"xpath\": \"//*[@id='username']\",\n    \"label\": null\n  },\n  \"formStateDelta\": {\n    \"//*[@id='root']/div/div/div/div/div[1]/div[2]/div[3]/div/div/label[1]/input\": {\n      \"value\": \"on\",\n      \"checked\": true\n    },\n    \"//div[normalize-space(.)='密码登录']\": {\n      \"ariaSelected\": \"true\"\n    },\n    \"//*[@id='root']/div/div/div/div/div[1]/div[2]/div[3]/div/div/label[2]/input\": {\n      \"value\": \"on\",\n      \"checked\": false\n    },\n    \"//div[normalize-space(.)='验证码登录']\": {\n      \"ariaSelected\": \"false\"\n    },\n    \"//*[@id='username']\": {\n      \"value\": \"\"\n    },\n    \"//*[@id='pass64']\": {\n      \"value\": \"\"\n    },\n    \"//*[@id='agree']\": {\n      \"value\": \"on\",\n      \"checked\": false\n    }\n  },\n  \"snapshotDiff\": \"-   - textbox \\\"请输入用户名\\\" [required]\\n+   - textbox \\\"请输入用户名\\\" [required, value=\\\"15700078644\\\"]\"\n}\n\n=============【动作 Index: 2 (第 2/3 个)】=============\n{\n  \"type\": \"input\",\n  \"timestamp\": 1780573211264,\n  \"element\": {\n    \"tag\": \"input\",\n    \"id\": \"pass64\",\n    \"name\": null,\n    \"type\": \"password\",\n    \"text\": \"\",\n    \"placeholder\": \"请输入密码\",\n    \"title\": null,\n    \"href\": null,\n    \"xpath\": \"//*[@id='pass64']\",\n    \"label\": null\n  },\n  \"formStateDelta\": {\n    \"//*[@id='root']/div/div/div/div/div[1]/div[2]/div[3]/div/div/label[1]/input\": {\n      \"value\": \"on\",\n      \"checked\": true\n    },\n    \"//div[normalize-space(.)='密码登录']\": {\n      \"ariaSelected\": \"true\"\n    },\n    \"//*[@id='root']/div/div/div/div/div[1]/div[2]/div[3]/div/div/label[2]/input\": {\n      \"value\": \"on\",\n      \"checked\": false\n    },\n    \"//div[normalize-space(.)='验证码登录']\": {\n      \"ariaSelected\": \"false\"\n    },\n    \"//*[@id='username']\": {\n      \"value\": \"15700078644\"\n    },\n    \"//*[@id='pass64']\": {\n      \"value\": \"\"\n    },\n    \"//*[@id='agree']\": {\n      \"value\": \"on\",\n      \"checked\": false\n    }\n  },\n  \"snapshotDiff\": \"-   - textbox \\\"请输入密码\\\" [required]\\n+   - textbox \\\"请输入密码\\\" [required, value=\\\"•••••••••••\\\"]\"\n}\n\n=============【动作 Index: 3 (第 3/3 个)】=============\n{\n  \"type\": \"click\",\n  \"timestamp\": 1780573217804,\n  \"element\": {\n    \"tag\": \"span\",\n    \"id\": null,\n    \"name\": null,\n    \"type\": null,\n    \"text\": \"\",\n    \"placeholder\": null,\n    \"title\": null,\n    \"href\": null,\n    \"xpath\": \"//*[@id='root']/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[4]/form[1]/div[3]/div[1]/div[1]/div[1]/div[1]/div[1]/label[1]/span[1]/span[1]\",\n    \"label\": null\n  },\n  \"formStateDelta\": {\n    \"//*[@id='root']/div/div/div/div/div[1]/div[2]/div[3]/div/div/label[1]/input\": {\n      \"value\": \"on\",\n      \"checked\": true\n    },\n    \"//div[normalize-space(.)='密码登录']\": {\n      \"ariaSelected\": \"true\"\n    },\n    \"//*[@id='root']/div/div/div/div/div[1]/div[2]/div[3]/div/div/label[2]/input\": {\n      \"value\": \"on\",\n      \"checked\": false\n    },\n    \"//div[normalize-space(.)='验证码登录']\": {\n      \"ariaSelected\": \"false\"\n    },\n    \"//*[@id='username']\": {\n      \"value\": \"15700078644\"\n    },\n    \"//*[@id='pass64']\": {\n      \"value\": \"Supcon@1304\"\n    },\n    \"//*[@id='agree']\": {\n      \"value\": \"on\",\n      \"checked\": false\n    }\n  },\n  \"snapshotDiff\": \"（preSnapshot 和 postSnapshot 完全相同，操作未引起可见的 UI 变化）\"\n}\n\n请立即开始解析，并严格按照 System Prompt 的 Output Format 输出 JSON 对象。"
+      }
+    ]
+  },
+  "response": {
+    "raw": "<think>\n用户要求我解析3个动作，并将它们翻译成标准化的测试步骤。根据规则，我需要：\n1. 输出3个 `<step>` 元素，每个对应一个 action\n2. 每个 step 的 id 必须与输入的 index 一致\n3. 不能揣测测试意图，只能客观描述\n4. 输出 XML 格式，不是 JSON\n\n让我分析每个动作：\n\n**动作 1 (Index 1)**：\n- type: input\n- element: input#username, placeholder=\"请输入用户名\"\n- snapshotDiff: 从空值变为 \"15700078644\"\n- formStateDelta 显示 username 值变为 \"15700078644\"\n\naction: 在「用户名」输入框中输入手机号 15700078644\nobservation: 输入框值从空变为 15700078644，表单状态已更新\n\n**动作 2 (Index 2)**：\n- type: input\n- element: input#pass64, placeholder=\"请输入密码\"\n- snapshotDiff: 从空值变为 \"•••••••••••\"（密码遮罩）\n- formStateDelta 显示 pass64 值存在（但密码不可见）\n\naction: 在「密码」输入框中输入密码\nobservation: 输入框值显示为掩码字符，表单状态已更新\n\n**动作 3 (Index 3)**：\n\n\n- type: click\n- element: span（复选框的勾选标记）\n- snapshotDiff: 无可见变化，但 formStateDelta 显示 agree 复选框的状态从 unchecked 变为 checked\n- 这是一个用户协议同意复选框\n\naction: 点击「用户协议」复选框\nobservation: 复选框状态变为已选中，表单状态已更新\n</think>\n\n<steps>\n  <step id=\"1\">\n    <action>在「用户名」输入框中输入手机号 15700078644</action>\n    <observation>输入框值从空变为 15700078644，表单状态已更新</observation>\n  </step>\n  <step id=\"2\">\n    <action>在「密码」输入框中输入密码</action>\n    <observation>输入框值从空变为掩码显示，表单状态已更新</observation>\n  </step>\n  <step id=\"3\">\n    <action>点击「用户协议」复选框</action>\n    <observation>复选框状态从未选中变为已选中，表单状态已更新</observation>\n  </step>\n</steps>"
+  },
+  "outcome": {
+    "ok": true,
+    "problems": [],
+    "details": {
+      "parsedCount": 3,
+      "expectedCount": 3,
+      "failedIndices": []
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "index": 12,
+  "type": "click",
+  "element": {
+    "tag": "input",
+    "id": null,
+    "name": ":r56:",
+    "type": "radio",
+    "text": "",
+    "placeholder": null,
+    "title": null,
+    "href": null,
+    "xpath": "/html/body/div[3]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/label[2]/input[1]",
+    "label": "深色"
+  },
+  "url": "https://tpt.supcon.com/tpt-app/#/home/chat/main?TptSaasUserTenantryId=ATL43NW8",
+  "title": "TPT",
+  "timestamp": 1780573230563,
+  "formStateDelta": null
+}

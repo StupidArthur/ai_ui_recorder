@@ -70,20 +70,27 @@ export const SCREENSHOT_DELAY_MS = 500;
 /** 输出根目录 */
 export const OUTPUT_BASE_DIR = './output';
 
-/** 截图子目录名 */
-export const SCREENSHOTS_SUBDIR = 'screenshots';
-
-/** 日志文件名 */
-export const LOG_FILENAME = 'recorder.log';
-
-/** 快照数据子目录名 */
-export const SNAPSHOTS_DATA_SUBDIR = 'snapshots';
-
-/** 操作数据子目录名 */
-export const ACTIONS_DATA_SUBDIR = 'actions';
-
-/** 录制元信息文件名（含操作摘要，取代原 actions.json 和手工测试用例.md） */
-export const META_FILENAME = 'meta.json';
+/**
+ * 以下路径均为相对 runDir 的相对路径，完整布局见 run-layout.js
+ */
+export {
+  META_FILENAME,
+  SCREENSHOTS_SUBDIR,
+  RECORD_ACTIONS_REL as ACTIONS_DATA_SUBDIR,
+  RECORD_SNAPSHOTS_REL as SNAPSHOTS_DATA_SUBDIR,
+  RECORD_LOG_REL as LOG_FILENAME,
+  TRANSLATE_PREPROCESS_REL as PREPROCESSED_SUBDIR,
+  TRANSLATE_GENERATE_LOG_REL as GENERATE_LOG_FILENAME,
+  TRANSLATE_PHASE1_STEPS_JSON_REL as AI_STEPS_STRUCTURED_FILENAME,
+  TRANSLATE_PHASE1_STEPS_XML_REL as AI_STEPS_STRUCTURED_XML_FILENAME,
+  TRANSLATE_PHASE1_LLM_RAW_XML_REL as AI_STEPS_LLM_RAW_XML_FILENAME,
+  TRANSLATE_PHASE1_ERRORS_JSON_REL as AI_STEPS_ERRORS_FILENAME,
+  TRANSLATE_PHASE2_CASES_MD_REL as AI_CASES_FILENAME,
+  TRANSLATE_PHASE2_COVERAGE_MD_REL as AI_CASES_COVERAGE_FILENAME,
+  TRANSLATE_PHASE4_AGENTS_TXT_REL as TRANSLATE_AGENT_TXT_FILENAME,
+  TRANSLATE_LLM_AUDIT_REL as LLM_AUDIT_DIRNAME,
+  DASHBOARD_PREVIEW_REL_PATHS as DASHBOARD_PREVIEW_FILES,
+} from './run-layout.js';
 
 // ==================== Snapshot 配置 ====================
 
@@ -111,13 +118,10 @@ export const RECORDER_POST_NAV_INJECT_CHECK_DELAY_MS = 800;
 
 // ==================== 预处理配置（case_translate/preprocessor） ====================
 
-/** 预处理输出子目录名（位于 run_XXXX/ 下） */
-export const PREPROCESSED_SUBDIR = 'preprocessed';
-
-/** 快照 diff 输出子目录名（位于 preprocessed/ 下） */
+/** 快照 diff 输出子目录名（位于 translate/preprocess/ 下） */
 export const DIFFS_DATA_SUBDIR = 'diffs';
 
-/** 富化后的 action 输出子目录名（位于 preprocessed/ 下） */
+/** 富化后的 action 输出子目录名（位于 translate/preprocess/ 下） */
 export const ENRICHED_DATA_SUBDIR = 'enriched';
 
 /** 预处理日志文件名 */
@@ -138,7 +142,7 @@ export const CONTEXT_EXCERPT_MAX_SIBLINGS = 5;
 
 // ==================== 语义归并配置（case_translate/preprocessor/action-merge） ====================
 
-/** 归并报告输出子目录名（位于 preprocessed/ 下） */
+/** 归并报告输出子目录名（位于 translate/preprocess/ 下） */
 export const MERGED_DATA_SUBDIR = 'merged';
 
 /**
@@ -163,31 +167,11 @@ export const PASSWORD_MASK = '[MASKED]';
  */
 export const EVIDENCE_CONTEXT_WINDOW_SIZE = 10;
 
-/** AI 生成的逐条操作分析文件名（原 AI_evidence.md） */
-export const AI_STEPS_FILENAME = 'AI_steps.md';
-
-/** Phase 1 结构化步骤文件名（机器主消费，替代 AI_steps.md 作为主输出） */
-export const AI_STEPS_STRUCTURED_FILENAME = 'step_2_structured_steps.json';
-
-/** Phase 1 结构化步骤错误追踪文件名（记录 JSON 修复/兜底信息） */
-export const AI_STEPS_ERRORS_FILENAME = 'step_2_structured_steps.errors.json';
-
-/** AI 生成的归纳测试用例文件名（原 AI_steps.md） */
-export const AI_CASES_FILENAME = 'AI_cases.md';
-
-/** AI 生成日志文件名 */
-export const GENERATE_LOG_FILENAME = 'generate.log';
-
 /**
  * Phase 1 局部字段自愈（description/uiChange/basis/confidence 等）
  * false：严格使用 LLM 原始输出，缺失字段由校验捕获并记入 llm_audit
  */
 export const LLM_AUTO_HEAL_ENABLED = false;
-
-/**
- * LLM 审计目录名（相对 run 目录，例如 run_2026-06-03T07-11-48/llm_audit/）
- */
-export const LLM_AUDIT_DIRNAME = 'llm_audit';
 
 /** 翻译开始前 LLM 探活超时（毫秒） */
 export const LLM_PING_TIMEOUT_MS = 3000;
@@ -220,6 +204,29 @@ export const PHASE2_ASSERT_TEXT_MAX_CHARS = 200;
  */
 export const PHASE2_CASE_WINDOW_MAX_TOKENS = 3500;
 
+// ==================== XML 解析（Phase 1/2/4 LLM 输出） ====================
+
+/** Phase 1 LLM 原始回复最大参与正则解析的字符数 */
+export const PHASE1_LLM_RAW_MAX_CHARS = 60000;
+
+/** Phase 1 `<step>` 块体内正则匹配最大字符数 */
+export const XML_REGEX_STEP_BLOCK_MAX_CHARS = 4000;
+
+/** Phase 1 `<action>` / `<observation>` 节点最大字符数 */
+export const XML_REGEX_ACTION_OBS_MAX_CHARS = 2000;
+
+/** Phase 4 `<logical_step>` 块体最大字符数 */
+export const XML_REGEX_LOGICAL_STEP_MAX_CHARS = 2000;
+
+/** Phase 4 `<micro>` 节点最大字符数 */
+export const XML_REGEX_MICRO_MAX_CHARS = 500;
+
+/**
+ * 滑动窗口最大轮次倍数（相对 ceil(total/windowSize)）
+ * 超出则本地兜底并退出，防止 consume=0 死循环
+ */
+export const SLIDING_WINDOW_MAX_ROUND_MULTIPLIER = 2;
+
 // ==================== 进程控制配置 ====================
 
 /** 停止录制超时时间（毫秒），超时强制退出 */
@@ -228,12 +235,3 @@ export const STOP_TIMEOUT_MS = 60000;
 /** 进程退出前延迟（毫秒），确保日志写入完成 */
 export const EXIT_DELAY_MS = 1000;
 
-/**
- * Dashboard「录制历史」文件预览白名单（仅给人阅读的产物，按展示顺序）
- */
-export const DASHBOARD_PREVIEW_FILES = [
-  AI_CASES_FILENAME,
-  'case_4_agents.txt',
-  AI_STEPS_STRUCTURED_FILENAME,
-  META_FILENAME,
-];

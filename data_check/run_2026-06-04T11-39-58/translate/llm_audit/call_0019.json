@@ -1,0 +1,60 @@
+{
+  "id": "call_0019",
+  "phase": "phase4",
+  "label": "agent txt chunk steps 20~38",
+  "extra": {
+    "stepIndices": [
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38
+    ],
+    "round": 2
+  },
+  "startedAt": "2026-06-04T15:05:48.570Z",
+  "finishedAt": "2026-06-04T15:05:59.826Z",
+  "request": {
+    "model": "MiniMax-M2.7-highspeed",
+    "temperature": 0.1,
+    "maxTokens": 2000,
+    "messages": [
+      {
+        "role": "system",
+        "content": "# Role: 资深 Web UI 自动化 Agent 测试用例编写专家\r\n\r\n## Profile\r\n- **Author**: @yuzechao\r\n- **Version**: 2.0\r\n- **Language**: 中文\r\n- **Description**: 将结构化步骤按业务逻辑聚合为供无视觉 Agent 执行的逻辑步骤，输出 XML（非 JSON），由程序渲染为 case_4_agents.txt。\r\n- **背景**: 下游 Agent 仅依赖文本中的 DOM 特征定位。输入为本窗纯文本步骤（动作 + 界面响应）。\r\n\r\n## Goals\r\n- 输出**唯一** `<agent_chunk>` XML，含逻辑步骤与 `totalConsume`。\r\n- 每条 `micro` 含可执行级定位描述（可见文案、placeholder、输入值）。\r\n- `totalConsume` = 各 `logical_step@consume` 之和，且 ≤ 本窗输入步数。\r\n\r\n## Constraints\r\n- **禁止 JSON**；禁止 Markdown 代码围栏。\r\n- **机器只读标签内内容**：核心内容必须写在 XML 标签内；标签外废话将被丢弃。\r\n- **严禁跳步**：弹窗须先写打开再写窗内操作。\r\n- **强 DOM 定位**：禁止「点击某个按钮」等笼统描述。\r\n- 无法形成闭环的尾部步骤可丢弃，不计入 `consume`。\r\n\r\n## Output Format\r\n\r\n```xml\r\n<agent_chunk totalConsume=\"5\">\r\n  <use_case name=\"用例名称\" purpose=\"测试目的\"/>\r\n  <logical_step consume=\"4\">\r\n    <name>完成用户登录</name>\r\n    <micro>在「请输入用户名」输入 15700078644</micro>\r\n    <micro>点击「立即登录」按钮</micro>\r\n  </logical_step>\r\n  <logical_step consume=\"1\">\r\n    <name>打开用户菜单</name>\r\n    <micro>点击右上角用户头像图标</micro>\r\n  </logical_step>\r\n</agent_chunk>\r\n```\r\n\r\n| 节点 | 说明 |\r\n|------|------|\r\n| `agent_chunk@totalConsume` | 本窗消耗底层步骤总数 |\r\n| `use_case` | 首轮必填 name/purpose；后续滑窗可省略 |\r\n| `logical_step@consume` | 该逻辑步骤消耗的底层步数 |\r\n| `micro` | 可执行微观动作，可多行 |\r\n\r\n## Workflows\r\n1. 阅读纯文本步骤流。\r\n2. 划分 logical_step，编写 micro。\r\n3. 统计 consume 之和 → totalConsume。\r\n4. 仅输出 XML，立即结束。\r\n\r\n## Initialization\r\n我是 case→agents 聚合 Agent。请提供本窗纯文本步骤。我只输出 `<agent_chunk>` XML，不含 JSON。"
+      },
+      {
+        "role": "user",
+        "content": "请根据以下按时间顺序排列的底层步骤记录（纯文本），进行业务逻辑聚合并输出 <agent_chunk> XML：\n\n步骤 20:\n- 动作: 点击「专家模式」选项\n- 界面响应: 页面左侧显示多个专家Agent选项卡片，包括：AI操作优化专家、AI复杂控制专家、AI回路整定专家、AI生产参数预测专家、AI生产异常检测专家、预测控制专家、回路整定专家、能耗瓶颈分析专家、AI换热网络优化专家、工业知识专家、报表分析专家、智能问数专家\n\n步骤 21:\n- 动作: 点击「智能问数与结果分析」Agent选项\n- 界面响应: 页面切换至智能问数专家模式，左侧专家选项卡片收起，输入框变为可输入状态，显示标题「智能问数专家」\n\n步骤 22:\n- 动作: 在「输入内容进行提问」输入框中输入文本「有哪些可以问」\n- 界面响应: 输入框内容更新为「有哪些可以问」，表单状态已更新\n\n步骤 23:\n- 动作: 点击发送按钮（SendOutlined图标）\n- 界面响应: 页面创建新对话项「有哪些可以问」，AI助手返回智能问数专家可咨询的三类问题说明：能耗与物耗指标查询、设备位号数据查询、系统与规则咨询\n\n步骤 24:\n- 动作: 点击AI回复下方的点赞按钮\n- 界面响应: 点赞图标变为打勾确认状态，显示提示文本「感谢您的赞美与肯定」\n\n步骤 25:\n- 动作: 点击左侧导航栏中的会话记录项或Agent管理入口\n- 界面响应: 页面从对话聊天视图切换至Agent管理视图，出现分段控制器（对话生成/组态生成）、搜索Agent输入框、导入Agent按钮及离线/实时模式切换功能\n\n步骤 26:\n- 动作: 点击可见文本为「组态生成」的分段控件标签\n- 界面响应: 无可见变化\n\n步骤 27:\n- 动作: 点击「组态生成」单选按钮\n- 界面响应: 分段控制器选中状态切换：对话生成取消选中，组态生成变为选中；页面显示Agent卡片列表，包含「仪表-离线」等预设Agent项，出现新增Agent入口及启用配置操作按钮\n\n步骤 28:\n- 动作: 点击分类筛选区域中可见文本为「控制」的标签\n- 界面响应: 列表视图切换：从原仪表、硫磺回收装置等卡片更新为显示「全部/MPC/AI」标签，并出现「uu私有控制MPC」和「ai1私有控制MPC」两个Agent卡片项\n\n步骤 29:\n- 动作: 点击可见文本为「AI」的分类标签\n- 界面响应: 列表视图再次筛选：MPC类型卡片消失，显示「AI_Control_1」AI控制类Agent卡片，状态显示「模型配置失败」「推理验证」「启用配置未完成」\n\n步骤 30:\n- 动作: 点击可见文本为「新增Agent」的按钮\n- 界面响应: 页面弹出「创建Agent」模态对话框，包含Agent名称、Agent描述、Agent类型（控制）、对应装置、是否有模型（默认否）、数据来源（默认数据文件上传）、是否需要引导上传数据（默认否）、保存目录（TPT智能体）等表单项，以及取消和确认按钮\n\n步骤 31:\n- 动作: 在Agent名称输入框中输入\"ai_demo\"\n- 界面响应: 输入框已填入值\"ai_demo\"，表单状态更新\n\n步骤 32:\n- 动作: 在对应装置下拉框中选择\"ai_equip\"\n- 界面响应: 对应装置字段已选为\"ai_equip\"，表单状态更新\n\n步骤 33:\n- 动作: 点击\"确认\"按钮\n- 界面响应: 创建Agent模态对话框关闭，页面跳转至iframe内容区域\n\n步骤 34:\n- 动作: 点击顶部导航区域（触发 Agent 列表页面加载）\n- 界面响应: 页面切换至\"我的Agent\"列表视图，显示 ai_demo 与 AI_Control_1 两个 Agent 条目，iframe 内容被替换\n\n步骤 35:\n- 动作: 点击文本为\"未完成\"的状态标签区域\n- 界面响应: Agent 列表视图关闭，页面返回 iframe 内容区域，筛选状态已重置\n\n步骤 36:\n- 动作: 点击\"返回确认目标\"按钮\n- 界面响应: 无可见变化\n\n步骤 37:\n- 动作: 点击文本为\"下载模板\"的按钮\n- 界面响应: 无可见变化\n\n步骤 38:\n- 动作: 点击触发文件下载的链接\n- 界面响应: 无可见变化"
+      }
+    ]
+  },
+  "response": {
+    "raw": "<think>\n用户提供了37个步骤（从步骤20到步骤38），但最后三个步骤（36、37、38）都没有可见响应，这些无法形成闭环的尾部步骤应该丢弃，不计入consume。\n\n让我分析业务逻辑：\n\n1. **选择专家模式**（步骤20）：点击「专家模式」选项\n2. **进入智能问数专家**（步骤21-23）：选择智能问数Agent，输入问题并发送\n3. **与AI交互**（步骤24）：对AI回复点赞\n4. **切换到Agent管理**（步骤25）：从对话切换到Agent管理视图\n5. **切换到组态生成**（步骤26-27）：选择组态生成模式\n6. **筛选控制类Agent**（步骤28-29）：先选\"控制\"标签，再选\"AI\"标签\n7. **创建新Agent**（步骤30-33）：点击新增，填写表单，确认创建\n8. **返回我的Agent列表**（步骤34）：页面显示新创建的agent\n9. **关闭列表返回**（步骤35）：返回iframe内容区域\n\n注意：步骤36-38没有可见响应，需要丢弃。\n\n让我计算consume：\n- 步骤20-23（进入智能问数专家并提问）：4个步骤\n- 步骤24（点赞）：1个步骤\n- 步骤25-27（切换到Agent管理并选择组态生成）：3个步骤\n\n\n- 步骤28-29（筛选AI类Agent）：2个步骤\n- 步骤30-33（创建Agent）：4个步骤\n- 步骤34-35（查看列表并返回）：2个步骤\n\n总计：4 + 1 + 3 + 2 + 4 + 2 = 16个步骤。步骤36-38被丢弃，因为它们无法形成闭环。\n\n聚合后的逻辑步骤为：选择专家模式并进入智能问数专家提问，对AI回复进行交互，切换到Agent管理视图选择组态生成，筛选AI类Agent并创建新Agent，最后查看列表返回iframe内容区域。\n\n这样形成4个logical_step，共消耗16个步骤。\n</think>\n\n<agent_chunk totalConsume=\"16\">\n  <use_case name=\"智能问数专家问答与Agent创建\" purpose=\"测试智能问数专家交互功能及Agent管理中创建新Agent的完整流程\"/>\n  <logical_step consume=\"4\">\n    <name>进入智能问数专家并提问</name>\n    <micro>点击左侧「专家模式」选项</micro>\n    <micro>点击「智能问数与结果分析」Agent选项</micro>\n    <micro>在「输入内容进行提问」输入框中输入「有哪些可以问」</micro>\n    <micro>点击发送按钮（SendOutlined图标）</micro>\n  </logical_step>\n  <logical_step consume=\"1\">\n    <name>对AI回复进行点赞</name>\n    <micro>点击AI回复下方的点赞按钮</micro>\n  </logical_step>\n  <logical_step consume=\"5\">\n    <name>切换至Agent管理并筛选AI控制类Agent</name>\n    <micro>点击左侧导航栏中的会话记录项或Agent管理入口</micro>\n    <micro>点击「组态生成」分段控件标签</micro>\n    <micro>点击「组态生成」单选按钮</micro>\n    <micro>点击分类筛选区域中「控制」标签</micro>\n    <micro>点击「AI」分类标签</micro>\n  </logical_step>\n  <logical_step consume=\"6\">\n    <name>创建新Agent并返回内容区</name>\n    <micro>点击「新增Agent」按钮</micro>\n    <micro>在Agent名称输入框中输入\"ai_demo\"</micro>\n    <micro>在对应装置下拉框中选择\"ai_equip\"</micro>\n    <micro>点击「确认」按钮</micro>\n    <micro>点击顶部导航区域触发Agent列表加载</micro>\n    <micro>点击「未完成」状态标签区域关闭列表</micro>\n  </logical_step>\n</agent_chunk>"
+  },
+  "outcome": {
+    "ok": true,
+    "problems": [],
+    "details": {
+      "useCaseName": "智能问数专家问答与Agent创建",
+      "agentStepCount": 4,
+      "totalConsume": 16,
+      "safeConsume": 16,
+      "rawConsume": 16
+    }
+  }
+}

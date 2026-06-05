@@ -1,0 +1,52 @@
+{
+  "index": 29,
+  "type": "click",
+  "element": {
+    "tag": "div",
+    "id": null,
+    "name": null,
+    "type": null,
+    "text": "AI",
+    "placeholder": null,
+    "title": null,
+    "href": null,
+    "xpath": "//*[@id='root']/div/div/div/div/div/div[2]/div/div/div/div/div[1]/div[3]/div[3]",
+    "label": null
+  },
+  "url": "https://tpt.supcon.com/tpt-app/#/home/chat/agent?agentType=3&agentShowType=custom&agentShowChildType=default&agentShowScene=all",
+  "title": "TPT",
+  "timestamp": 1780573274069,
+  "formStateDelta": {
+    "//*[@id='root']/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/label[1]/input[1]": {
+      "value": "on",
+      "checked": false
+    },
+    "//*[@id='root']/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/label[1]/div[1]": {
+      "ariaSelected": "false"
+    },
+    "//*[@id='root']/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/label[2]/input[1]": {
+      "value": "on",
+      "checked": true
+    },
+    "//*[@id='root']/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/label[2]/div[1]": {
+      "ariaSelected": "true"
+    },
+    "//input[@placeholder='搜索Agent']": {
+      "value": ""
+    },
+    "//textarea[@name='hiddenTextarea']": {
+      "value": " "
+    }
+  },
+  "snapshotDiff": "-   - generic \"uu 私有 控制 MPC -- 模型配置 进行中 启用配置 未完成  创建时间 2026-06-03 18:36:41 。。。 ai1 私有 控制 MPC -- 模型配置 进行中 启用配置 未完成  创建时间\"\n+   - text \"AI_Control_1\"\n+   - text \"私有\"\n+   - text \"控制\"\n+   - text \"AI\"\n+   - text \"--\"\n+   - text \"模型配置\"\n+   - text \"失败\"\n+   - text \"推理验证\"\n+   - text \"启用配置\"\n+   - text \"未完成\"\n+   - image \"stop\"\n+   - text \"\"\n+   - text \"创建时间\"\n+   - text \"2026-05-28 13:37:58\"\n+   - image \"。。。\"",
+  "preSnapshot": "[见 record/snapshots/snapshot_028.txt]",
+  "postSnapshot": "[见 record/snapshots/snapshot_029.txt]",
+  "contextExcerpt": "- WebArea \"TPT\"\n  - text \"导入Agent\"\n  - image \"search\"\n  - textbox \"搜索Agent\"\n  - text \"全部\"\n  - text \"MPC\"\n  - text \"AI\"  ← [操作目标]\n  - generic \"uu 私有 控制 MPC -- 模型配置 进行中 启用配置 未完成  创建时间 2026-06-03 18:36:41 。。。 ai1 私有 控制 MPC -- 模型配置 进行中 启用配置 未完成  创建时间\"",
+  "formStateChanges": null,
+  "formStateChangeText": null,
+  "classification": {
+    "category": "other",
+    "elementType": "other",
+    "hints": []
+  }
+}

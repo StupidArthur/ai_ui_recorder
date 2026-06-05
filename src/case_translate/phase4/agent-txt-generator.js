@@ -1,21 +1,19 @@
 /**
- * agent-txt-generator.js - Phase 4 核心逻辑模块（滑动窗口处理）
+ * agent-txt-generator.js - Phase 4 核心逻辑（滑动窗口 + XML 解析 + 本地渲染 TXT）
  *
- * 架构：滑动窗口切块 + LLM 逻辑分组(JSON) + 本地 Node.js 统一渲染(TXT)
- *
- * 设计目标：
- * - 保证步骤编号绝对单调递增（LLM 不可靠，本地渲染保证）
- * - LLM JSON 解析失败时：本地确定性兜底（不丢步骤）
- * - 生成供下游 AI Agent 消费的纯文本测试用例
+ * 架构：滑动窗口切块 + LLM XML(agent_chunk) + Node 本地渲染 case_4_agents.txt
  */
 
 import fs from 'fs';
 import path from 'path';
-import { parseJsonFromLlmReply } from '../ai-client.js';
+import { parseAgentChunkXml } from './xml-agent-chunk-parser.js';
 import {
   buildAgentTxtSystemPrompt,
   buildAgentTxtUserPrompt,
 } from '../prompts/agent-txt.js';
+import { formatStepsWindowPlainText } from '../phase2/format-step-plain-text.js';
+import { clampWindowConsume, maxSlidingWindowRounds } from '../xml-parse-utils.js';
+import { getTranslatePaths } from '../../utils/run-layout.js';
 
 /** 默认滑动窗口大小 */
 const DEFAULT_CHUNK_SIZE = 20;
@@ -51,7 +49,7 @@ function formatStepAsMicroAction(step) {
  * @param {Array<Object>} chunk
  * @returns {Array<Object>}
  */
-function buildLocalAgentStepsFromChunk(chunk) {
+export function buildLocalAgentStepsFromChunk(chunk) {
   return chunk.map((step) => ({
     logicalName: step.description || `操作 ${step.index}`,
     microActions: [formatStepAsMicroAction(step)],
@@ -77,12 +75,12 @@ function deriveUseCaseNameFromSteps(steps) {
 /**
  * Phase 4：生成供 Agent 使用的纯文本测试用例
  *
- * @param {string} runDir - 录制输出目录路径
- * @param {Array<Object>} structuredSteps - Phase 1 输出的结构化步骤数组
- * @param {Object} [options] - 可选配置
- * @param {Object} [options.log] - 日志器实例
- * @param {number} [options.phaseWindowSize] - 滑动窗口大小，默认 20
- * @returns {Promise<string>} 生成的 TXT 文件路径
+ * @param {string} runDir
+ * @param {Array<Object>} structuredSteps
+ * @param {Object} [options]
+ * @param {Object} [options.log]
+ * @param {number} [options.phaseWindowSize]
+ * @returns {Promise<string|null>}
  */
 export async function generateAgentTxt(runDir, structuredSteps, options = {}) {
   const { log, llmAudit } = options;
@@ -104,29 +102,37 @@ export async function generateAgentTxt(runDir, structuredSteps, options = {}) {
   let globalUseCasePurpose = '验证录制业务流程可正常执行';
   let usedLocalFallback = false;
 
-  while (cursor < effectiveSteps.length) {
-    const chunk = effectiveSteps.slice(cursor, cursor + phaseWindowSize);
+  const maxRounds = maxSlidingWindowRounds(effectiveSteps.length, phaseWindowSize);
+  let round = 0;
 
-    const slimChunk = chunk.map((s) => ({
-      description: s.description,
-      action: s.actionKind,
-      target: s.target,
-      inputText: s.inputText,
-      uiChange: s.uiChange,
-    }));
+  while (cursor < effectiveSteps.length) {
+    round++;
+    if (round > maxRounds) {
+      if (log) {
+        log.warn(
+          `[Agent TXT] 已达最大轮次 ${maxRounds}，剩余步骤本地 1:1 兜底`,
+        );
+      }
+      globalAgentSteps.push(...buildLocalAgentStepsFromChunk(effectiveSteps.slice(cursor)));
+      usedLocalFallback = true;
+      cursor = effectiveSteps.length;
+      break;
+    }
+
+    const chunk = effectiveSteps.slice(cursor, cursor + phaseWindowSize);
+    const windowPlainText = formatStepsWindowPlainText(chunk);
 
     const messages = [
       { role: 'system', content: buildAgentTxtSystemPrompt() },
-      { role: 'user', content: buildAgentTxtUserPrompt(JSON.stringify(slimChunk, null, 2)) },
+      { role: 'user', content: buildAgentTxtUserPrompt(windowPlainText) },
     ];
 
     const chunkStart = cursor + 1;
     const chunkEnd = cursor + chunk.length;
     const phase4Label = `agent txt chunk steps ${chunkStart}~${chunkEnd}`;
-    const auditMeta = { stepIndices: chunk.map((s) => s.index) };
+    const auditMeta = { stepIndices: chunk.map((s) => s.index), round };
 
-    let parsedReply = null;
-    let chunkHandledByLocal = false;
+    let parsedChunk = null;
     let callId = null;
     let rawReply;
 
@@ -147,16 +153,31 @@ export async function generateAgentTxt(runDir, structuredSteps, options = {}) {
         { temperature: 0.1, maxTokens: 2000 },
       ));
 
-      parsedReply = parseJsonFromLlmReply(rawReply);
+      parsedChunk = parseAgentChunkXml(rawReply);
 
-      const agentSteps = Array.isArray(parsedReply.agentSteps) ? parsedReply.agentSteps : [];
-      const parseOk = agentSteps.length > 0;
+      const parseOk = parsedChunk != null && parsedChunk.agentSteps?.length > 0;
+      const problems = parseOk ? [] : ['agent_chunk XML 解析失败或 agentSteps 为空'];
+
+      let safeConsume = chunk.length;
+      let rawConsume = null;
+      let clampReason = null;
+      if (parseOk) {
+        ({ safeConsume, rawConsume, clampReason } = clampWindowConsume(
+          parsedChunk.totalConsume,
+          chunk.length,
+        ));
+        if (clampReason) problems.push(clampReason);
+      }
+
       llmAudit.markOutcome(callId, {
         ok: parseOk,
-        problems: parseOk ? [] : ['agentSteps 为空或 JSON 结构无效'],
+        problems,
         details: {
-          useCaseName: parsedReply.useCaseName,
-          agentStepCount: agentSteps.length,
+          useCaseName: parsedChunk?.useCaseName,
+          agentStepCount: parsedChunk?.agentSteps?.length ?? 0,
+          totalConsume: parsedChunk?.totalConsume,
+          safeConsume,
+          rawConsume,
         },
       });
     } catch (error) {
@@ -167,42 +188,49 @@ export async function generateAgentTxt(runDir, structuredSteps, options = {}) {
           details: auditMeta,
         });
       }
-      if (log)
+      if (log) {
         log.warn(
-          `[Agent TXT] LLM 解析失败 (${error.message})，使用本地确定性兜底渲染 ${chunk.length} 步`,
+          `[Agent TXT] LLM 失败 (${error.message})，使用本地兜底 ${chunk.length} 步`,
         );
-      parsedReply = {
-        agentSteps: buildLocalAgentStepsFromChunk(chunk),
-      };
+      }
+      parsedChunk = null;
       usedLocalFallback = true;
-      chunkHandledByLocal = true;
     }
 
-    if (cursor === 0 && parsedReply.useCaseName && !chunkHandledByLocal) {
-      globalUseCaseName = parsedReply.useCaseName;
-      globalUseCasePurpose = parsedReply.useCasePurpose || globalUseCasePurpose;
-    }
-
-    const agentSteps = Array.isArray(parsedReply.agentSteps) ? parsedReply.agentSteps : [];
-
-    if (agentSteps.length === 0) {
-      if (log) log.warn('[Agent TXT] LLM 返回空 agentSteps，使用本地兜底');
-      globalAgentSteps.push(...buildLocalAgentStepsFromChunk(chunk));
+    if (!parsedChunk || !parsedChunk.agentSteps?.length) {
+      if (log) log.warn('[Agent TXT] XML 无效，使用本地兜底');
+      const localSteps = buildLocalAgentStepsFromChunk(chunk);
+      globalAgentSteps.push(...localSteps);
       usedLocalFallback = true;
       cursor += chunk.length;
       continue;
     }
 
-    let consumedInThisChunk = 0;
-    for (const logicalStep of agentSteps) {
-      globalAgentSteps.push(logicalStep);
-      consumedInThisChunk += logicalStep.consumeStepCount || 1;
+    if (cursor === 0 && parsedChunk.useCaseName) {
+      globalUseCaseName = parsedChunk.useCaseName;
+      if (parsedChunk.useCasePurpose) {
+        globalUseCasePurpose = parsedChunk.useCasePurpose;
+      }
     }
 
-    cursor +=
-      consumedInThisChunk > 0 && consumedInThisChunk <= chunk.length
-        ? consumedInThisChunk
-        : chunk.length;
+    const { safeConsume, rawConsume, clampReason } = clampWindowConsume(
+      parsedChunk.totalConsume,
+      chunk.length,
+    );
+
+    let consumedInChunk = 0;
+    for (const logicalStep of parsedChunk.agentSteps) {
+      globalAgentSteps.push(logicalStep);
+      consumedInChunk += logicalStep.consumeStepCount || 1;
+      if (consumedInChunk >= safeConsume) break;
+    }
+
+    cursor += safeConsume;
+    if (log) {
+      log.info(
+        `[Agent TXT] 轮次 ${round} 消费 ${safeConsume} 步 (raw=${rawConsume ?? 'n/a'}${clampReason ? `, ${clampReason}` : ''})`,
+      );
+    }
   }
 
   if (globalAgentSteps.length === 0) {
@@ -223,10 +251,10 @@ export async function generateAgentTxt(runDir, structuredSteps, options = {}) {
         finalTxt += `- ${action}\n`;
       });
     }
-    finalTxt += `\n`;
+    finalTxt += '\n';
   });
 
-  const txtFilePath = path.join(runDir, 'case_4_agents.txt');
+  const { agentsTxt: txtFilePath } = getTranslatePaths(runDir);
   fs.writeFileSync(txtFilePath, finalTxt.trim(), 'utf-8');
 
   if (log) {

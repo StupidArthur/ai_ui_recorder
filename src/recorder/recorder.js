@@ -49,15 +49,12 @@ import {
   SCREENSHOT_FULL_PAGE,
   SCREENSHOT_DELAY_MS,
   OUTPUT_BASE_DIR,
-  SCREENSHOTS_SUBDIR,
-  LOG_FILENAME,
-  SNAPSHOTS_DATA_SUBDIR,
-  ACTIONS_DATA_SUBDIR,
   META_FILENAME,
   SNAPSHOT_POLL_INTERVAL_MS,
   RECORDER_POST_NAV_INJECT_CHECK_DELAY_MS,
 } from '../utils/config.js';
 
+import { ensureRecordLayout, getRecordPaths } from '../utils/run-layout.js';
 import { createLogger } from '../utils/logger.js';
 import { buildInjectedScript } from './inject-script.js';
 import { pruneSnapshot, snapshotToText } from './snapshot-utils.js';
@@ -83,25 +80,15 @@ function generateRunTimestamp() {
 function createOutputDirs(baseDir) {
   const runTimestamp = generateRunTimestamp();
   const runDir = path.join(baseDir, `run_${runTimestamp}`);
-  const snapshotsDir = path.join(runDir, SNAPSHOTS_DATA_SUBDIR);
-  const actionsDir = path.join(runDir, ACTIONS_DATA_SUBDIR);
-  const screenshotDir = path.join(runDir, SCREENSHOTS_SUBDIR);
-
-  // 创建数据子目录
-  fs.mkdirSync(snapshotsDir, { recursive: true });
-  fs.mkdirSync(actionsDir, { recursive: true });
-
-  // 截图目录仅在截图功能开启时创建
-  if (SCREENSHOT_ENABLED) {
-    fs.mkdirSync(screenshotDir, { recursive: true });
-  }
+  ensureRecordLayout(runDir, { screenshots: SCREENSHOT_ENABLED });
+  const { snapshotsDir, actionsDir, screenshotsDir, recorderLog } = getRecordPaths(runDir);
 
   return {
     runDir,
-    screenshotDir,
+    screenshotDir: screenshotsDir,
     snapshotsDir,
     actionsDir,
-    logFile: path.join(runDir, LOG_FILENAME),
+    logFile: recorderLog,
   };
 }
 

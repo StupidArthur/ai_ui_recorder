@@ -28,11 +28,10 @@ import {
   TARGET_URL,
   OUTPUT_BASE_DIR,
   META_FILENAME,
-  AI_STEPS_FILENAME,
   AI_STEPS_STRUCTURED_FILENAME,
   AI_CASES_FILENAME,
   AI_STEPS_ERRORS_FILENAME,
-  PREPROCESS_LOG_FILENAME,
+  TRANSLATE_AGENT_TXT_FILENAME,
   GENERATE_LOG_FILENAME,
   DASHBOARD_PREVIEW_FILES,
 } from '../utils/config.js';
@@ -49,7 +48,9 @@ const DASHBOARD_PORT = 3000;
  * @returns {string[]}
  */
 function listRunPreviewFiles(runDir) {
-  return DASHBOARD_PREVIEW_FILES.filter((name) => fs.existsSync(path.join(runDir, name)));
+  return DASHBOARD_PREVIEW_FILES.filter(
+    (name) => typeof name === 'string' && name.length > 0 && fs.existsSync(path.join(runDir, name)),
+  );
 }
 
 /** 静态文件目录（pkg 打包时 import.meta.url 为 undefined，用 exe 所在目录） */
@@ -204,12 +205,10 @@ function getRunsList() {
       const runDir = path.join(outputDir, name);
       const metaFile = path.join(runDir, META_FILENAME);
       const hasMeta = fs.existsSync(metaFile);
-      const hasSteps = fs.existsSync(path.join(runDir, AI_STEPS_STRUCTURED_FILENAME))
-        || fs.existsSync(path.join(runDir, AI_STEPS_FILENAME));
+      const hasSteps = fs.existsSync(path.join(runDir, AI_STEPS_STRUCTURED_FILENAME));
       const hasCases = fs.existsSync(path.join(runDir, AI_CASES_FILENAME));
       const hasStepErrors = fs.existsSync(path.join(runDir, AI_STEPS_ERRORS_FILENAME));
-      const hasAgentTxt = fs.existsSync(path.join(runDir, 'case_4_agents.txt'));
-      const hasPreprocessLog = fs.existsSync(path.join(runDir, PREPROCESS_LOG_FILENAME));
+      const hasAgentTxt = fs.existsSync(path.join(runDir, TRANSLATE_AGENT_TXT_FILENAME));
       const hasGenerateLog = fs.existsSync(path.join(runDir, GENERATE_LOG_FILENAME));
 
       let meta = null;
@@ -227,7 +226,6 @@ function getRunsList() {
         hasCases,
         hasStepErrors,
         hasAgentTxt,
-        hasPreprocessLog,
         hasGenerateLog,
         totalActions: meta?.totalActions || 0,
         targetUrl: meta?.targetUrl || '',

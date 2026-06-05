@@ -1,0 +1,74 @@
+{
+  "index": 2,
+  "type": "input",
+  "originalType": "click",
+  "inputValue": "[MASKED]",
+  "element": {
+    "tag": "input",
+    "id": "pass64",
+    "name": null,
+    "type": "password",
+    "text": "",
+    "placeholder": "请输入密码",
+    "title": null,
+    "href": null,
+    "xpath": "//*[@id='pass64']",
+    "label": null
+  },
+  "url": "https://tpt.supcon.com/tpt-app/#/login",
+  "title": "TPT",
+  "timestamp": 1780573211264,
+  "formStateDelta": {
+    "//*[@id='root']/div/div/div/div/div[1]/div[2]/div[3]/div/div/label[1]/input": {
+      "value": "on",
+      "checked": true
+    },
+    "//div[normalize-space(.)='密码登录']": {
+      "ariaSelected": "true"
+    },
+    "//*[@id='root']/div/div/div/div/div[1]/div[2]/div[3]/div/div/label[2]/input": {
+      "value": "on",
+      "checked": false
+    },
+    "//div[normalize-space(.)='验证码登录']": {
+      "ariaSelected": "false"
+    },
+    "//*[@id='username']": {
+      "value": "15700078644"
+    },
+    "//*[@id='pass64']": {
+      "value": ""
+    },
+    "//*[@id='agree']": {
+      "value": "on",
+      "checked": false
+    }
+  },
+  "snapshotDiff": "-   - textbox \"请输入密码\" [required]\n+   - textbox \"请输入密码\" [required, value=\"•••••••••••\"]",
+  "preSnapshot": "[见 record/snapshots/snapshot_001.txt]",
+  "postSnapshot": "[见 record/snapshots/snapshot_002.txt]",
+  "contextExcerpt": "- WebArea \"TPT\"\n  - text \"\"\n  - textbox \"请输入用户名\" [required, value=\"15700078644\"]\n  - text \"\"\n  - textbox \"请输入密码\" [required]  ← [操作目标]\n  - image \"eye-invisible\"\n  - checkbox \" \" [unchecked]\n  - text \" \"\n  - text \"勾选即表示您同意并接受\"\n  - text \"隐私政策\"",
+  "formStateChanges": {
+    "changed": {
+      "//*[@id='username']": {
+        "from": {
+          "value": ""
+        },
+        "to": {
+          "value": "15700078644"
+        }
+      }
+    },
+    "added": {},
+    "removed": {},
+    "hasChanges": true
+  },
+  "formStateChangeText": "[变化] //*[@id='username']: \"[object Object]\" → \"[object Object]\"",
+  "classification": {
+    "category": "form-input",
+    "elementType": "input",
+    "hints": [
+      "这是一次文本输入操作（由语义归并识别），用户在此元素中输入了 \"[MASKED]\"。请以此值为准描述操作。"
+    ]
+  }
+}

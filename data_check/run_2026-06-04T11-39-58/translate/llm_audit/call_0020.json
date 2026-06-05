@@ -1,0 +1,44 @@
+{
+  "id": "call_0020",
+  "phase": "phase4",
+  "label": "agent txt chunk steps 36~38",
+  "extra": {
+    "stepIndices": [
+      36,
+      37,
+      38
+    ],
+    "round": 3
+  },
+  "startedAt": "2026-06-04T15:05:59.844Z",
+  "finishedAt": "2026-06-04T15:06:02.988Z",
+  "request": {
+    "model": "MiniMax-M2.7-highspeed",
+    "temperature": 0.1,
+    "maxTokens": 2000,
+    "messages": [
+      {
+        "role": "system",
+        "content": "# Role: 资深 Web UI 自动化 Agent 测试用例编写专家\r\n\r\n## Profile\r\n- **Author**: @yuzechao\r\n- **Version**: 2.0\r\n- **Language**: 中文\r\n- **Description**: 将结构化步骤按业务逻辑聚合为供无视觉 Agent 执行的逻辑步骤，输出 XML（非 JSON），由程序渲染为 case_4_agents.txt。\r\n- **背景**: 下游 Agent 仅依赖文本中的 DOM 特征定位。输入为本窗纯文本步骤（动作 + 界面响应）。\r\n\r\n## Goals\r\n- 输出**唯一** `<agent_chunk>` XML，含逻辑步骤与 `totalConsume`。\r\n- 每条 `micro` 含可执行级定位描述（可见文案、placeholder、输入值）。\r\n- `totalConsume` = 各 `logical_step@consume` 之和，且 ≤ 本窗输入步数。\r\n\r\n## Constraints\r\n- **禁止 JSON**；禁止 Markdown 代码围栏。\r\n- **机器只读标签内内容**：核心内容必须写在 XML 标签内；标签外废话将被丢弃。\r\n- **严禁跳步**：弹窗须先写打开再写窗内操作。\r\n- **强 DOM 定位**：禁止「点击某个按钮」等笼统描述。\r\n- 无法形成闭环的尾部步骤可丢弃，不计入 `consume`。\r\n\r\n## Output Format\r\n\r\n```xml\r\n<agent_chunk totalConsume=\"5\">\r\n  <use_case name=\"用例名称\" purpose=\"测试目的\"/>\r\n  <logical_step consume=\"4\">\r\n    <name>完成用户登录</name>\r\n    <micro>在「请输入用户名」输入 15700078644</micro>\r\n    <micro>点击「立即登录」按钮</micro>\r\n  </logical_step>\r\n  <logical_step consume=\"1\">\r\n    <name>打开用户菜单</name>\r\n    <micro>点击右上角用户头像图标</micro>\r\n  </logical_step>\r\n</agent_chunk>\r\n```\r\n\r\n| 节点 | 说明 |\r\n|------|------|\r\n| `agent_chunk@totalConsume` | 本窗消耗底层步骤总数 |\r\n| `use_case` | 首轮必填 name/purpose；后续滑窗可省略 |\r\n| `logical_step@consume` | 该逻辑步骤消耗的底层步数 |\r\n| `micro` | 可执行微观动作，可多行 |\r\n\r\n## Workflows\r\n1. 阅读纯文本步骤流。\r\n2. 划分 logical_step，编写 micro。\r\n3. 统计 consume 之和 → totalConsume。\r\n4. 仅输出 XML，立即结束。\r\n\r\n## Initialization\r\n我是 case→agents 聚合 Agent。请提供本窗纯文本步骤。我只输出 `<agent_chunk>` XML，不含 JSON。"
+      },
+      {
+        "role": "user",
+        "content": "请根据以下按时间顺序排列的底层步骤记录（纯文本），进行业务逻辑聚合并输出 <agent_chunk> XML：\n\n步骤 36:\n- 动作: 点击\"返回确认目标\"按钮\n- 界面响应: 无可见变化\n\n步骤 37:\n- 动作: 点击文本为\"下载模板\"的按钮\n- 界面响应: 无可见变化\n\n步骤 38:\n- 动作: 点击触发文件下载的链接\n- 界面响应: 无可见变化"
+      }
+    ]
+  },
+  "response": {
+    "raw": "<think>\n用户提供了3个底层步骤，需要我聚合成逻辑步骤并输出XML。\n\n分析这3个步骤：\n- 步骤36: 点击\"返回确认目标\"按钮\n- 步骤37: 点击文本为\"下载模板\"的按钮\n- 步骤38: 点击触发文件下载的链接\n\n这3个步骤都是与\"下载模板\"功能相关的操作，可以聚合为一个逻辑步骤：下载模板文件。\n\nconsume = 3（因为有3个底层步骤）\n\n输出XML：\n</think>\n\n```xml\n<agent_chunk totalConsume=\"3\">\n  <use_case name=\"下载模板文件\" purpose=\"获取导入数据模板\"/>\n  <logical_step consume=\"3\">\n    <name>下载导入模板</name>\n    <micro>点击「返回确认目标」按钮</micro>\n    <micro>点击文本为「下载模板」的按钮</micro>\n    <micro>点击触发文件下载的链接</micro>\n  </logical_step>\n</agent_chunk>\n```"
+  },
+  "outcome": {
+    "ok": true,
+    "problems": [],
+    "details": {
+      "useCaseName": "下载模板文件",
+      "agentStepCount": 1,
+      "totalConsume": 3,
+      "safeConsume": 3,
+      "rawConsume": 3
+    }
+  }
+}

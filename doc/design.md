@@ -211,11 +211,11 @@ output/
 
 ### 6.2 翻译工作流（最终形态）
 
-- **Phase 1**：逐条生成结构化步骤（JSON）→ `step_2_structured_steps.json`
-  - 模型输出非严格 JSON 时，执行修复与兜底，不阻塞流程
-  - 每条步骤携带 `intervalFromPreviousMs`（相邻步骤完成间隔，供 Phase 2 窗口边界信号）
-- **Phase 2**：有效步骤瘦身后按固定窗口（默认 20 步）多次归纳，每窗 1 个 Case，合并为 `AI_cases.md`
-- **Phase 4**：基于结构化步骤生成 Agent 文本用例 → `case_4_agents.txt`
+- **Phase 1**：LLM 输出 XML → 解析 → `step_2_structured_steps.json`（下游）；并行落盘 `step_2_structured_steps.xml`（镜像）、`step_2_phase1_llm_raw.xml`（原始批次，排查用）
+  - 解析失败按 `actionBatch[].index` 兜底，不阻塞流程
+  - 每条步骤携带 `intervalFromPreviousMs`（供 Phase 2 `gapTag`）
+- **Phase 2**：纯文本窗口 → Markdown Case + `<case_meta consumeStepCount/>` → `AI_cases.md`（`consume` 经 Node 钳制）
+- **Phase 4**：纯文本窗口 → `<agent_chunk>` XML → 本地渲染 `case_4_agents.txt`
 
 ### 6.2.1 独立翻译启动器（standalone）
 

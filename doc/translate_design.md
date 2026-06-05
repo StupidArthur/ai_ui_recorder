@@ -333,7 +333,7 @@ npm run translate
 
 ### 7.3 Phase 2：归纳用例（固定窗口多次调用）
 
-过滤有效步骤 → 瘦身投影 → 按 `PHASE2_CASE_WINDOW_STEPS` 切窗 → 每窗一次 `callChat`（输出严格 JSON）→ 解析后合并渲染 `AI_cases.md`。  
+过滤有效步骤 → 纯文本窗口 → 按 `PHASE2_CASE_WINDOW_STEPS` 切窗 → 每窗一次 `callChat`（输出 Markdown + `<case_meta/>`）→ `parsePhase2MarkdownResponse` 合并 `AI_cases.md`。  
 任意一窗调用失败则整段 Phase 2 失败（不重试）；重跑翻译即可。
 
 ### 7.4 错误处理策略

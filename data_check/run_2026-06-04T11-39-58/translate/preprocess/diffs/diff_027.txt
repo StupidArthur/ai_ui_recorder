@@ -1,0 +1,9 @@
+-     - radio "对话生成" [checked]
++     - radio "对话生成" [unchecked]
+-     - radio "组态生成" [unchecked]
++     - radio "组态生成" [checked]
++   - image "plus-circle"
++   - text "新增Agent"
+-   - text "离线数据模式"
+-   - text "实时运行模式"
++   - generic "仪表-离线 公用 评估 仪表 -- 模型配置 已完成 推理验证  启用配置 已完成 stop 查看结果   创建时间 2026-04-01 18:35:41 。。。 硫磺回收装置-评估 公用 评估 工艺参数 池承志-0120230747 模型配置"

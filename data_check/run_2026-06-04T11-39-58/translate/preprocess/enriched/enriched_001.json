@@ -1,0 +1,90 @@
+{
+  "index": 1,
+  "type": "input",
+  "originalType": "click",
+  "inputValue": "15700078644",
+  "element": {
+    "tag": "input",
+    "id": "username",
+    "name": null,
+    "type": "text",
+    "text": "",
+    "placeholder": "请输入用户名",
+    "title": null,
+    "href": null,
+    "xpath": "//*[@id='username']",
+    "label": null
+  },
+  "url": "https://tpt.supcon.com/tpt-app/#/login",
+  "title": "TPT",
+  "timestamp": 1780573206937,
+  "formStateDelta": {
+    "//*[@id='root']/div/div/div/div/div[1]/div[2]/div[3]/div/div/label[1]/input": {
+      "value": "on",
+      "checked": true
+    },
+    "//div[normalize-space(.)='密码登录']": {
+      "ariaSelected": "true"
+    },
+    "//*[@id='root']/div/div/div/div/div[1]/div[2]/div[3]/div/div/label[2]/input": {
+      "value": "on",
+      "checked": false
+    },
+    "//div[normalize-space(.)='验证码登录']": {
+      "ariaSelected": "false"
+    },
+    "//*[@id='username']": {
+      "value": ""
+    },
+    "//*[@id='pass64']": {
+      "value": ""
+    },
+    "//*[@id='agree']": {
+      "value": "on",
+      "checked": false
+    }
+  },
+  "snapshotDiff": "-   - textbox \"请输入用户名\" [required]\n+   - textbox \"请输入用户名\" [required, value=\"15700078644\"]",
+  "preSnapshot": "[见 record/snapshots/snapshot_000.txt]",
+  "postSnapshot": "[见 record/snapshots/snapshot_001.txt]",
+  "contextExcerpt": "- WebArea \"TPT\"\n  - text \"\"\n  - textbox \"请输入用户名\" [required]  ← [操作目标]\n  - text \"\"\n  - textbox \"请输入密码\" [required]\n  - image \"eye-invisible\"\n  - checkbox \" \" [unchecked]\n  - text \" \"",
+  "formStateChanges": {
+    "changed": {},
+    "added": {
+      "//*[@id='root']/div/div/div/div/div[1]/div[2]/div[3]/div/div/label[1]/input": {
+        "value": "on",
+        "checked": true
+      },
+      "//div[normalize-space(.)='密码登录']": {
+        "ariaSelected": "true"
+      },
+      "//*[@id='root']/div/div/div/div/div[1]/div[2]/div[3]/div/div/label[2]/input": {
+        "value": "on",
+        "checked": false
+      },
+      "//div[normalize-space(.)='验证码登录']": {
+        "ariaSelected": "false"
+      },
+      "//*[@id='username']": {
+        "value": ""
+      },
+      "//*[@id='pass64']": {
+        "value": ""
+      },
+      "//*[@id='agree']": {
+        "value": "on",
+        "checked": false
+      }
+    },
+    "removed": {},
+    "hasChanges": true
+  },
+  "formStateChangeText": "[新增] //*[@id='root']/div/div/div/div/div[1]/div[2]/div[3]/div/div/label[1]/input: \"[object Object]\"\n[新增] //div[normalize-space(.)='密码登录']: \"[object Object]\"\n[新增] //*[@id='root']/div/div/div/div/div[1]/div[2]/div[3]/div/div/label[2]/input: \"[object Object]\"\n[新增] //div[normalize-space(.)='验证码登录']: \"[object Object]\"\n[新增] //*[@id='username']: \"[object Object]\"\n[新增] //*[@id='pass64']: \"[object Object]\"\n[新增] //*[@id='agree']: \"[object Object]\"",
+  "classification": {
+    "category": "form-input",
+    "elementType": "input",
+    "hints": [
+      "这是一次文本输入操作（由语义归并识别），用户在此元素中输入了 \"15700078644\"。请以此值为准描述操作。"
+    ]
+  }
+}

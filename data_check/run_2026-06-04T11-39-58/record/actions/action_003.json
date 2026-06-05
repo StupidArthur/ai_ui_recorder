@@ -1,0 +1,45 @@
+{
+  "index": 3,
+  "type": "click",
+  "element": {
+    "tag": "span",
+    "id": null,
+    "name": null,
+    "type": null,
+    "text": "",
+    "placeholder": null,
+    "title": null,
+    "href": null,
+    "xpath": "//*[@id='root']/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[4]/form[1]/div[3]/div[1]/div[1]/div[1]/div[1]/div[1]/label[1]/span[1]/span[1]",
+    "label": null
+  },
+  "url": "https://tpt.supcon.com/tpt-app/#/login",
+  "title": "TPT",
+  "timestamp": 1780573217804,
+  "formStateDelta": {
+    "//*[@id='root']/div/div/div/div/div[1]/div[2]/div[3]/div/div/label[1]/input": {
+      "value": "on",
+      "checked": true
+    },
+    "//div[normalize-space(.)='密码登录']": {
+      "ariaSelected": "true"
+    },
+    "//*[@id='root']/div/div/div/div/div[1]/div[2]/div[3]/div/div/label[2]/input": {
+      "value": "on",
+      "checked": false
+    },
+    "//div[normalize-space(.)='验证码登录']": {
+      "ariaSelected": "false"
+    },
+    "//*[@id='username']": {
+      "value": "15700078644"
+    },
+    "//*[@id='pass64']": {
+      "value": "Supcon@1304"
+    },
+    "//*[@id='agree']": {
+      "value": "on",
+      "checked": false
+    }
+  }
+}

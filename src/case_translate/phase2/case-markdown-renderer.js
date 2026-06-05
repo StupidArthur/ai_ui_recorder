@@ -1,124 +1,79 @@
 /**
  * case-markdown-renderer.js
  *
- * 将多段「单窗口单 Case」的 JSON 结果合并为 AI_cases.md 文档。
- * 同时提供 LLM 原始 JSON 的解析与校验兜底。
+ * Phase 2：解析 LLM Markdown + case_meta，合并为 AI_cases.md。
  */
+
+import { cleanMarkdownFence } from '../ai-client.js';
+import { clampWindowConsume, preprocessLlmXmlOutput } from '../xml-parse-utils.js';
 
 /**
- * 从文本中提取首个 JSON 对象子串
+ * 解析 Phase 2 单窗口 Markdown 回复
  *
- * @param {string} text
- * @returns {string|null}
+ * @param {string} rawReply
+ * @param {Array<number>} expectedIndices - 当前窗口有序 index 列表
+ * @returns {{ markdownBlock: string, consumeStepCount: number, rawConsume: number|null, clampReason: string|null, coveredActionIndices: number[] }}
  */
-function extractFirstJsonObject(text) {
-  const start = text.indexOf('{');
-  const end = text.lastIndexOf('}');
-  if (start < 0 || end <= start) return null;
-  return text.slice(start, end + 1);
-}
+export function parsePhase2MarkdownResponse(rawReply, expectedIndices) {
+  const { text: cleaned } = preprocessLlmXmlOutput(cleanMarkdownFence(String(rawReply || '')));
 
-/**
- * 解析 Phase 2 单窗口返回的 JSON（仅一个 Case）
- *
- * @param {string} rawReply - 已去除 markdown 围栏的文本
- * @param {Array<number>} expectedIndices - 当前窗口内原始 action index 列表（有序）
- * @param {Array<Object>} [slimWindow] - 当前窗口瘦身步骤（与 expectedIndices 顺序一致），用于回填 operation/uiChange
- * @returns {{ title: string, summary: string, coveredActionIndices: number[], consumeStepCount: number, rows: Array<{ order: number, operation: string, uiChange: string }> }}
- */
-export function parseSingleCaseJsonResponse(rawReply, expectedIndices, slimWindow = []) {
-  const normalized = String(rawReply || '').trim();
-  let parsed;
-  try {
-    parsed = JSON.parse(normalized);
-  } catch {
-    const extracted = extractFirstJsonObject(normalized);
-    if (!extracted) {
-      throw new Error('[Phase 2] 单窗口返回不是合法 JSON');
-    }
-    parsed = JSON.parse(extracted);
+  const metaPat = /<case_meta[^>]*\bconsumeStepCount\s*=\s*["']?(\d+)["']?[^>]*\/?>/i;
+  const metaMatch = cleaned.match(metaPat);
+
+  let rawConsume = null;
+  if (metaMatch) {
+    rawConsume = parseInt(metaMatch[1], 10);
   }
 
-  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
-    throw new Error('[Phase 2] 单窗口 JSON 根须为对象');
+  let rawLastIndex = null;
+  const lastIndexPat = /\blastIndex\s*=\s*["']?(\d+)["']?/i;
+  const lastIndexInMeta = metaMatch ? metaMatch[0].match(lastIndexPat) : cleaned.match(lastIndexPat);
+  if (lastIndexInMeta) {
+    rawLastIndex = parseInt(lastIndexInMeta[1], 10);
   }
 
-  const title = String(parsed.title || parsed.caseTitle || '未命名用例').trim() || '未命名用例';
-  const summary = String(parsed.summary || '').trim();
+  let markdownBlock = cleaned.replace(metaPat, '').trim();
+  if (!markdownBlock) {
+    markdownBlock = '# 测试用例：未命名用例\n\n（模型未返回 Markdown 正文）';
+  }
 
-  let covered = Array.isArray(parsed.coveredActionIndices)
-    ? parsed.coveredActionIndices.map((n) => Number(n)).filter(Number.isFinite)
-    : [];
-  const consumeFromField = Number(parsed.consumeStepCount);
+  const indices = expectedIndices || [];
+  const winLen = indices.length;
+  let { safeConsume, rawConsume: rawVal, clampReason } = clampWindowConsume(
+    rawConsume,
+    winLen,
+  );
 
-  // 合法覆盖集：expectedIndices 的「前缀连续子数组」
-  // 例如 expected=[11,12,13,14]，合法 covered=[11],[11,12],[11,12,13]...
-  const isPrefixCovered = (() => {
-    if (covered.length <= 0 || covered.length > expectedIndices.length) return false;
-    for (let i = 0; i < covered.length; i++) {
-      if (covered[i] !== expectedIndices[i]) return false;
-    }
-    return true;
-  })();
-
-  if (!isPrefixCovered) {
-    // 次优兜底：允许模型仅给 consumeStepCount
-    if (Number.isInteger(consumeFromField) && consumeFromField >= 1 && consumeFromField <= expectedIndices.length) {
-      covered = expectedIndices.slice(0, consumeFromField);
-    } else if (Array.isArray(parsed.steps) && parsed.steps.length >= 1 && parsed.steps.length <= expectedIndices.length) {
-      covered = expectedIndices.slice(0, parsed.steps.length);
-    } else {
-      covered = [...expectedIndices];
+  if (Number.isInteger(rawLastIndex) && rawLastIndex > 0 && winLen > 0) {
+    const pos = indices.indexOf(rawLastIndex);
+    if (pos >= 0) {
+      const anchoredConsume = pos + 1;
+      const tailAtConsume = indices[safeConsume - 1];
+      if (tailAtConsume !== rawLastIndex) {
+        safeConsume = anchoredConsume;
+        const detail = `consume/lastIndex 不一致: consume→index ${tailAtConsume ?? '?'}, lastIndex=${rawLastIndex}, 已按 lastIndex 锚定为 ${anchoredConsume} 步`;
+        clampReason = clampReason ? `${clampReason}; ${detail}` : detail;
+      }
     }
   }
 
-  /** @type {Array<{ actionIndex?: number, operation?: string, uiChange?: string }>} */
-  const stepRows = Array.isArray(parsed.steps) ? parsed.steps : [];
-
-  const slimByIndex = new Map();
-  for (const s of slimWindow || []) {
-    if (s && Number.isFinite(s.index)) slimByIndex.set(s.index, s);
-  }
-
-  const rows = [];
-  let order = 1;
-  let pos = 0;
-  for (const idx of covered) {
-    let match = stepRows.find((r) => Number(r.actionIndex) === idx);
-    if (!match && stepRows[pos]) {
-      match = stepRows[pos];
-    }
-    pos += 1;
-
-    const slim = slimByIndex.get(idx);
-    const fallbackOp = slim ? String(slim.description || '').trim() : '';
-    const fallbackUi = slim ? String(slim.uiChange || '').trim() : '';
-
-    const operation = match && String(match.operation || '').trim()
-      ? String(match.operation).trim()
-      : (fallbackOp || `操作 ${idx}`);
-    const uiChange = match && String(match.uiChange || '').trim()
-      ? String(match.uiChange).trim()
-      : (fallbackUi || '无可见变化');
-
-    rows.push({ order: order++, operation, uiChange });
-  }
+  const coveredActionIndices = indices.slice(0, safeConsume);
 
   return {
-    title,
-    summary,
-    coveredActionIndices: covered,
-    consumeStepCount: covered.length,
-    rows,
+    markdownBlock,
+    consumeStepCount: safeConsume,
+    rawConsume: rawVal,
+    clampReason,
+    coveredActionIndices,
   };
 }
 
 /**
- * 将多个单 Case 块渲染为完整 Markdown（与历史 AI_cases.md 表格风格一致）
+ * 将多个 Case Markdown 块合并为 AI_cases.md
  *
- * @param {Array<{ title: string, summary?: string, rows: Array<{ order: number, operation: string, uiChange: string }> }>} cases
+ * @param {Array<{ markdownBlock?: string, title?: string, summary?: string, rows?: Array<{ order: number, operation: string, uiChange: string }> }>} cases
  * @param {Object} [options]
- * @param {string} [options.documentTitle] - 文档总标题
+ * @param {string} [options.documentTitle]
  * @returns {string}
  */
 export function renderCasesMarkdownDocument(cases, options = {}) {
@@ -128,30 +83,35 @@ export function renderCasesMarkdownDocument(cases, options = {}) {
   let md = `# ${documentTitle}\n\n`;
   if (list.length === 0) {
     md += '> 无有效步骤（均为 noise/skip/fallback 等），未生成 Case。\n';
-    return md;
-  }
+  } else {
+    list.forEach((c, i) => {
+      if (c.markdownBlock) {
+        if (i > 0) md += '\n\n---\n\n';
+        md += String(c.markdownBlock).trim();
+        return;
+      }
 
-  list.forEach((c, i) => {
-    const caseNo = i + 1;
-    md += `## Case ${caseNo}: ${c.title}\n`;
-    if (c.summary) {
-      md += `\n> ${c.summary}\n\n`;
-    }
-    md += '| 步骤 | 操作 | UI 变化 |\n';
-    md += '|------|------|---------|\n';
-    for (const r of c.rows || []) {
-      const op = escapeTableCell(r.operation);
-      const ui = escapeTableCell(r.uiChange);
-      md += `| ${r.order} | ${op} | ${ui} |\n`;
-    }
-    md += '\n';
-  });
+      const caseNo = i + 1;
+      md += `## Case ${caseNo}: ${c.title || '未命名用例'}\n`;
+      if (c.summary) {
+        md += `\n> ${c.summary}\n\n`;
+      }
+      md += '| 步骤 | 操作 | UI 变化 |\n';
+      md += '|------|------|---------|\n';
+      for (const r of c.rows || []) {
+        const op = escapeTableCell(r.operation);
+        const ui = escapeTableCell(r.uiChange);
+        md += `| ${r.order} | ${op} | ${ui} |\n`;
+      }
+      md += '\n';
+    });
+  }
 
   return md.trimEnd() + '\n';
 }
 
 /**
- * Markdown 表格单元格转义（管道符、换行）
+ * Markdown 表格单元格转义
  *
  * @param {string} text
  * @returns {string}

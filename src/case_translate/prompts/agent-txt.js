@@ -17,13 +17,13 @@ export function buildAgentTxtSystemPrompt() {
 }
 
 /**
- * 构建 Phase 4 Agent TXT 的 User Prompt
+ * 构建 Phase 4 Agent TXT 的 User Prompt（纯文本步骤流）
  *
- * @param {string} stepsJson - 结构化步骤的 JSON 字符串
+ * @param {string} stepsPlainText - 本窗步骤纯文本
  * @returns {string}
  */
-export function buildAgentTxtUserPrompt(stepsJson) {
-  return `请根据以下按时间顺序排列的结构化步骤数据，进行业务逻辑聚合：
+export function buildAgentTxtUserPrompt(stepsPlainText) {
+  return `请根据以下按时间顺序排列的底层步骤记录（纯文本），进行业务逻辑聚合并输出 <agent_chunk> XML：
 
-${stepsJson}`;
+${stepsPlainText}`;
 }

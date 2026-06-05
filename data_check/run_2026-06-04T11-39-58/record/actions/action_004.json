@@ -1,0 +1,20 @@
+{
+  "index": 4,
+  "type": "click",
+  "element": {
+    "tag": "input",
+    "id": "agree",
+    "name": null,
+    "type": "checkbox",
+    "text": "",
+    "placeholder": null,
+    "title": null,
+    "href": null,
+    "xpath": "//*[@id='agree']",
+    "label": null
+  },
+  "url": "https://tpt.supcon.com/tpt-app/#/login",
+  "title": "TPT",
+  "timestamp": 1780573217805,
+  "formStateDelta": null
+}

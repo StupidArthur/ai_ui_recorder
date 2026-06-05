@@ -1,0 +1,762 @@
+[
+  {
+    "index": 1,
+    "status": "normal",
+    "description": "在「用户名」输入框中输入手机号 15700078644",
+    "uiChange": "输入框值从空变为 15700078644，表单状态已更新",
+    "page": "TPT",
+    "basis": [
+      "xml:action",
+      "xml:observation"
+    ],
+    "actionKind": "input",
+    "target": "请输入用户名",
+    "inputText": "15700078644",
+    "key": "",
+    "assertText": "",
+    "confidence": 0.7,
+    "intervalFromPreviousMs": null,
+    "url": "https://tpt.supcon.com/tpt-app/#/login",
+    "sourceType": "input"
+  },
+  {
+    "index": 2,
+    "status": "normal",
+    "description": "在「密码」输入框中输入密码",
+    "uiChange": "输入框值从空变为掩码显示，表单状态已更新",
+    "page": "TPT",
+    "basis": [
+      "xml:action",
+      "xml:observation"
+    ],
+    "actionKind": "input",
+    "target": "请输入密码",
+    "inputText": "[MASKED]",
+    "key": "",
+    "assertText": "",
+    "confidence": 0.7,
+    "intervalFromPreviousMs": 4327,
+    "url": "https://tpt.supcon.com/tpt-app/#/login",
+    "sourceType": "input"
+  },
+  {
+    "index": 3,
+    "status": "normal",
+    "description": "点击「用户协议」复选框",
+    "uiChange": "复选框状态从未选中变为已选中，表单状态已更新",
+    "page": "TPT",
+    "basis": [
+      "xml:action",
+      "xml:observation"
+    ],
+    "actionKind": "click",
+    "target": "span",
+    "inputText": "",
+    "key": "",
+    "assertText": "",
+    "confidence": 0.7,
+    "intervalFromPreviousMs": 6540,
+    "url": "https://tpt.supcon.com/tpt-app/#/login",
+    "sourceType": "click"
+  },
+  {
+    "index": 4,
+    "status": "normal",
+    "description": "点击「同意协议」复选框",
+    "uiChange": "复选框从未选中变为已选中，表单状态已更新",
+    "page": "TPT",
+    "basis": [
+      "xml:action",
+      "xml:observation"
+    ],
+    "actionKind": "click",
+    "target": "agree",
+    "inputText": "",
+    "key": "",
+    "assertText": "",
+    "confidence": 0.7,
+    "intervalFromPreviousMs": 1,
+    "url": "https://tpt.supcon.com/tpt-app/#/login",
+    "sourceType": "click"
+  },
+  {
+    "index": 5,
+    "status": "normal",
+    "description": "点击「立即登录」按钮",
+    "uiChange": "登录页跳转至工作台页面，左侧显示「我的对话」「Agent」「我的应用」等菜单，顶部显示用户名「余泽超」及「黄金会员」标签，主体区域展示多个应用卡片，底部出现「积分签到」「签到成功」提示",
+    "page": "TPT",
+    "basis": [
+      "xml:action",
+      "xml:observation"
+    ],
+    "actionKind": "click",
+    "target": "立即登录",
+    "inputText": "",
+    "key": "",
+    "assertText": "",
+    "confidence": 0.7,
+    "intervalFromPreviousMs": 546,
+    "url": "https://tpt.supcon.com/tpt-app/#/login",
+    "sourceType": "click"
+  },
+  {
+    "index": 6,
+    "status": "normal",
+    "description": "点击页面右上角用户头像图标",
+    "uiChange": "页面右侧弹出用户菜单，显示「余泽超」「黄金会员」「偏好设置」「系统管理」「反馈记录」「通知公告」「退出登录」等选项",
+    "page": "TPT",
+    "basis": [
+      "xml:action",
+      "xml:observation"
+    ],
+    "actionKind": "click",
+    "target": "img",
+    "inputText": "",
+    "key": "",
+    "assertText": "",
+    "confidence": 0.7,
+    "intervalFromPreviousMs": 5880,
+    "url": "https://tpt.supcon.com/tpt-app/#/home/chat/main?TptSaasUserTenantryId=ATL43NW8",
+    "sourceType": "click"
+  },
+  {
+    "index": 7,
+    "status": "normal",
+    "description": "点击用户菜单中的「偏好设置」选项",
+    "uiChange": "页面弹出「偏好设置」弹窗，显示外观（浅色/深色）、模式（简洁模式/常规模式/详细模式）、字体大小（20/小号/默认/大号/超大号）、首页显示内容（案例介绍/推荐问题）、Agent设置等配置项",
+    "page": "TPT",
+    "basis": [
+      "xml:action",
+      "xml:observation"
+    ],
+    "actionKind": "click",
+    "target": "偏好设置",
+    "inputText": "",
+    "key": "",
+    "assertText": "",
+    "confidence": 0.7,
+    "intervalFromPreviousMs": 1779,
+    "url": "https://tpt.supcon.com/tpt-app/#/home/chat/main?TptSaasUserTenantryId=ATL43NW8",
+    "sourceType": "click"
+  },
+  {
+    "index": 8,
+    "status": "normal",
+    "description": "在偏好设置弹窗中点击「详细模式」选项",
+    "uiChange": "模式选择从「简洁模式 常规模式 使用中 详细模式」变为「简洁模式 常规模式 详细模式 使用中」，当前使用模式切换为详细模式；推荐问题列表内容发生更新",
+    "page": "TPT",
+    "basis": [
+      "xml:action",
+      "xml:observation"
+    ],
+    "actionKind": "click",
+    "target": "div",
+    "inputText": "",
+    "key": "",
+    "assertText": "",
+    "confidence": 0.7,
+    "intervalFromPreviousMs": 1282,
+    "url": "https://tpt.supcon.com/tpt-app/#/home/chat/main?TptSaasUserTenantryId=ATL43NW8",
+    "sourceType": "click"
+  },
+  {
+    "index": 9,
+    "status": "normal",
+    "description": "点击「推荐问题」开关以启用该功能",
+    "uiChange": "「推荐问题」开关从未选中变为已选中状态，首页显示内容配置已更新",
+    "page": "TPT",
+    "basis": [
+      "xml:action",
+      "xml:observation"
+    ],
+    "actionKind": "click",
+    "target": "span",
+    "inputText": "",
+    "key": "",
+    "assertText": "",
+    "confidence": 0.7,
+    "intervalFromPreviousMs": 1139,
+    "url": "https://tpt.supcon.com/tpt-app/#/home/chat/main?TptSaasUserTenantryId=ATL43NW8",
+    "sourceType": "click"
+  },
+  {
+    "index": 10,
+    "status": "normal",
+    "description": "在偏好设置弹窗中点击「推荐问题」开关以启用该功能",
+    "uiChange": "「推荐问题」开关从未选中变为已选中状态；推荐问题列表内容发生更新，出现新的推荐问题选项",
+    "page": "TPT",
+    "basis": [
+      "xml:action",
+      "xml:observation"
+    ],
+    "actionKind": "click",
+    "target": "span",
+    "inputText": "",
+    "key": "",
+    "assertText": "",
+    "confidence": 0.7,
+    "intervalFromPreviousMs": 893,
+    "url": "https://tpt.supcon.com/tpt-app/#/home/chat/main?TptSaasUserTenantryId=ATL43NW8",
+    "sourceType": "click"
+  },
+  {
+    "index": 11,
+    "status": "normal",
+    "description": "点击「深色」外观选项",
+    "uiChange": "无可见变化",
+    "page": "TPT",
+    "basis": [
+      "xml:action",
+      "xml:observation"
+    ],
+    "actionKind": "click",
+    "target": "深色",
+    "inputText": "",
+    "key": "",
+    "assertText": "",
+    "confidence": 0.7,
+    "intervalFromPreviousMs": 1238,
+    "url": "https://tpt.supcon.com/tpt-app/#/home/chat/main?TptSaasUserTenantryId=ATL43NW8",
+    "sourceType": "click"
+  },
+  {
+    "index": 12,
+    "status": "normal",
+    "description": "在偏好设置弹窗中点击「深色」单选按钮以切换外观主题",
+    "uiChange": "外观主题从「浅色」切换为「深色」；推荐问题列表内容发生更新",
+    "page": "TPT",
+    "basis": [
+      "xml:action",
+      "xml:observation"
+    ],
+    "actionKind": "click",
+    "target": "深色",
+    "inputText": "",
+    "key": "",
+    "assertText": "",
+    "confidence": 0.7,
+    "intervalFromPreviousMs": 1,
+    "url": "https://tpt.supcon.com/tpt-app/#/home/chat/main?TptSaasUserTenantryId=ATL43NW8",
+    "sourceType": "click"
+  },
+  {
+    "index": 13,
+    "status": "normal",
+    "description": "点击偏好设置弹窗中的某个按钮",
+    "uiChange": "偏好设置弹窗从页面中移除；表单状态中弹窗内元素状态保持不变",
+    "page": "TPT",
+    "basis": [
+      "xml:action",
+      "xml:observation"
+    ],
+    "actionKind": "click",
+    "target": "span",
+    "inputText": "",
+    "key": "",
+    "assertText": "",
+    "confidence": 0.7,
+    "intervalFromPreviousMs": 1603,
+    "url": "https://tpt.supcon.com/tpt-app/#/home/chat/main?TptSaasUserTenantryId=ATL43NW8",
+    "sourceType": "click"
+  },
+  {
+    "index": 14,
+    "status": "normal",
+    "description": "点击头像区域中的第二张图片",
+    "uiChange": "页面右侧出现用户信息区域，显示「余泽超」「黄金会员」标签；侧边栏出现「偏好设置」「系统管理」「反馈记录」「通知公告」「退出登录」菜单选项",
+    "page": "TPT",
+    "basis": [
+      "xml:action",
+      "xml:observation"
+    ],
+    "actionKind": "click",
+    "target": "img",
+    "inputText": "",
+    "key": "",
+    "assertText": "",
+    "confidence": 0.7,
+    "intervalFromPreviousMs": 1651,
+    "url": "https://tpt.supcon.com/tpt-app/#/home/chat/main?TptSaasUserTenantryId=ATL43NW8",
+    "sourceType": "click"
+  },
+  {
+    "index": 15,
+    "status": "normal",
+    "description": "点击侧边栏中的「偏好设置」文本",
+    "uiChange": "偏好设置弹窗重新出现，显示深色主题、模式设置、字体大小滑块及多个开关选项",
+    "page": "TPT",
+    "basis": [
+      "xml:action",
+      "xml:observation"
+    ],
+    "actionKind": "click",
+    "target": "偏好设置",
+    "inputText": "",
+    "key": "",
+    "assertText": "",
+    "confidence": 0.7,
+    "intervalFromPreviousMs": 1335,
+    "url": "https://tpt.supcon.com/tpt-app/#/home/chat/main?TptSaasUserTenantryId=ATL43NW8",
+    "sourceType": "click"
+  },
+  {
+    "index": 16,
+    "status": "normal",
+    "description": "点击「恢复默认设置」按钮",
+    "uiChange": "主题从深色切换为浅色；模式segmented control中「常规模式」变为使用中状态；多个开关选项均恢复为默认关闭状态",
+    "page": "TPT",
+    "basis": [
+      "xml:action",
+      "xml:observation"
+    ],
+    "actionKind": "click",
+    "target": "恢复默认设置",
+    "inputText": "",
+    "key": "",
+    "assertText": "",
+    "confidence": 0.7,
+    "intervalFromPreviousMs": 2010,
+    "url": "https://tpt.supcon.com/tpt-app/#/home/chat/main?TptSaasUserTenantryId=ATL43NW8",
+    "sourceType": "click"
+  },
+  {
+    "index": 17,
+    "status": "normal",
+    "description": "点击模式选项「常规模式」",
+    "uiChange": "首页推荐问题列表内容更新；segmented control中「常规模式」显示为使用中状态",
+    "page": "TPT",
+    "basis": [
+      "xml:action",
+      "xml:observation"
+    ],
+    "actionKind": "click",
+    "target": "div",
+    "inputText": "",
+    "key": "",
+    "assertText": "",
+    "confidence": 0.7,
+    "intervalFromPreviousMs": 2468,
+    "url": "https://tpt.supcon.com/tpt-app/#/home/chat/main?TptSaasUserTenantryId=ATL43NW8",
+    "sourceType": "click"
+  },
+  {
+    "index": 18,
+    "status": "normal",
+    "description": "点击某个开关选项",
+    "uiChange": "首页显示内容区域出现案例介绍入口，显示「点击使用工业Agent」「查看更多」及多个Agent选项卡片",
+    "page": "TPT",
+    "basis": [
+      "xml:action",
+      "xml:observation"
+    ],
+    "actionKind": "click",
+    "target": "span",
+    "inputText": "",
+    "key": "",
+    "assertText": "",
+    "confidence": 0.7,
+    "intervalFromPreviousMs": 710,
+    "url": "https://tpt.supcon.com/tpt-app/#/home/chat/main?TptSaasUserTenantryId=ATL43NW8",
+    "sourceType": "click"
+  },
+  {
+    "index": 19,
+    "status": "normal",
+    "description": "点击关闭偏好设置面板的按钮",
+    "uiChange": "偏好设置面板关闭，首页内容恢复显示",
+    "page": "TPT",
+    "basis": [
+      "xml:action",
+      "xml:observation"
+    ],
+    "actionKind": "click",
+    "target": "button",
+    "inputText": "",
+    "key": "",
+    "assertText": "",
+    "confidence": 0.7,
+    "intervalFromPreviousMs": 2266,
+    "url": "https://tpt.supcon.com/tpt-app/#/home/chat/main?TptSaasUserTenantryId=ATL43NW8",
+    "sourceType": "click"
+  },
+  {
+    "index": 20,
+    "status": "normal",
+    "description": "点击「专家模式」选项",
+    "uiChange": "页面左侧显示多个专家Agent选项卡片，包括：AI操作优化专家、AI复杂控制专家、AI回路整定专家、AI生产参数预测专家、AI生产异常检测专家、预测控制专家、回路整定专家、能耗瓶颈分析专家、AI换热网络优化专家、工业知识专家、报表分析专家、智能问数专家",
+    "page": "TPT",
+    "basis": [
+      "xml:action",
+      "xml:observation"
+    ],
+    "actionKind": "click",
+    "target": "专家模式",
+    "inputText": "",
+    "key": "",
+    "assertText": "",
+    "confidence": 0.7,
+    "intervalFromPreviousMs": 3735,
+    "url": "https://tpt.supcon.com/tpt-app/#/home/chat/main?TptSaasUserTenantryId=ATL43NW8",
+    "sourceType": "click"
+  },
+  {
+    "index": 21,
+    "status": "normal",
+    "description": "点击「智能问数与结果分析」Agent选项",
+    "uiChange": "页面切换至智能问数专家模式，左侧专家选项卡片收起，输入框变为可输入状态，显示标题「智能问数专家」",
+    "page": "TPT",
+    "basis": [
+      "xml:action",
+      "xml:observation"
+    ],
+    "actionKind": "click",
+    "target": "智能问数与结果分析",
+    "inputText": "",
+    "key": "",
+    "assertText": "",
+    "confidence": 0.7,
+    "intervalFromPreviousMs": 2770,
+    "url": "https://tpt.supcon.com/tpt-app/#/home/chat/main?TptSaasUserTenantryId=ATL43NW8",
+    "sourceType": "click"
+  },
+  {
+    "index": 22,
+    "status": "normal",
+    "description": "在「输入内容进行提问」输入框中输入文本「有哪些可以问」",
+    "uiChange": "输入框内容更新为「有哪些可以问」，表单状态已更新",
+    "page": "TPT",
+    "basis": [
+      "xml:action",
+      "xml:observation"
+    ],
+    "actionKind": "input",
+    "target": "输入内容进行提问",
+    "inputText": "有哪些可以问",
+    "key": "",
+    "assertText": "",
+    "confidence": 0.7,
+    "intervalFromPreviousMs": 1895,
+    "url": "https://tpt.supcon.com/tpt-app/#/home/chat/main?TptSaasUserTenantryId=ATL43NW8",
+    "sourceType": "input"
+  },
+  {
+    "index": 23,
+    "status": "normal",
+    "description": "点击发送按钮（SendOutlined图标）",
+    "uiChange": "页面创建新对话项「有哪些可以问」，AI助手返回智能问数专家可咨询的三类问题说明：能耗与物耗指标查询、设备位号数据查询、系统与规则咨询",
+    "page": "TPT",
+    "basis": [
+      "xml:action",
+      "xml:observation"
+    ],
+    "actionKind": "click",
+    "target": "SendOutlined",
+    "inputText": "",
+    "key": "",
+    "assertText": "",
+    "confidence": 0.7,
+    "intervalFromPreviousMs": 7351,
+    "url": "https://tpt.supcon.com/tpt-app/#/home/chat/main?TptSaasUserTenantryId=ATL43NW8",
+    "sourceType": "click"
+  },
+  {
+    "index": 24,
+    "status": "normal",
+    "description": "点击AI回复下方的点赞按钮",
+    "uiChange": "点赞图标变为打勾确认状态，显示提示文本「感谢您的赞美与肯定」",
+    "page": "TPT",
+    "basis": [
+      "xml:action",
+      "xml:observation"
+    ],
+    "actionKind": "click",
+    "target": "img",
+    "inputText": "",
+    "key": "",
+    "assertText": "",
+    "confidence": 0.7,
+    "intervalFromPreviousMs": 6802,
+    "url": "https://tpt.supcon.com/tpt-app/#/home/chat/main?TptSaasUserTenantryId=ATL43NW8",
+    "sourceType": "click"
+  },
+  {
+    "index": 25,
+    "status": "normal",
+    "description": "点击左侧导航栏中的会话记录项或Agent管理入口",
+    "uiChange": "页面从对话聊天视图切换至Agent管理视图，出现分段控制器（对话生成/组态生成）、搜索Agent输入框、导入Agent按钮及离线/实时模式切换功能",
+    "page": "TPT",
+    "basis": [
+      "xml:action",
+      "xml:observation"
+    ],
+    "actionKind": "click",
+    "target": "img",
+    "inputText": "",
+    "key": "",
+    "assertText": "",
+    "confidence": 0.7,
+    "intervalFromPreviousMs": 2155,
+    "url": "https://tpt.supcon.com/tpt-app/#/home/chat/main?TptSaasUserTenantryId=ATL43NW8",
+    "sourceType": "click"
+  },
+  {
+    "index": 26,
+    "status": "normal",
+    "description": "点击可见文本为「组态生成」的分段控件标签",
+    "uiChange": "无可见变化",
+    "page": "TPT",
+    "basis": [
+      "xml:action",
+      "xml:observation"
+    ],
+    "actionKind": "click",
+    "target": "组态生成",
+    "inputText": "",
+    "key": "",
+    "assertText": "",
+    "confidence": 0.7,
+    "intervalFromPreviousMs": 1445,
+    "url": "https://tpt.supcon.com/tpt-app/#/home/chat/agent",
+    "sourceType": "click"
+  },
+  {
+    "index": 27,
+    "status": "normal",
+    "description": "点击「组态生成」单选按钮",
+    "uiChange": "分段控制器选中状态切换：对话生成取消选中，组态生成变为选中；页面显示Agent卡片列表，包含「仪表-离线」等预设Agent项，出现新增Agent入口及启用配置操作按钮",
+    "page": "TPT",
+    "basis": [
+      "xml:action",
+      "xml:observation"
+    ],
+    "actionKind": "click",
+    "target": "组态生成",
+    "inputText": "",
+    "key": "",
+    "assertText": "",
+    "confidence": 0.7,
+    "intervalFromPreviousMs": 2,
+    "url": "https://tpt.supcon.com/tpt-app/#/home/chat/agent",
+    "sourceType": "click"
+  },
+  {
+    "index": 28,
+    "status": "normal",
+    "description": "点击分类筛选区域中可见文本为「控制」的标签",
+    "uiChange": "列表视图切换：从原仪表、硫磺回收装置等卡片更新为显示「全部/MPC/AI」标签，并出现「uu私有控制MPC」和「ai1私有控制MPC」两个Agent卡片项",
+    "page": "TPT",
+    "basis": [
+      "xml:action",
+      "xml:observation"
+    ],
+    "actionKind": "click",
+    "target": "控制",
+    "inputText": "",
+    "key": "",
+    "assertText": "",
+    "confidence": 0.7,
+    "intervalFromPreviousMs": 3179,
+    "url": "https://tpt.supcon.com/tpt-app/#/home/chat/agent?agentType=all&agentShowType=custom&agentShowChildType=default&agentShowScene=all",
+    "sourceType": "click"
+  },
+  {
+    "index": 29,
+    "status": "normal",
+    "description": "点击可见文本为「AI」的分类标签",
+    "uiChange": "列表视图再次筛选：MPC类型卡片消失，显示「AI_Control_1」AI控制类Agent卡片，状态显示「模型配置失败」「推理验证」「启用配置未完成」",
+    "page": "TPT",
+    "basis": [
+      "xml:action",
+      "xml:observation"
+    ],
+    "actionKind": "click",
+    "target": "AI",
+    "inputText": "",
+    "key": "",
+    "assertText": "",
+    "confidence": 0.7,
+    "intervalFromPreviousMs": 2129,
+    "url": "https://tpt.supcon.com/tpt-app/#/home/chat/agent?agentType=3&agentShowType=custom&agentShowChildType=default&agentShowScene=all",
+    "sourceType": "click"
+  },
+  {
+    "index": 30,
+    "status": "normal",
+    "description": "点击可见文本为「新增Agent」的按钮",
+    "uiChange": "页面弹出「创建Agent」模态对话框，包含Agent名称、Agent描述、Agent类型（控制）、对应装置、是否有模型（默认否）、数据来源（默认数据文件上传）、是否需要引导上传数据（默认否）、保存目录（TPT智能体）等表单项，以及取消和确认按钮",
+    "page": "TPT",
+    "basis": [
+      "xml:action",
+      "xml:observation"
+    ],
+    "actionKind": "click",
+    "target": "新增Agent",
+    "inputText": "",
+    "key": "",
+    "assertText": "",
+    "confidence": 0.7,
+    "intervalFromPreviousMs": 1740,
+    "url": "https://tpt.supcon.com/tpt-app/#/home/chat/agent?agentType=3&agentShowType=custom&agentShowChildType=default&agentShowScene=control-spc",
+    "sourceType": "click"
+  },
+  {
+    "index": 31,
+    "status": "normal",
+    "description": "在Agent名称输入框中输入\"ai_demo\"",
+    "uiChange": "输入框已填入值\"ai_demo\"，表单状态更新",
+    "page": "TPT",
+    "basis": [
+      "xml:action",
+      "xml:observation"
+    ],
+    "actionKind": "input",
+    "target": "输入Agent 名称",
+    "inputText": "ai_demo",
+    "key": "",
+    "assertText": "",
+    "confidence": 0.7,
+    "intervalFromPreviousMs": 969,
+    "url": "https://tpt.supcon.com/tpt-app/#/home/chat/agent?agentType=3&agentShowType=custom&agentShowChildType=default&agentShowScene=control-spc",
+    "sourceType": "input"
+  },
+  {
+    "index": 32,
+    "status": "normal",
+    "description": "在对应装置下拉框中选择\"ai_equip\"",
+    "uiChange": "对应装置字段已选为\"ai_equip\"，表单状态更新",
+    "page": "TPT",
+    "basis": [
+      "xml:action",
+      "xml:observation"
+    ],
+    "actionKind": "input",
+    "target": "rc_select_1",
+    "inputText": "ai_equip",
+    "key": "",
+    "assertText": "",
+    "confidence": 0.7,
+    "intervalFromPreviousMs": 4537,
+    "url": "https://tpt.supcon.com/tpt-app/#/home/chat/agent?agentType=3&agentShowType=custom&agentShowChildType=default&agentShowScene=control-spc",
+    "sourceType": "input"
+  },
+  {
+    "index": 33,
+    "status": "normal",
+    "description": "点击\"确认\"按钮",
+    "uiChange": "创建Agent模态对话框关闭，页面跳转至iframe内容区域",
+    "page": "TPT",
+    "basis": [
+      "xml:action",
+      "xml:observation"
+    ],
+    "actionKind": "click",
+    "target": "确 认",
+    "inputText": "",
+    "key": "",
+    "assertText": "",
+    "confidence": 0.7,
+    "intervalFromPreviousMs": 9201,
+    "url": "https://tpt.supcon.com/tpt-app/#/home/chat/agent?agentType=3&agentShowType=custom&agentShowChildType=default&agentShowScene=control-spc",
+    "sourceType": "click"
+  },
+  {
+    "index": 34,
+    "status": "normal",
+    "description": "点击顶部导航区域（触发 Agent 列表页面加载）",
+    "uiChange": "页面切换至\"我的Agent\"列表视图，显示 ai_demo 与 AI_Control_1 两个 Agent 条目，iframe 内容被替换",
+    "page": "App",
+    "basis": [
+      "xml:action",
+      "xml:observation"
+    ],
+    "actionKind": "click",
+    "target": "span",
+    "inputText": "",
+    "key": "",
+    "assertText": "",
+    "confidence": 0.7,
+    "intervalFromPreviousMs": 6322,
+    "url": "https://tpt.supcon.com/xpt-super-process-control2/control-config?language=zh-CN&theme=light&token=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySW5mbyI6IntcInVzZXJcIjp7XCJpZFwiOjEzOTkxLFwidXNlcm5hbWVcIjpcIjE1NzAwMDc4NjQ0XCIsXCJuaWNrTmFtZVwiOlwi5L2Z5rO96LaFXCIsXCJ0eXBlXCI6MSxcImNsaWVudElkXCI6XCJhZG1pbi1hcHBcIixcInBob25lXCI6XCIxNTcwMDA3ODY0NFwifSxcInBhcmVudE9yZ1wiOntcImlkXCI6MSxcImNvZGVcIjpcIm9icERlZmF1bHRPcmdcIixcIm5hbWVcIjpcIum7mOiupOe7hOe7h1wifSxcInJvb3RPcmdcIjp7XCJpZFwiOjEsXCJjb2RlXCI6XCJvYnBEZWZhdWx0T3JnXCIsXCJuYW1lXCI6XCLpu5jorqTnu4Tnu4dcIn0sXCJyb2xlc1wiOlt7XCJpZFwiOjQsXCJjb2RlXCI6XCJzeXN0ZW1Sb2xlXCIsXCJuYW1lXCI6XCLnrqHnkIblkZjop5LoibJcIn0se1wiaWRcIjo1LFwiY29kZVwiOlwibm9ybWFsUm9sZVwiLFwibmFtZVwiOlwi5pmu6YCa55So5oi36KeS6ImyXCJ9XX0iLCJ1c2VyX25hbWUiOiIxNTcwMDA3ODY0NCIsIm5pY2tOYW1lIjoi5L2Z5rO96LaFIiwic2NvcGUiOlsiYWxsIl0sImlkIjoxMzk5MSwiZXhwIjoxNzgzMTY1MjE2LCJ0eXBlIjoxLCJhdXRob3JpdGllcyI6WyI1X-aZrumAmueUqOaIt-inkuiJsiIsIjRf566h55CG5ZGY6KeS6ImyIl0sImp0aSI6ImQxNmM1NTQ1LTYyMWItNDk4Mi1iY2M3LWE4Mjc1YzlmZWM1ZCIsImNsaWVudF9pZCI6ImFkbWluLWFwcCJ9.WHtr2JbeGLA7O1SXTedJOQZl9tsyNySonO1X5HO7Ynq88Gz5EuMf2lxaMVcAyA-K3pMSH5Czg9qNsaGhUtJz3cFrHWEThGvSfVUz7M0gNwQvpKO5Jazn6O_t4QFuSel9JY_oVJ9hdaGjEUsRbrxlHOsJKYGYb9Gk5CaCLUG7J2nKHlhqSE3qwzTo5x83gldX2JG082Um0UyX8aL7UADylLljF_sXA73PsOmU5RBEanTlHXcY5JdTszd1Mf2Bm6oh3T_mOqAmqFGQ4Y-9iIUAECCWfgRAP4hitUva3qfKiEfOSkZetq3c7A16ykKiDRC2Rj8eVXQ2JniHhWGk4IxO_A&tpt-token=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySW5mbyI6IntcInVzZXJcIjp7XCJpZFwiOjEzOTkxLFwidXNlcm5hbWVcIjpcIjE1NzAwMDc4NjQ0XCIsXCJuaWNrTmFtZVwiOlwi5L2Z5rO96LaFXCIsXCJ0eXBlXCI6MSxcImNsaWVudElkXCI6XCJhZG1pbi1hcHBcIixcInBob25lXCI6XCIxNTcwMDA3ODY0NFwifSxcInBhcmVudE9yZ1wiOntcImlkXCI6MSxcImNvZGVcIjpcIm9icERlZmF1bHRPcmdcIixcIm5hbWVcIjpcIum7mOiupOe7hOe7h1wifSxcInJvb3RPcmdcIjp7XCJpZFwiOjEsXCJjb2RlXCI6XCJvYnBEZWZhdWx0T3JnXCIsXCJuYW1lXCI6XCLpu5jorqTnu4Tnu4dcIn0sXCJyb2xlc1wiOlt7XCJpZFwiOjQsXCJjb2RlXCI6XCJzeXN0ZW1Sb2xlXCIsXCJuYW1lXCI6XCLnrqHnkIblkZjop5LoibJcIn0se1wiaWRcIjo1LFwiY29kZVwiOlwibm9ybWFsUm9sZVwiLFwibmFtZVwiOlwi5pmu6YCa55So5oi36KeS6ImyXCJ9XX0iLCJ1c2VyX25hbWUiOiIxNTcwMDA3ODY0NCIsIm5pY2tOYW1lIjoi5L2Z5rO96LaFIiwic2NvcGUiOlsiYWxsIl0sImlkIjoxMzk5MSwiZXhwIjoxNzgzMTY1MjE2LCJ0eXBlIjoxLCJhdXRob3JpdGllcyI6WyI1X-aZrumAmueUqOaIt-inkuiJsiIsIjRf566h55CG5ZGY6KeS6ImyIl0sImp0aSI6ImQxNmM1NTQ1LTYyMWItNDk4Mi1iY2M3LWE4Mjc1YzlmZWM1ZCIsImNsaWVudF9pZCI6ImFkbWluLWFwcCJ9.WHtr2JbeGLA7O1SXTedJOQZl9tsyNySonO1X5HO7Ynq88Gz5EuMf2lxaMVcAyA-K3pMSH5Czg9qNsaGhUtJz3cFrHWEThGvSfVUz7M0gNwQvpKO5Jazn6O_t4QFuSel9JY_oVJ9hdaGjEUsRbrxlHOsJKYGYb9Gk5CaCLUG7J2nKHlhqSE3qwzTo5x83gldX2JG082Um0UyX8aL7UADylLljF_sXA73PsOmU5RBEanTlHXcY5JdTszd1Mf2Bm6oh3T_mOqAmqFGQ4Y-9iIUAECCWfgRAP4hitUva3qfKiEfOSkZetq3c7A16ykKiDRC2Rj8eVXQ2JniHhWGk4IxO_A&agentId=019e9270-383d-7000-bac7-6cc8c38b9b6d&agentName=ai_demo&controlDataSource=offline&controlDataGuide=0&TptSaasUserTenantryId=ATL43NW8",
+    "sourceType": "click"
+  },
+  {
+    "index": 35,
+    "status": "normal",
+    "description": "点击文本为\"未完成\"的状态标签区域",
+    "uiChange": "Agent 列表视图关闭，页面返回 iframe 内容区域，筛选状态已重置",
+    "page": "TPT",
+    "basis": [
+      "xml:action",
+      "xml:observation"
+    ],
+    "actionKind": "click",
+    "target": "未完成",
+    "inputText": "",
+    "key": "",
+    "assertText": "",
+    "confidence": 0.7,
+    "intervalFromPreviousMs": 4576,
+    "url": "https://tpt.supcon.com/tpt-app/#/home/chat/agent?agentType=3&agentShowType=custom&agentShowChildType=default&agentShowScene=control-spc",
+    "sourceType": "click"
+  },
+  {
+    "index": 36,
+    "status": "normal",
+    "description": "点击\"返回确认目标\"按钮",
+    "uiChange": "无可见变化",
+    "page": "App",
+    "basis": [
+      "xml:action",
+      "xml:observation"
+    ],
+    "actionKind": "click",
+    "target": "返回确认目标",
+    "inputText": "",
+    "key": "",
+    "assertText": "",
+    "confidence": 0.7,
+    "intervalFromPreviousMs": 4477,
+    "url": "https://tpt.supcon.com/xpt-super-process-control2/control-config?language=zh-CN&theme=light&token=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySW5mbyI6IntcInVzZXJcIjp7XCJpZFwiOjEzOTkxLFwidXNlcm5hbWVcIjpcIjE1NzAwMDc4NjQ0XCIsXCJuaWNrTmFtZVwiOlwi5L2Z5rO96LaFXCIsXCJ0eXBlXCI6MSxcImNsaWVudElkXCI6XCJhZG1pbi1hcHBcIixcInBob25lXCI6XCIxNTcwMDA3ODY0NFwifSxcInBhcmVudE9yZ1wiOntcImlkXCI6MSxcImNvZGVcIjpcIm9icERlZmF1bHRPcmdcIixcIm5hbWVcIjpcIum7mOiupOe7hOe7h1wifSxcInJvb3RPcmdcIjp7XCJpZFwiOjEsXCJjb2RlXCI6XCJvYnBEZWZhdWx0T3JnXCIsXCJuYW1lXCI6XCLpu5jorqTnu4Tnu4dcIn0sXCJyb2xlc1wiOlt7XCJpZFwiOjQsXCJjb2RlXCI6XCJzeXN0ZW1Sb2xlXCIsXCJuYW1lXCI6XCLnrqHnkIblkZjop5LoibJcIn0se1wiaWRcIjo1LFwiY29kZVwiOlwibm9ybWFsUm9sZVwiLFwibmFtZVwiOlwi5pmu6YCa55So5oi36KeS6ImyXCJ9XX0iLCJ1c2VyX25hbWUiOiIxNTcwMDA3ODY0NCIsIm5pY2tOYW1lIjoi5L2Z5rO96LaFIiwic2NvcGUiOlsiYWxsIl0sImlkIjoxMzk5MSwiZXhwIjoxNzgzMTY1MjE2LCJ0eXBlIjoxLCJhdXRob3JpdGllcyI6WyI1X-aZrumAmueUqOaIt-inkuiJsiIsIjRf566h55CG5ZGY6KeS6ImyIl0sImp0aSI6ImQxNmM1NTQ1LTYyMWItNDk4Mi1iY2M3LWE4Mjc1YzlmZWM1ZCIsImNsaWVudF9pZCI6ImFkbWluLWFwcCJ9.WHtr2JbeGLA7O1SXTedJOQZl9tsyNySonO1X5HO7Ynq88Gz5EuMf2lxaMVcAyA-K3pMSH5Czg9qNsaGhUtJz3cFrHWEThGvSfVUz7M0gNwQvpKO5Jazn6O_t4QFuSel9JY_oVJ9hdaGjEUsRbrxlHOsJKYGYb9Gk5CaCLUG7J2nKHlhqSE3qwzTo5x83gldX2JG082Um0UyX8aL7UADylLljF_sXA73PsOmU5RBEanTlHXcY5JdTszd1Mf2Bm6oh3T_mOqAmqFGQ4Y-9iIUAECCWfgRAP4hitUva3qfKiEfOSkZetq3c7A16ykKiDRC2Rj8eVXQ2JniHhWGk4IxO_A&tpt-token=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySW5mbyI6IntcInVzZXJcIjp7XCJpZFwiOjEzOTkxLFwidXNlcm5hbWVcIjpcIjE1NzAwMDc4NjQ0XCIsXCJuaWNrTmFtZVwiOlwi5L2Z5rO96LaFXCIsXCJ0eXBlXCI6MSxcImNsaWVudElkXCI6XCJhZG1pbi1hcHBcIixcInBob25lXCI6XCIxNTcwMDA3ODY0NFwifSxcInBhcmVudE9yZ1wiOntcImlkXCI6MSxcImNvZGVcIjpcIm9icERlZmF1bHRPcmdcIixcIm5hbWVcIjpcIum7mOiupOe7hOe7h1wifSxcInJvb3RPcmdcIjp7XCJpZFwiOjEsXCJjb2RlXCI6XCJvYnBEZWZhdWx0T3JnXCIsXCJuYW1lXCI6XCLpu5jorqTnu4Tnu4dcIn0sXCJyb2xlc1wiOlt7XCJpZFwiOjQsXCJjb2RlXCI6XCJzeXN0ZW1Sb2xlXCIsXCJuYW1lXCI6XCLnrqHnkIblkZjop5LoibJcIn0se1wiaWRcIjo1LFwiY29kZVwiOlwibm9ybWFsUm9sZVwiLFwibmFtZVwiOlwi5pmu6YCa55So5oi36KeS6ImyXCJ9XX0iLCJ1c2VyX25hbWUiOiIxNTcwMDA3ODY0NCIsIm5pY2tOYW1lIjoi5L2Z5rO96LaFIiwic2NvcGUiOlsiYWxsIl0sImlkIjoxMzk5MSwiZXhwIjoxNzgzMTY1MjE2LCJ0eXBlIjoxLCJhdXRob3JpdGllcyI6WyI1X-aZrumAmueUqOaIt-inkuiJsiIsIjRf566h55CG5ZGY6KeS6ImyIl0sImp0aSI6ImQxNmM1NTQ1LTYyMWItNDk4Mi1iY2M3LWE4Mjc1YzlmZWM1ZCIsImNsaWVudF9pZCI6ImFkbWluLWFwcCJ9.WHtr2JbeGLA7O1SXTedJOQZl9tsyNySonO1X5HO7Ynq88Gz5EuMf2lxaMVcAyA-K3pMSH5Czg9qNsaGhUtJz3cFrHWEThGvSfVUz7M0gNwQvpKO5Jazn6O_t4QFuSel9JY_oVJ9hdaGjEUsRbrxlHOsJKYGYb9Gk5CaCLUG7J2nKHlhqSE3qwzTo5x83gldX2JG082Um0UyX8aL7UADylLljF_sXA73PsOmU5RBEanTlHXcY5JdTszd1Mf2Bm6oh3T_mOqAmqFGQ4Y-9iIUAECCWfgRAP4hitUva3qfKiEfOSkZetq3c7A16ykKiDRC2Rj8eVXQ2JniHhWGk4IxO_A&agentId=019e9270-383d-7000-bac7-6cc8c38b9b6d&agentName=ai_demo&controlDataSource=offline&controlDataGuide=0&TptSaasUserTenantryId=ATL43NW8",
+    "sourceType": "click"
+  },
+  {
+    "index": 37,
+    "status": "normal",
+    "description": "点击文本为\"下载模板\"的按钮",
+    "uiChange": "无可见变化",
+    "page": "App",
+    "basis": [
+      "xml:action",
+      "xml:observation"
+    ],
+    "actionKind": "click",
+    "target": "下载模板",
+    "inputText": "",
+    "key": "",
+    "assertText": "",
+    "confidence": 0.7,
+    "intervalFromPreviousMs": 4013,
+    "url": "https://tpt.supcon.com/xpt-super-process-control2/control-config?language=zh-CN&theme=light&token=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySW5mbyI6IntcInVzZXJcIjp7XCJpZFwiOjEzOTkxLFwidXNlcm5hbWVcIjpcIjE1NzAwMDc4NjQ0XCIsXCJuaWNrTmFtZVwiOlwi5L2Z5rO96LaFXCIsXCJ0eXBlXCI6MSxcImNsaWVudElkXCI6XCJhZG1pbi1hcHBcIixcInBob25lXCI6XCIxNTcwMDA3ODY0NFwifSxcInBhcmVudE9yZ1wiOntcImlkXCI6MSxcImNvZGVcIjpcIm9icERlZmF1bHRPcmdcIixcIm5hbWVcIjpcIum7mOiupOe7hOe7h1wifSxcInJvb3RPcmdcIjp7XCJpZFwiOjEsXCJjb2RlXCI6XCJvYnBEZWZhdWx0T3JnXCIsXCJuYW1lXCI6XCLpu5jorqTnu4Tnu4dcIn0sXCJyb2xlc1wiOlt7XCJpZFwiOjQsXCJjb2RlXCI6XCJzeXN0ZW1Sb2xlXCIsXCJuYW1lXCI6XCLnrqHnkIblkZjop5LoibJcIn0se1wiaWRcIjo1LFwiY29kZVwiOlwibm9ybWFsUm9sZVwiLFwibmFtZVwiOlwi5pmu6YCa55So5oi36KeS6ImyXCJ9XX0iLCJ1c2VyX25hbWUiOiIxNTcwMDA3ODY0NCIsIm5pY2tOYW1lIjoi5L2Z5rO96LaFIiwic2NvcGUiOlsiYWxsIl0sImlkIjoxMzk5MSwiZXhwIjoxNzgzMTY1MjE2LCJ0eXBlIjoxLCJhdXRob3JpdGllcyI6WyI1X-aZrumAmueUqOaIt-inkuiJsiIsIjRf566h55CG5ZGY6KeS6ImyIl0sImp0aSI6ImQxNmM1NTQ1LTYyMWItNDk4Mi1iY2M3LWE4Mjc1YzlmZWM1ZCIsImNsaWVudF9pZCI6ImFkbWluLWFwcCJ9.WHtr2JbeGLA7O1SXTedJOQZl9tsyNySonO1X5HO7Ynq88Gz5EuMf2lxaMVcAyA-K3pMSH5Czg9qNsaGhUtJz3cFrHWEThGvSfVUz7M0gNwQvpKO5Jazn6O_t4QFuSel9JY_oVJ9hdaGjEUsRbrxlHOsJKYGYb9Gk5CaCLUG7J2nKHlhqSE3qwzTo5x83gldX2JG082Um0UyX8aL7UADylLljF_sXA73PsOmU5RBEanTlHXcY5JdTszd1Mf2Bm6oh3T_mOqAmqFGQ4Y-9iIUAECCWfgRAP4hitUva3qfKiEfOSkZetq3c7A16ykKiDRC2Rj8eVXQ2JniHhWGk4IxO_A&tpt-token=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySW5mbyI6IntcInVzZXJcIjp7XCJpZFwiOjEzOTkxLFwidXNlcm5hbWVcIjpcIjE1NzAwMDc4NjQ0XCIsXCJuaWNrTmFtZVwiOlwi5L2Z5rO96LaFXCIsXCJ0eXBlXCI6MSxcImNsaWVudElkXCI6XCJhZG1pbi1hcHBcIixcInBob25lXCI6XCIxNTcwMDA3ODY0NFwifSxcInBhcmVudE9yZ1wiOntcImlkXCI6MSxcImNvZGVcIjpcIm9icERlZmF1bHRPcmdcIixcIm5hbWVcIjpcIum7mOiupOe7hOe7h1wifSxcInJvb3RPcmdcIjp7XCJpZFwiOjEsXCJjb2RlXCI6XCJvYnBEZWZhdWx0T3JnXCIsXCJuYW1lXCI6XCLpu5jorqTnu4Tnu4dcIn0sXCJyb2xlc1wiOlt7XCJpZFwiOjQsXCJjb2RlXCI6XCJzeXN0ZW1Sb2xlXCIsXCJuYW1lXCI6XCLnrqHnkIblkZjop5LoibJcIn0se1wiaWRcIjo1LFwiY29kZVwiOlwibm9ybWFsUm9sZVwiLFwibmFtZVwiOlwi5pmu6YCa55So5oi36KeS6ImyXCJ9XX0iLCJ1c2VyX25hbWUiOiIxNTcwMDA3ODY0NCIsIm5pY2tOYW1lIjoi5L2Z5rO96LaFIiwic2NvcGUiOlsiYWxsIl0sImlkIjoxMzk5MSwiZXhwIjoxNzgzMTY1MjE2LCJ0eXBlIjoxLCJhdXRob3JpdGllcyI6WyI1X-aZrumAmueUqOaIt-inkuiJsiIsIjRf566h55CG5ZGY6KeS6ImyIl0sImp0aSI6ImQxNmM1NTQ1LTYyMWItNDk4Mi1iY2M3LWE4Mjc1YzlmZWM1ZCIsImNsaWVudF9pZCI6ImFkbWluLWFwcCJ9.WHtr2JbeGLA7O1SXTedJOQZl9tsyNySonO1X5HO7Ynq88Gz5EuMf2lxaMVcAyA-K3pMSH5Czg9qNsaGhUtJz3cFrHWEThGvSfVUz7M0gNwQvpKO5Jazn6O_t4QFuSel9JY_oVJ9hdaGjEUsRbrxlHOsJKYGYb9Gk5CaCLUG7J2nKHlhqSE3qwzTo5x83gldX2JG082Um0UyX8aL7UADylLljF_sXA73PsOmU5RBEanTlHXcY5JdTszd1Mf2Bm6oh3T_mOqAmqFGQ4Y-9iIUAECCWfgRAP4hitUva3qfKiEfOSkZetq3c7A16ykKiDRC2Rj8eVXQ2JniHhWGk4IxO_A&agentId=019e9270-383d-7000-bac7-6cc8c38b9b6d&agentName=ai_demo&controlDataSource=offline&controlDataGuide=0&TptSaasUserTenantryId=ATL43NW8",
+    "sourceType": "click"
+  },
+  {
+    "index": 38,
+    "status": "normal",
+    "description": "点击触发文件下载的链接",
+    "uiChange": "无可见变化",
+    "page": "App",
+    "basis": [
+      "xml:action",
+      "xml:observation"
+    ],
+    "actionKind": "click",
+    "target": "a",
+    "inputText": "",
+    "key": "",
+    "assertText": "",
+    "confidence": 0.7,
+    "intervalFromPreviousMs": 7,
+    "url": "https://tpt.supcon.com/xpt-super-process-control2/control-config?language=zh-CN&theme=light&token=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySW5mbyI6IntcInVzZXJcIjp7XCJpZFwiOjEzOTkxLFwidXNlcm5hbWVcIjpcIjE1NzAwMDc4NjQ0XCIsXCJuaWNrTmFtZVwiOlwi5L2Z5rO96LaFXCIsXCJ0eXBlXCI6MSxcImNsaWVudElkXCI6XCJhZG1pbi1hcHBcIixcInBob25lXCI6XCIxNTcwMDA3ODY0NFwifSxcInBhcmVudE9yZ1wiOntcImlkXCI6MSxcImNvZGVcIjpcIm9icERlZmF1bHRPcmdcIixcIm5hbWVcIjpcIum7mOiupOe7hOe7h1wifSxcInJvb3RPcmdcIjp7XCJpZFwiOjEsXCJjb2RlXCI6XCJvYnBEZWZhdWx0T3JnXCIsXCJuYW1lXCI6XCLpu5jorqTnu4Tnu4dcIn0sXCJyb2xlc1wiOlt7XCJpZFwiOjQsXCJjb2RlXCI6XCJzeXN0ZW1Sb2xlXCIsXCJuYW1lXCI6XCLnrqHnkIblkZjop5LoibJcIn0se1wiaWRcIjo1LFwiY29kZVwiOlwibm9ybWFsUm9sZVwiLFwibmFtZVwiOlwi5pmu6YCa55So5oi36KeS6ImyXCJ9XX0iLCJ1c2VyX25hbWUiOiIxNTcwMDA3ODY0NCIsIm5pY2tOYW1lIjoi5L2Z5rO96LaFIiwic2NvcGUiOlsiYWxsIl0sImlkIjoxMzk5MSwiZXhwIjoxNzgzMTY1MjE2LCJ0eXBlIjoxLCJhdXRob3JpdGllcyI6WyI1X-aZrumAmueUqOaIt-inkuiJsiIsIjRf566h55CG5ZGY6KeS6ImyIl0sImp0aSI6ImQxNmM1NTQ1LTYyMWItNDk4Mi1iY2M3LWE4Mjc1YzlmZWM1ZCIsImNsaWVudF9pZCI6ImFkbWluLWFwcCJ9.WHtr2JbeGLA7O1SXTedJOQZl9tsyNySonO1X5HO7Ynq88Gz5EuMf2lxaMVcAyA-K3pMSH5Czg9qNsaGhUtJz3cFrHWEThGvSfVUz7M0gNwQvpKO5Jazn6O_t4QFuSel9JY_oVJ9hdaGjEUsRbrxlHOsJKYGYb9Gk5CaCLUG7J2nKHlhqSE3qwzTo5x83gldX2JG082Um0UyX8aL7UADylLljF_sXA73PsOmU5RBEanTlHXcY5JdTszd1Mf2Bm6oh3T_mOqAmqFGQ4Y-9iIUAECCWfgRAP4hitUva3qfKiEfOSkZetq3c7A16ykKiDRC2Rj8eVXQ2JniHhWGk4IxO_A&tpt-token=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySW5mbyI6IntcInVzZXJcIjp7XCJpZFwiOjEzOTkxLFwidXNlcm5hbWVcIjpcIjE1NzAwMDc4NjQ0XCIsXCJuaWNrTmFtZVwiOlwi5L2Z5rO96LaFXCIsXCJ0eXBlXCI6MSxcImNsaWVudElkXCI6XCJhZG1pbi1hcHBcIixcInBob25lXCI6XCIxNTcwMDA3ODY0NFwifSxcInBhcmVudE9yZ1wiOntcImlkXCI6MSxcImNvZGVcIjpcIm9icERlZmF1bHRPcmdcIixcIm5hbWVcIjpcIum7mOiupOe7hOe7h1wifSxcInJvb3RPcmdcIjp7XCJpZFwiOjEsXCJjb2RlXCI6XCJvYnBEZWZhdWx0T3JnXCIsXCJuYW1lXCI6XCLpu5jorqTnu4Tnu4dcIn0sXCJyb2xlc1wiOlt7XCJpZFwiOjQsXCJjb2RlXCI6XCJzeXN0ZW1Sb2xlXCIsXCJuYW1lXCI6XCLnrqHnkIblkZjop5LoibJcIn0se1wiaWRcIjo1LFwiY29kZVwiOlwibm9ybWFsUm9sZVwiLFwibmFtZVwiOlwi5pmu6YCa55So5oi36KeS6ImyXCJ9XX0iLCJ1c2VyX25hbWUiOiIxNTcwMDA3ODY0NCIsIm5pY2tOYW1lIjoi5L2Z5rO96LaFIiwic2NvcGUiOlsiYWxsIl0sImlkIjoxMzk5MSwiZXhwIjoxNzgzMTY1MjE2LCJ0eXBlIjoxLCJhdXRob3JpdGllcyI6WyI1X-aZrumAmueUqOaIt-inkuiJsiIsIjRf566h55CG5ZGY6KeS6ImyIl0sImp0aSI6ImQxNmM1NTQ1LTYyMWItNDk4Mi1iY2M3LWE4Mjc1YzlmZWM1ZCIsImNsaWVudF9pZCI6ImFkbWluLWFwcCJ9.WHtr2JbeGLA7O1SXTedJOQZl9tsyNySonO1X5HO7Ynq88Gz5EuMf2lxaMVcAyA-K3pMSH5Czg9qNsaGhUtJz3cFrHWEThGvSfVUz7M0gNwQvpKO5Jazn6O_t4QFuSel9JY_oVJ9hdaGjEUsRbrxlHOsJKYGYb9Gk5CaCLUG7J2nKHlhqSE3qwzTo5x83gldX2JG082Um0UyX8aL7UADylLljF_sXA73PsOmU5RBEanTlHXcY5JdTszd1Mf2Bm6oh3T_mOqAmqFGQ4Y-9iIUAECCWfgRAP4hitUva3qfKiEfOSkZetq3c7A16ykKiDRC2Rj8eVXQ2JniHhWGk4IxO_A&agentId=019e9270-383d-7000-bac7-6cc8c38b9b6d&agentName=ai_demo&controlDataSource=offline&controlDataGuide=0&TptSaasUserTenantryId=ATL43NW8",
+    "sourceType": "click"
+  }
+]

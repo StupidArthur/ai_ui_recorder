@@ -1,5 +1,27 @@
 # 交互记录
 
+## 2026-06-04 交互：run 目录结构重组
+
+### 操作概述
+- 新增 `src/utils/run-layout.js` 作为 run 路径唯一来源。
+- **record/**：actions、snapshots、screenshots、recorder.log。
+- **translate/**：logs、preprocess、phase1、phase2、phase4、llm_audit。
+- 产物重命名：`AI_cases.md` → `translate/phase2/cases.md`，`case_4_agents.txt` → `translate/phase4/agents.txt`，Phase1 文件迁入 `translate/phase1/` 并缩短文件名。
+- 文档：`doc/run_directory_layout.md`。
+- **不兼容旧平铺布局**；`release1/output` 下既有 run 需重新录制/翻译后才会是新结构。
+
+---
+
+## 2026-06-04 交互：release1 录制数据翻译调试
+
+### 操作概述
+- 对 `release1/output/run_2026-06-03T07-11-48` 跑完整 XML/Markdown 翻译管线（约 177s，LLM audit 0 问题）。
+- **修复** `maxSlidingWindowRounds`：当 `total < windowSize` 且每轮 consume 较小时，原 `ceil(total/window)*2` 仅 2 轮导致 Phase 2 后半段落入「剩余步骤兜底」。
+- **修复** `parsePhase2MarkdownResponse`：用 `lastIndex` 锚定 `consumeStepCount`，避免模型跳过窗口前缀却用大 `lastIndex` 导致游标与正文错位、重复 Case。
+- 同步 `release1/prompts/md/*-skill.md`；新增 `scripts/run-translate-on-meta.mjs` 便于对指定 meta 重跑。
+
+---
+
 ## 2026-02-12 交互 #1
 
 ### 原始需求
@@ -1336,3 +1358,20 @@
 - `recorder.js`：`action_*.json` 不再写入 `position`
 - `preprocessor/index.js`：enriched 不再携带 `position`
 - 文档：`requirements.md`、`translate_design.md`
+
+---
+
+## 2026-06-04 — 翻译管线去 JSON 化（Phase 1/2/4）
+
+### 背景
+- Phase 1 强制 JSON 导致 `JSON.parse` 频繁失败；架构上 Phase 4 终稿本就为纯文本，不应保留 JSON 中间契约。
+
+### 实现
+- **Phase 1**：`snapshots-2-steps-skill.md` 改为 XML（action/observation）；`phase1/xml-step-extractor.js` 宽松正则 + 按 `actionBatch[].index` 锚定；`workflow.js` 接入。
+- **Phase 2**：`steps-2-cases-skill.md` 改为 Markdown + `<case_meta/>`；User 纯文本；`parsePhase2MarkdownResponse`；`clampWindowConsume` 防死循环。
+- **Phase 4**：`case-4-agents-skill.md` 改为 `<agent_chunk>` XML；`phase4/xml-agent-chunk-parser.js`；`agent-txt-generator.js` 移除 `parseJsonFromLlmReply`。
+- **共用**：`xml-parse-utils.js`（预处理、ReDoS 预检、consume 钳制、轮次保险丝）；`format-step-plain-text.js`。
+- **配置**：`config.js` 新增 XML 正则上界与 `SLIDING_WINDOW_MAX_ROUND_MULTIPLIER`。
+
+### 文档
+- `prompts/总纲.md`、`doc/interaction_record.md`（本条）

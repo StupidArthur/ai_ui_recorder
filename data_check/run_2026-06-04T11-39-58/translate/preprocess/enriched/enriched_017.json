@@ -1,0 +1,157 @@
+{
+  "index": 17,
+  "type": "click",
+  "element": {
+    "tag": "div",
+    "id": null,
+    "name": null,
+    "type": null,
+    "text": "",
+    "placeholder": null,
+    "title": null,
+    "href": null,
+    "xpath": "/html/body/div[3]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[2]/div[2]/div[1]/div[3]/div[1]/div[1]/div[2]",
+    "label": null
+  },
+  "url": "https://tpt.supcon.com/tpt-app/#/home/chat/main?TptSaasUserTenantryId=ATL43NW8",
+  "title": "TPT",
+  "timestamp": 1780573239630,
+  "formStateDelta": {
+    "//*[@id='chat_input_textarea']": {
+      "value": ""
+    },
+    "//*[@id='root']/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[2]/div[1]/div[2]/div[2]/div[1]/div[1]/label[1]/input[1]": {
+      "value": "on",
+      "checked": true
+    },
+    "//*[@id='root']/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[2]/div[1]/div[2]/div[2]/div[1]/div[1]/label[1]/div[1]": {
+      "ariaSelected": "true"
+    },
+    "//*[@id='root']/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[2]/div[1]/div[2]/div[2]/div[1]/div[1]/label[2]/input[1]": {
+      "value": "on",
+      "checked": false
+    },
+    "//div[normalize-space(.)='低碳']": {
+      "ariaSelected": "false"
+    },
+    "//*[@id='root']/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[2]/div[1]/div[2]/div[2]/div[1]/div[1]/label[3]/input[1]": {
+      "value": "on",
+      "checked": false
+    },
+    "//div[normalize-space(.)='安全']": {
+      "ariaSelected": "false"
+    },
+    "//*[@id='root']/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[2]/div[1]/div[2]/div[2]/div[1]/div[1]/label[4]/input[1]": {
+      "value": "on",
+      "checked": false
+    },
+    "//div[normalize-space(.)='质量']": {
+      "ariaSelected": "false"
+    },
+    "//*[@id='root']/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[2]/div[1]/div[2]/div[2]/div[1]/div[1]/label[5]/input[1]": {
+      "value": "on",
+      "checked": false
+    },
+    "//div[normalize-space(.)='效益']": {
+      "ariaSelected": "false"
+    },
+    "//textarea[@name='hiddenTextarea']": {
+      "value": " "
+    },
+    "/html/body/div[3]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/label[1]/input[1]": {
+      "value": "on",
+      "checked": true
+    },
+    "//div[normalize-space(.)='浅色']": {
+      "ariaSelected": "true"
+    },
+    "/html/body/div[3]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/label[2]/input[1]": {
+      "value": "on",
+      "checked": false
+    },
+    "//div[normalize-space(.)='深色']": {
+      "ariaSelected": "false"
+    },
+    "/html/body/div[3]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[4]/div[2]/div[1]/div[1]/div[1]/button[1]": {
+      "ariaChecked": "true"
+    },
+    "/html/body/div[3]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[4]/div[2]/div[1]/div[1]/div[2]/button[1]": {
+      "ariaChecked": "true"
+    },
+    "/html/body/div[3]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[4]/div[2]/div[1]/div[1]/div[3]/button[1]": {
+      "ariaChecked": "false"
+    },
+    "/html/body/div[3]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[5]/div[2]/div[1]/button[1]": {
+      "ariaChecked": "false"
+    }
+  },
+  "snapshotDiff": "-     - textbox \"丙烯制冷压缩机喘振：防喘振阀开度突然增大且出口压力波动剧烈，操作参数如何优化？\"\n+     - textbox \"裂解炉在线清焦周期缩短：3#裂解炉TLX废锅压差上升速率加快，清焦后仅两周又异常？\"\n-     - text \"分离冷箱冻堵风险：甲烷产品分析仪显示CO₂含量跳涨，冷箱哪段管线最可能冰堵？\"\n-     - text \"急冷油系统换热效率下降：急冷油泵出口压力波动伴随换热器温差缩小，怎么排查粘度过高问题？\"\n+     - text \"丙烯制冷压缩机喘振：防喘振阀开度突然增大且出口压力波动剧烈，操作参数如何优化？\"\n+     - text \"高压脱丙烷塔法兰泄漏：T-470塔顶液相出口法兰接连出现乙烷渗漏，密封面该重点检查啥？\"\n-     - generic \"Close 偏好设置 外观 segmented control 模式 简洁模式 常规模式 使用中 详细模式 字体大小 20 小号 默认 大号 超大号 首页显示内容 案例介绍 推荐问题\"\n+     - generic \"Close 偏好设置 外观 segmented control 模式 简洁模式 常规模式 详细模式 使用中 字体大小 20 小号 默认 大号 超大号 首页显示内容 案例介绍 推荐问题\"\n-       - text \"使用中\"\n+       - text \"使用中\"",
+  "preSnapshot": "[见 record/snapshots/snapshot_016.txt]",
+  "postSnapshot": "[见 record/snapshots/snapshot_017.txt]",
+  "contextExcerpt": null,
+  "formStateChanges": {
+    "changed": {
+      "/html/body/div[3]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/label[1]/input[1]": {
+        "from": {
+          "value": "on",
+          "checked": false
+        },
+        "to": {
+          "value": "on",
+          "checked": true
+        }
+      },
+      "//div[normalize-space(.)='浅色']": {
+        "from": {
+          "ariaSelected": "false"
+        },
+        "to": {
+          "ariaSelected": "true"
+        }
+      },
+      "/html/body/div[3]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/label[2]/input[1]": {
+        "from": {
+          "value": "on",
+          "checked": true
+        },
+        "to": {
+          "value": "on",
+          "checked": false
+        }
+      },
+      "//div[normalize-space(.)='深色']": {
+        "from": {
+          "ariaSelected": "true"
+        },
+        "to": {
+          "ariaSelected": "false"
+        }
+      },
+      "/html/body/div[3]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[4]/div[2]/div[1]/div[1]/div[3]/button[1]": {
+        "from": {
+          "ariaChecked": "true"
+        },
+        "to": {
+          "ariaChecked": "false"
+        }
+      },
+      "/html/body/div[3]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[5]/div[2]/div[1]/button[1]": {
+        "from": {
+          "ariaChecked": "true"
+        },
+        "to": {
+          "ariaChecked": "false"
+        }
+      }
+    },
+    "added": {},
+    "removed": {},
+    "hasChanges": true
+  },
+  "formStateChangeText": "[变化] /html/body/div[3]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/label[1]/input[1]: \"[object Object]\" → \"[object Object]\"\n[变化] //div[normalize-space(.)='浅色']: \"[object Object]\" → \"[object Object]\"\n[变化] /html/body/div[3]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/label[2]/input[1]: \"[object Object]\" → \"[object Object]\"\n[变化] //div[normalize-space(.)='深色']: \"[object Object]\" → \"[object Object]\"\n[变化] /html/body/div[3]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[4]/div[2]/div[1]/div[1]/div[3]/button[1]: \"[object Object]\" → \"[object Object]\"\n[变化] /html/body/div[3]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[5]/div[2]/div[1]/button[1]: \"[object Object]\" → \"[object Object]\"",
+  "classification": {
+    "category": "other",
+    "elementType": "other",
+    "hints": []
+  }
+}

@@ -26,14 +26,18 @@ import fs from 'fs';
 import path from 'path';
 
 import {
-  SNAPSHOTS_DATA_SUBDIR,
-  ACTIONS_DATA_SUBDIR,
   META_FILENAME,
-  PREPROCESSED_SUBDIR,
   DIFFS_DATA_SUBDIR,
   ENRICHED_DATA_SUBDIR,
   MERGED_DATA_SUBDIR,
 } from '../../utils/config.js';
+
+import {
+  ensureTranslateLayout,
+  getRecordPaths,
+  getTranslatePaths,
+  RECORD_SNAPSHOTS_REL,
+} from '../../utils/run-layout.js';
 
 import { mergeActions, detectNoise } from './action-merge.js';
 import { computeAllDiffs } from './snapshot-diff.js';
@@ -60,24 +64,17 @@ export async function preprocess(runDir, options = {}) {
   if (log) log.info('========== 数据预处理开始 ==========');
 
   // ---------- 读取原始数据 ----------
+  ensureTranslateLayout(runDir);
+
   const metaFile = path.join(runDir, META_FILENAME);
   const meta = JSON.parse(fs.readFileSync(metaFile, 'utf-8'));
   const totalActions = meta.totalActions;
 
-  const snapshotsDir = path.join(runDir, SNAPSHOTS_DATA_SUBDIR);
-  const actionsDir = path.join(runDir, ACTIONS_DATA_SUBDIR);
+  const { snapshotsDir, actionsDir } = getRecordPaths(runDir);
+  const { preprocessDir, diffsDir, enrichedDir, mergedDir } = getTranslatePaths(runDir);
 
   if (log) log.info(`原始数据: ${totalActions} 个操作, 快照目录: ${snapshotsDir}`);
-
-  // ---------- 创建预处理输出目录 ----------
-  const preprocessedDir = path.join(runDir, PREPROCESSED_SUBDIR);
-  const diffsDir = path.join(preprocessedDir, DIFFS_DATA_SUBDIR);
-  const enrichedDir = path.join(preprocessedDir, ENRICHED_DATA_SUBDIR);
-  const mergedDir = path.join(preprocessedDir, MERGED_DATA_SUBDIR);
-
-  fs.mkdirSync(diffsDir, { recursive: true });
-  fs.mkdirSync(enrichedDir, { recursive: true });
-  fs.mkdirSync(mergedDir, { recursive: true });
+  if (log) log.info(`预处理输出目录: ${preprocessDir}`);
 
   // ========== 第1步：批量读取原始 action + 语义归并 ==========
   if (log) log.info('[预处理 1/3] 批量读取 action + 语义归并...');
@@ -207,8 +204,8 @@ export async function preprocess(runDir, options = {}) {
       const enrichedFile = path.join(enrichedDir, `enriched_${String(i).padStart(3, '0')}.json`);
       const enrichedForFile = {
         ...enriched,
-        preSnapshot: preSnapshot ? `[见 ${SNAPSHOTS_DATA_SUBDIR}/snapshot_${String(i - 1).padStart(3, '0')}.txt]` : null,
-        postSnapshot: postSnapshot ? `[见 ${SNAPSHOTS_DATA_SUBDIR}/snapshot_${String(i).padStart(3, '0')}.txt]` : null,
+        preSnapshot: preSnapshot ? `[见 ${RECORD_SNAPSHOTS_REL}/snapshot_${String(i - 1).padStart(3, '0')}.txt]` : null,
+        postSnapshot: postSnapshot ? `[见 ${RECORD_SNAPSHOTS_REL}/snapshot_${String(i).padStart(3, '0')}.txt]` : null,
       };
       fs.writeFileSync(enrichedFile, JSON.stringify(enrichedForFile, null, 2), 'utf-8');
 
@@ -248,7 +245,7 @@ export async function preprocess(runDir, options = {}) {
   return {
     enrichedActions,
     meta,
-    preprocessedDir,
+    preprocessedDir: preprocessDir,
   };
 }
 

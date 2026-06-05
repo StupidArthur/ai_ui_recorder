@@ -17,17 +17,18 @@ export function buildPhase2WindowSystemPrompt() {
 }
 
 /**
- * 构建 Phase 2 单窗口 User Prompt
+ * 构建 Phase 2 单窗口 User Prompt（纯文本步骤流）
  *
- * @param {string} windowStepsJson - 当前窗口瘦身步骤的 JSON 字符串
- * @param {string} indexListText - 本窗口 index 列表
+ * @param {string} windowStepsPlainText - 当前窗口步骤纯文本
+ * @param {string} indexListText - 本窗口 index 列表 JSON 字符串
  * @returns {string}
  */
-export function buildPhase2WindowUserPrompt(windowStepsJson, indexListText) {
-  return `本窗口瘦身步骤（JSON 数组）：
-${windowStepsJson}
+export function buildPhase2WindowUserPrompt(windowStepsPlainText, indexListText) {
+  return `本窗口底层步骤记录（纯文本）：
 
-本窗口可用 index 列表（必须从这里取前缀连续子数组）：${indexListText}
+${windowStepsPlainText}
 
-请归纳成 1 个 Case，并只输出符合 system 要求的 JSON 对象。`;
+本窗口可用 index 列表（consumeStepCount 对应前缀连续子集，从这里取）：${indexListText}
+
+请归纳成 1 个 Case，输出 Markdown 正文，最后一行输出 <case_meta consumeStepCount="N" lastIndex="..."/>。禁止 JSON。`;
 }

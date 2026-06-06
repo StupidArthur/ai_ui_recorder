@@ -3,47 +3,40 @@
   "type": "click",
   "element": {
     "tag": "input",
-    "id": "agree",
-    "name": null,
-    "type": "checkbox",
-    "text": "",
-    "placeholder": null,
-    "title": null,
-    "href": null,
     "xpath": "//*[@id='agree']",
-    "label": null
+    "text": "",
+    "id": "agree",
+    "inputType": "checkbox"
   },
   "url": "https://tpt.supcon.com/tpt-app/#/login",
-  "title": "TPT",
+  "page_title": "TPT",
   "timestamp": 1780573217805,
-  "formStateDelta": null,
-  "snapshotDiff": "-   - checkbox \" \" [unchecked]\n+   - checkbox \" \" [checked]",
-  "preSnapshot": "[见 record/snapshots/snapshot_003.txt]",
-  "postSnapshot": "[见 record/snapshots/snapshot_004.txt]",
-  "contextExcerpt": null,
-  "formStateChanges": {
+  "snapshot_diff": "-   - checkbox \" \" [unchecked]\n+   - checkbox \" \" [checked]",
+  "pre_snapshot": "[见 record/snapshots/snapshot_003.txt]",
+  "post_snapshot": "[见 record/snapshots/snapshot_004.txt]",
+  "form_state_changes": {
     "changed": {},
     "added": {},
     "removed": {
-      "//*[@id='root']/div/div/div/div/div[1]/div[2]/div[3]/div/div/label[1]/input": {
-        "value": "on",
-        "checked": true
-      },
-      "//div[normalize-space(.)='密码登录']": {
-        "ariaSelected": "true"
+      "//*[@id='pass64']": {
+        "value": "Supcon@1304"
       },
       "//*[@id='root']/div/div/div/div/div[1]/div[2]/div[3]/div/div/label[2]/input": {
         "value": "on",
         "checked": false
       },
-      "//div[normalize-space(.)='验证码登录']": {
-        "ariaSelected": "false"
-      },
       "//*[@id='username']": {
         "value": "15700078644"
       },
-      "//*[@id='pass64']": {
-        "value": "Supcon@1304"
+      "//*[@id='root']/div/div/div/div/div[1]/div[2]/div[3]/div/div/label[1]/input": {
+        "value": "on",
+        "checked": true
+      },
+      "//div[normalize-space(.)='验证码登录']": {
+        "ariaSelected": "false"
+      },
+      "//div[normalize-space(.)='密码登录']": {
+        "ariaSelected": "true"
       },
       "//*[@id='agree']": {
         "value": "on",
@@ -52,12 +45,12 @@
     },
     "hasChanges": true
   },
-  "formStateChangeText": "[消失] //*[@id='root']/div/div/div/div/div[1]/div[2]/div[3]/div/div/label[1]/input: \"[object Object]\"\n[消失] //div[normalize-space(.)='密码登录']: \"[object Object]\"\n[消失] //*[@id='root']/div/div/div/div/div[1]/div[2]/div[3]/div/div/label[2]/input: \"[object Object]\"\n[消失] //div[normalize-space(.)='验证码登录']: \"[object Object]\"\n[消失] //*[@id='username']: \"[object Object]\"\n[消失] //*[@id='pass64']: \"[object Object]\"\n[消失] //*[@id='agree']: \"[object Object]\"",
+  "form_state_change_text": "[消失] //*[@id='pass64']: \"{'value': 'Supcon@1304'}\"\n[消失] //*[@id='root']/div/div/div/div/div[1]/div[2]/div[3]/div/div/label[2]/input: \"{'value': 'on', 'checked': False}\"\n[消失] //*[@id='username']: \"{'value': '15700078644'}\"\n[消失] //*[@id='root']/div/div/div/div/div[1]/div[2]/div[3]/div/div/label[1]/input: \"{'value': 'on', 'checked': True}\"\n[消失] //div[normalize-space(.)='验证码登录']: \"{'ariaSelected': 'false'}\"\n[消失] //div[normalize-space(.)='密码登录']: \"{'ariaSelected': 'true'}\"\n[消失] //*[@id='agree']: \"{'value': 'on', 'checked': False}\"",
   "classification": {
     "category": "toggle",
-    "elementType": "checkbox",
+    "element_type": "checkbox",
     "hints": [
-      "这是一个开关/复选框操作，请在 diff 中查找 checked/unchecked 状态变化来判断是\"打开\"还是\"关闭\"。"
+      "这是一个开关/复选框操作，请在 diff 中查找 checked/unchecked 状态变化。"
     ]
   }
 }

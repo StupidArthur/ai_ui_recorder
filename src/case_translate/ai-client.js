@@ -1,19 +1,21 @@
 /**
- * ai-client.js - OpenAI SDK 纯封装层
+ * ai-client.js - LLM 客户端封装层
  *
- * 本模块只做两件事：
- * 1. callChat(messages, options) — 调用 OpenAI Chat Completions API
- * 2. cleanMarkdownFence(text) — 清理 AI 输出中多余的 markdown 代码围栏
+ * 本模块提供以下能力：
+ * 1. callChat(messages, options) — 调用 LLM Chat Completions API（纯文本）
+ * 2. callVision(imageBase64, prompt, options) — 调用视觉模型分析图片
+ * 3. cleanMarkdownFence(text) — 清理 AI 输出中多余的 markdown 代码围栏
  *
  * 所有 Prompt 构建逻辑已迁移至 prompts/ 子模块，
  * 所有工作流编排逻辑已迁移至 workflow.js。
  *
  * 使用方式：
- *   import { callChat, cleanMarkdownFence } from './ai-client.js';
+ *   import { callChat, callVision, cleanMarkdownFence } from './ai-client.js';
  *   const reply = await callChat([
  *     { role: 'system', content: '...' },
  *     { role: 'user', content: '...' },
  *   ]);
+ *   const description = await callVision(imageBase64, '描述这张图片');
  */
 
 import OpenAI from 'openai';
@@ -41,7 +43,96 @@ const client = new OpenAI({
 const MAX_RETRIES = 3;
 const BASE_DELAY_MS = 2000;
 
+// ==================== 视觉模型配置 ====================
+
+/** 视觉模型 API 端点（MiniMax M3 使用 Anthropic 格式） */
+const VISION_API_ENDPOINT = 'https://api.minimaxi.com/anthropic/v1/messages';
+
+/** 视觉模型名称 */
+const VISION_MODEL_NAME = 'MiniMax-M3';
+
 // ==================== 核心 API ====================
+
+/**
+ * 调用视觉模型分析图片（MiniMax M3 Anthropic 格式）
+ *
+ * @param {string} imageBase64 - 图片的 base64 编码（不含 data:image/... 前缀）
+ * @param {string} prompt - 分析提示词
+ * @param {Object} [options] - 可选参数
+ * @param {string} [options.mediaType='image/jpeg'] - 图片 MIME 类型
+ * @param {number} [options.maxTokens=1000] - 最大生成 token 数
+ * @param {string} [options.model] - 覆盖默认视觉模型
+ * @returns {Promise<string>} AI 生成的分析文本
+ * @throws {Error} API 调用失败或返回空结果时抛出错误
+ */
+export async function callVision(imageBase64, prompt, options = {}) {
+  const {
+    mediaType = 'image/jpeg',
+    maxTokens = 1000,
+    model = VISION_MODEL_NAME,
+  } = options;
+
+  let lastError;
+
+  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      const response = await fetch(VISION_API_ENDPOINT, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': runtimeAIConfig.apiKey,
+          'anthropic-version': '2023-06-01',
+        },
+        body: JSON.stringify({
+          model,
+          max_tokens: maxTokens,
+          messages: [{
+            role: 'user',
+            content: [
+              {
+                type: 'image',
+                source: {
+                  type: 'base64',
+                  media_type: mediaType,
+                  data: imageBase64,
+                },
+              },
+              {
+                type: 'text',
+                text: prompt,
+              },
+            ],
+          }],
+        }),
+      });
+
+      const result = await response.json();
+
+      // 检查错误
+      if (result.error) {
+        throw new Error(`视觉 API 错误: ${result.error.message || JSON.stringify(result.error)}`);
+      }
+
+      // 提取文本内容（跳过 thinking 块）
+      const textContent = result.content?.find(c => c.type === 'text');
+      if (!textContent?.text) {
+        throw new Error('视觉模型返回空结果');
+      }
+
+      return textContent.text;
+    } catch (error) {
+      lastError = error;
+
+      if (attempt < MAX_RETRIES) {
+        const delay = BASE_DELAY_MS * Math.pow(2, attempt - 1);
+        console.warn(`[视觉模型调用失败，第 ${attempt} 次重试] ${error.message}，${delay}ms 后重试...`);
+        await new Promise((resolve) => setTimeout(resolve, delay));
+      }
+    }
+  }
+
+  throw new Error(`[视觉模型调用彻底失败] 已重试 ${MAX_RETRIES} 次，最终错误: ${lastError.message}`);
+}
 
 /**
  * 调用 OpenAI Chat Completions API（带全局重试机制）

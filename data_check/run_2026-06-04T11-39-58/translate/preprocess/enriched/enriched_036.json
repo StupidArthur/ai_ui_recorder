@@ -3,29 +3,21 @@
   "type": "click",
   "element": {
     "tag": "span",
-    "id": null,
-    "name": null,
-    "type": null,
-    "text": "返回确认目标",
-    "placeholder": null,
-    "title": null,
-    "href": null,
     "xpath": "//span[normalize-space(.)='返回确认目标']",
-    "label": null
+    "text": "返回确认目标"
   },
   "url": "https://tpt.supcon.com/xpt-super-process-control2/control-config?language=zh-CN&theme=light&token=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySW5mbyI6IntcInVzZXJcIjp7XCJpZFwiOjEzOTkxLFwidXNlcm5hbWVcIjpcIjE1NzAwMDc4NjQ0XCIsXCJuaWNrTmFtZVwiOlwi5L2Z5rO96LaFXCIsXCJ0eXBlXCI6MSxcImNsaWVudElkXCI6XCJhZG1pbi1hcHBcIixcInBob25lXCI6XCIxNTcwMDA3ODY0NFwifSxcInBhcmVudE9yZ1wiOntcImlkXCI6MSxcImNvZGVcIjpcIm9icERlZmF1bHRPcmdcIixcIm5hbWVcIjpcIum7mOiupOe7hOe7h1wifSxcInJvb3RPcmdcIjp7XCJpZFwiOjEsXCJjb2RlXCI6XCJvYnBEZWZhdWx0T3JnXCIsXCJuYW1lXCI6XCLpu5jorqTnu4Tnu4dcIn0sXCJyb2xlc1wiOlt7XCJpZFwiOjQsXCJjb2RlXCI6XCJzeXN0ZW1Sb2xlXCIsXCJuYW1lXCI6XCLnrqHnkIblkZjop5LoibJcIn0se1wiaWRcIjo1LFwiY29kZVwiOlwibm9ybWFsUm9sZVwiLFwibmFtZVwiOlwi5pmu6YCa55So5oi36KeS6ImyXCJ9XX0iLCJ1c2VyX25hbWUiOiIxNTcwMDA3ODY0NCIsIm5pY2tOYW1lIjoi5L2Z5rO96LaFIiwic2NvcGUiOlsiYWxsIl0sImlkIjoxMzk5MSwiZXhwIjoxNzgzMTY1MjE2LCJ0eXBlIjoxLCJhdXRob3JpdGllcyI6WyI1X-aZrumAmueUqOaIt-inkuiJsiIsIjRf566h55CG5ZGY6KeS6ImyIl0sImp0aSI6ImQxNmM1NTQ1LTYyMWItNDk4Mi1iY2M3LWE4Mjc1YzlmZWM1ZCIsImNsaWVudF9pZCI6ImFkbWluLWFwcCJ9.WHtr2JbeGLA7O1SXTedJOQZl9tsyNySonO1X5HO7Ynq88Gz5EuMf2lxaMVcAyA-K3pMSH5Czg9qNsaGhUtJz3cFrHWEThGvSfVUz7M0gNwQvpKO5Jazn6O_t4QFuSel9JY_oVJ9hdaGjEUsRbrxlHOsJKYGYb9Gk5CaCLUG7J2nKHlhqSE3qwzTo5x83gldX2JG082Um0UyX8aL7UADylLljF_sXA73PsOmU5RBEanTlHXcY5JdTszd1Mf2Bm6oh3T_mOqAmqFGQ4Y-9iIUAECCWfgRAP4hitUva3qfKiEfOSkZetq3c7A16ykKiDRC2Rj8eVXQ2JniHhWGk4IxO_A&tpt-token=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySW5mbyI6IntcInVzZXJcIjp7XCJpZFwiOjEzOTkxLFwidXNlcm5hbWVcIjpcIjE1NzAwMDc4NjQ0XCIsXCJuaWNrTmFtZVwiOlwi5L2Z5rO96LaFXCIsXCJ0eXBlXCI6MSxcImNsaWVudElkXCI6XCJhZG1pbi1hcHBcIixcInBob25lXCI6XCIxNTcwMDA3ODY0NFwifSxcInBhcmVudE9yZ1wiOntcImlkXCI6MSxcImNvZGVcIjpcIm9icERlZmF1bHRPcmdcIixcIm5hbWVcIjpcIum7mOiupOe7hOe7h1wifSxcInJvb3RPcmdcIjp7XCJpZFwiOjEsXCJjb2RlXCI6XCJvYnBEZWZhdWx0T3JnXCIsXCJuYW1lXCI6XCLpu5jorqTnu4Tnu4dcIn0sXCJyb2xlc1wiOlt7XCJpZFwiOjQsXCJjb2RlXCI6XCJzeXN0ZW1Sb2xlXCIsXCJuYW1lXCI6XCLnrqHnkIblkZjop5LoibJcIn0se1wiaWRcIjo1LFwiY29kZVwiOlwibm9ybWFsUm9sZVwiLFwibmFtZVwiOlwi5pmu6YCa55So5oi36KeS6ImyXCJ9XX0iLCJ1c2VyX25hbWUiOiIxNTcwMDA3ODY0NCIsIm5pY2tOYW1lIjoi5L2Z5rO96LaFIiwic2NvcGUiOlsiYWxsIl0sImlkIjoxMzk5MSwiZXhwIjoxNzgzMTY1MjE2LCJ0eXBlIjoxLCJhdXRob3JpdGllcyI6WyI1X-aZrumAmueUqOaIt-inkuiJsiIsIjRf566h55CG5ZGY6KeS6ImyIl0sImp0aSI6ImQxNmM1NTQ1LTYyMWItNDk4Mi1iY2M3LWE4Mjc1YzlmZWM1ZCIsImNsaWVudF9pZCI6ImFkbWluLWFwcCJ9.WHtr2JbeGLA7O1SXTedJOQZl9tsyNySonO1X5HO7Ynq88Gz5EuMf2lxaMVcAyA-K3pMSH5Czg9qNsaGhUtJz3cFrHWEThGvSfVUz7M0gNwQvpKO5Jazn6O_t4QFuSel9JY_oVJ9hdaGjEUsRbrxlHOsJKYGYb9Gk5CaCLUG7J2nKHlhqSE3qwzTo5x83gldX2JG082Um0UyX8aL7UADylLljF_sXA73PsOmU5RBEanTlHXcY5JdTszd1Mf2Bm6oh3T_mOqAmqFGQ4Y-9iIUAECCWfgRAP4hitUva3qfKiEfOSkZetq3c7A16ykKiDRC2Rj8eVXQ2JniHhWGk4IxO_A&agentId=019e9270-383d-7000-bac7-6cc8c38b9b6d&agentName=ai_demo&controlDataSource=offline&controlDataGuide=0&TptSaasUserTenantryId=ATL43NW8",
-  "title": "App",
+  "page_title": "App",
   "timestamp": 1780573305891,
-  "formStateDelta": {
+  "form_state": {
     "//input[@name='file']": {
       "value": ""
     }
   },
-  "snapshotDiff": "（preSnapshot 和 postSnapshot 完全相同，操作未引起可见的 UI 变化）",
-  "preSnapshot": "[见 record/snapshots/snapshot_035.txt]",
-  "postSnapshot": "[见 record/snapshots/snapshot_036.txt]",
-  "contextExcerpt": null,
-  "formStateChanges": {
+  "snapshot_diff": "（preSnapshot 和 postSnapshot 完全相同，操作未引起可见的 UI 变化）",
+  "pre_snapshot": "[见 record/snapshots/snapshot_035.txt]",
+  "post_snapshot": "[见 record/snapshots/snapshot_036.txt]",
+  "form_state_changes": {
     "changed": {},
     "added": {
       "//input[@name='file']": {
@@ -37,29 +29,29 @@
         "value": "on",
         "checked": false
       },
-      "//*[@id='root']/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/label[1]/div[1]": {
-        "ariaSelected": "false"
-      },
       "//*[@id='root']/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/label[2]/input[1]": {
         "value": "on",
         "checked": true
       },
-      "//*[@id='root']/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/label[2]/div[1]": {
-        "ariaSelected": "true"
+      "//textarea[@name='hiddenTextarea']": {
+        "value": " "
+      },
+      "//*[@id='root']/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/label[1]/div[1]": {
+        "ariaSelected": "false"
       },
       "//input[@placeholder='搜索Agent']": {
         "value": ""
       },
-      "//textarea[@name='hiddenTextarea']": {
-        "value": " "
+      "//*[@id='root']/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/label[2]/div[1]": {
+        "ariaSelected": "true"
       }
     },
     "hasChanges": true
   },
-  "formStateChangeText": "[新增] //input[@name='file']: \"[object Object]\"\n[消失] //*[@id='root']/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/label[1]/input[1]: \"[object Object]\"\n[消失] //*[@id='root']/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/label[1]/div[1]: \"[object Object]\"\n[消失] //*[@id='root']/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/label[2]/input[1]: \"[object Object]\"\n[消失] //*[@id='root']/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/label[2]/div[1]: \"[object Object]\"\n[消失] //input[@placeholder='搜索Agent']: \"[object Object]\"\n[消失] //textarea[@name='hiddenTextarea']: \"[object Object]\"",
+  "form_state_change_text": "[新增] //input[@name='file']: \"{'value': ''}\"\n[消失] //*[@id='root']/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/label[1]/input[1]: \"{'value': 'on', 'checked': False}\"\n[消失] //*[@id='root']/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/label[2]/input[1]: \"{'value': 'on', 'checked': True}\"\n[消失] //textarea[@name='hiddenTextarea']: \"{'value': ' '}\"\n[消失] //*[@id='root']/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/label[1]/div[1]: \"{'ariaSelected': 'false'}\"\n[消失] //input[@placeholder='搜索Agent']: \"{'value': ''}\"\n[消失] //*[@id='root']/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/label[2]/div[1]: \"{'ariaSelected': 'true'}\"",
   "classification": {
     "category": "other",
-    "elementType": "other",
+    "element_type": "other",
     "hints": [
       "Diff 显示 UI 无变化，这可能是一次没有视觉反馈的点击，或者效果是异步的。"
     ]

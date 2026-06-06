@@ -3,20 +3,13 @@
   "type": "click",
   "element": {
     "tag": "div",
-    "id": null,
-    "name": null,
-    "type": null,
-    "text": "专家模式",
-    "placeholder": null,
-    "title": null,
-    "href": null,
     "xpath": "//div[normalize-space(.)='专家模式']",
-    "label": null
+    "text": "专家模式"
   },
   "url": "https://tpt.supcon.com/tpt-app/#/home/chat/main?TptSaasUserTenantryId=ATL43NW8",
-  "title": "TPT",
+  "page_title": "TPT",
   "timestamp": 1780573246341,
-  "formStateDelta": {
+  "form_state": {
     "//*[@id='chat_input_textarea']": {
       "value": ""
     },
@@ -59,11 +52,11 @@
       "value": " "
     }
   },
-  "snapshotDiff": "+   - text \"AI 操作优化专家\"\n+   - text \"TPT操作参数优化\"\n+   - text \"AI 复杂控制专家\"\n+   - text \"TPT复杂控制\"\n+   - text \"AI 回路整定专家\"\n+   - text \"TPT控制回路整定\"\n+   - text \"AI 生产参数预测专家\"\n+   - text \"TPT参数预测\"\n+   - text \"AI 生产异常检测专家\"\n+   - text \"TPT异常检测\"\n+   - text \"预测控制专家\"\n+   - text \"MPC 预测控制\"\n+   - text \"回路整定专家\"\n+   - text \"PID回路整定\"\n+   - text \"能耗瓶颈分析专家\"\n+   - text \"识别装置能耗瓶颈\"\n+   - text \"AI 换热网络优化专家\"\n+   - text \"AI换热网络优化设计\"\n+   - text \"工业知识专家\"\n+   - text \"工业知识答疑解惑\"\n+   - text \"报表分析专家\"\n+   - text \"生产报表与报告分析\"\n+   - text \"智能问数专家\"\n+   - text \"智能问数与结果分析\"",
-  "preSnapshot": "[见 record/snapshots/snapshot_019.txt]",
-  "postSnapshot": "[见 record/snapshots/snapshot_020.txt]",
-  "contextExcerpt": "  - generic\n    - text \"，\"\n    - text \"余泽超\"\n    - text \"我能为您做什么？\"\n    - textbox \"废热锅炉管束泄漏：1#裂解炉汽包连续三日补水增量超10吨，壳程水质化验重点关注啥？\"\n    - image \"结束任务备份\"\n    - text \"专家模式\"  ← [操作目标]\n    - image \"语音x36\"\n    - image \"SendOutlined\"\n    - text \"您可以问我\"\n    - text \"：\"\n    - text \"换一批\"",
-  "formStateChanges": {
+  "snapshot_diff": "+   - text \"AI 操作优化专家\"\n+   - text \"TPT操作参数优化\"\n+   - text \"AI 复杂控制专家\"\n+   - text \"TPT复杂控制\"\n+   - text \"AI 回路整定专家\"\n+   - text \"TPT控制回路整定\"\n+   - text \"AI 生产参数预测专家\"\n+   - text \"TPT参数预测\"\n+   - text \"AI 生产异常检测专家\"\n+   - text \"TPT异常检测\"\n+   - text \"预测控制专家\"\n+   - text \"MPC 预测控制\"\n+   - text \"回路整定专家\"\n+   - text \"PID回路整定\"\n+   - text \"能耗瓶颈分析专家\"\n+   - text \"识别装置能耗瓶颈\"\n+   - text \"AI 换热网络优化专家\"\n+   - text \"AI换热网络优化设计\"\n+   - text \"工业知识专家\"\n+   - text \"工业知识答疑解惑\"\n+   - text \"报表分析专家\"\n+   - text \"生产报表与报告分析\"\n+   - text \"智能问数专家\"\n+   - text \"智能问数与结果分析\"",
+  "pre_snapshot": "[见 record/snapshots/snapshot_019.txt]",
+  "post_snapshot": "[见 record/snapshots/snapshot_020.txt]",
+  "context_excerpt": "  - generic\n    - text \"，\"\n    - text \"余泽超\"\n    - text \"我能为您做什么？\"\n    - textbox \"废热锅炉管束泄漏：1#裂解炉汽包连续三日补水增量超10吨，壳程水质化验重点关注啥？\"\n    - image \"结束任务备份\"\n    - text \"专家模式\"  ← [操作目标]\n    - image \"语音x36\"\n    - image \"SendOutlined\"\n    - text \"您可以问我\"\n    - text \"：\"\n    - text \"换一批\"",
+  "form_state_changes": {
     "changed": {},
     "added": {},
     "removed": {
@@ -71,23 +64,23 @@
         "value": "on",
         "checked": true
       },
-      "//div[normalize-space(.)='浅色']": {
-        "ariaSelected": "true"
+      "/html/body/div[3]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[4]/div[2]/div[1]/div[1]/div[1]/button[1]": {
+        "ariaChecked": "true"
       },
       "/html/body/div[3]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/label[2]/input[1]": {
         "value": "on",
         "checked": false
       },
+      "//div[normalize-space(.)='浅色']": {
+        "ariaSelected": "true"
+      },
+      "/html/body/div[3]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[4]/div[2]/div[1]/div[1]/div[3]/button[1]": {
+        "ariaChecked": "true"
+      },
       "//div[normalize-space(.)='深色']": {
         "ariaSelected": "false"
       },
-      "/html/body/div[3]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[4]/div[2]/div[1]/div[1]/div[1]/button[1]": {
-        "ariaChecked": "true"
-      },
       "/html/body/div[3]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[4]/div[2]/div[1]/div[1]/div[2]/button[1]": {
-        "ariaChecked": "true"
-      },
-      "/html/body/div[3]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[4]/div[2]/div[1]/div[1]/div[3]/button[1]": {
         "ariaChecked": "true"
       },
       "/html/body/div[3]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[5]/div[2]/div[1]/button[1]": {
@@ -96,10 +89,10 @@
     },
     "hasChanges": true
   },
-  "formStateChangeText": "[消失] /html/body/div[3]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/label[1]/input[1]: \"[object Object]\"\n[消失] //div[normalize-space(.)='浅色']: \"[object Object]\"\n[消失] /html/body/div[3]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/label[2]/input[1]: \"[object Object]\"\n[消失] //div[normalize-space(.)='深色']: \"[object Object]\"\n[消失] /html/body/div[3]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[4]/div[2]/div[1]/div[1]/div[1]/button[1]: \"[object Object]\"\n[消失] /html/body/div[3]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[4]/div[2]/div[1]/div[1]/div[2]/button[1]: \"[object Object]\"\n[消失] /html/body/div[3]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[4]/div[2]/div[1]/div[1]/div[3]/button[1]: \"[object Object]\"\n[消失] /html/body/div[3]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[5]/div[2]/div[1]/button[1]: \"[object Object]\"",
+  "form_state_change_text": "[消失] /html/body/div[3]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/label[1]/input[1]: \"{'value': 'on', 'checked': True}\"\n[消失] /html/body/div[3]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[4]/div[2]/div[1]/div[1]/div[1]/button[1]: \"{'ariaChecked': 'true'}\"\n[消失] /html/body/div[3]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/label[2]/input[1]: \"{'value': 'on', 'checked': False}\"\n[消失] //div[normalize-space(.)='浅色']: \"{'ariaSelected': 'true'}\"\n[消失] /html/body/div[3]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[4]/div[2]/div[1]/div[1]/div[3]/button[1]: \"{'ariaChecked': 'true'}\"\n[消失] //div[normalize-space(.)='深色']: \"{'ariaSelected': 'false'}\"\n[消失] /html/body/div[3]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[4]/div[2]/div[1]/div[1]/div[2]/button[1]: \"{'ariaChecked': 'true'}\"\n[消失] /html/body/div[3]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[5]/div[2]/div[1]/button[1]: \"{'ariaChecked': 'false'}\"",
   "classification": {
     "category": "other",
-    "elementType": "other",
+    "element_type": "other",
     "hints": []
   }
 }

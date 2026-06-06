@@ -3,20 +3,13 @@
   "type": "click",
   "element": {
     "tag": "div",
-    "id": null,
-    "name": null,
-    "type": null,
-    "text": "",
-    "placeholder": null,
-    "title": null,
-    "href": null,
     "xpath": "/html/body/div[3]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[2]/div[2]/div[1]/div[3]/div[1]/div[1]/div[2]",
-    "label": null
+    "text": ""
   },
   "url": "https://tpt.supcon.com/tpt-app/#/home/chat/main?TptSaasUserTenantryId=ATL43NW8",
-  "title": "TPT",
+  "page_title": "TPT",
   "timestamp": 1780573227292,
-  "formStateDelta": {
+  "form_state": {
     "//*[@id='chat_input_textarea']": {
       "value": ""
     },
@@ -85,35 +78,34 @@
       "ariaChecked": "false"
     }
   },
-  "snapshotDiff": "-     - text \"裂解气压缩机振动异常：五段出口支撑轴瓦温度连续两天超报警值，为啥振动值突然上涨？\"\n-     - text \"急冷水乳化现象：急冷水系统浊度持续上升且油水分层困难，破乳剂注入点是否需调整？\"\n-     - text \"急冷油系统换热效率下降：急冷油泵出口压力波动伴随换热器温差缩小，怎么排查粘度过高问题？\"\n-     - text \"裂解气压缩机振动异常：机组非驱动端轴振值频繁超过报警阈值，可能是什么原因导致的？\"\n+     - text \"高压脱丙烷塔法兰泄漏：T-470塔顶液相出口法兰接连出现乙烷渗漏，密封面该重点检查啥？\"\n+     - text \"冷箱通道压降增大：多个冷箱单元压差同步上升，是否存在水分或重烃冻结堵塞？\"\n+     - text \"乙烯球罐BOG回收异常：压缩机入口压力偏低导致蒸发气回收率下降，预冷系统是否运行异常？\"\n+     - text \"裂解炉烧嘴火焰不稳定：多个烧嘴出现闪烁或偏烧现象，燃料气组分变化是否影响燃烧效率？\"\n-   - text \"余泽超\"\n-   - text \"黄金会员\"\n-   - text \"偏好设置\"\n-   - text \"系统管理\"\n-   - text \"反馈记录\"\n-   - text \"通知公告\"\n-   - text \"退出登录\"\n-     - generic \"Close 偏好设置 外观 segmented control 模式 简洁模式 常规模式 使用中 详细模式 字体大小 20 小号 默认 大号 超大号 首页显示内容 案例介绍 推荐问题\"\n+     - generic \"Close 偏好设置 外观 segmented control 模式 简洁模式 常规模式 详细模式 使用中 字体大小 20 小号 默认 大号 超大号 首页显示内容 案例介绍 推荐问题\"\n-       - text \"使用中\"\n+       - text \"使用中\"",
-  "preSnapshot": "[见 record/snapshots/snapshot_007.txt]",
-  "postSnapshot": "[见 record/snapshots/snapshot_008.txt]",
-  "contextExcerpt": null,
-  "formStateChanges": {
+  "snapshot_diff": "-     - text \"裂解气压缩机振动异常：五段出口支撑轴瓦温度连续两天超报警值，为啥振动值突然上涨？\"\n-     - text \"急冷水乳化现象：急冷水系统浊度持续上升且油水分层困难，破乳剂注入点是否需调整？\"\n-     - text \"急冷油系统换热效率下降：急冷油泵出口压力波动伴随换热器温差缩小，怎么排查粘度过高问题？\"\n-     - text \"裂解气压缩机振动异常：机组非驱动端轴振值频繁超过报警阈值，可能是什么原因导致的？\"\n+     - text \"高压脱丙烷塔法兰泄漏：T-470塔顶液相出口法兰接连出现乙烷渗漏，密封面该重点检查啥？\"\n+     - text \"冷箱通道压降增大：多个冷箱单元压差同步上升，是否存在水分或重烃冻结堵塞？\"\n+     - text \"乙烯球罐BOG回收异常：压缩机入口压力偏低导致蒸发气回收率下降，预冷系统是否运行异常？\"\n+     - text \"裂解炉烧嘴火焰不稳定：多个烧嘴出现闪烁或偏烧现象，燃料气组分变化是否影响燃烧效率？\"\n-   - text \"余泽超\"\n-   - text \"黄金会员\"\n-   - text \"偏好设置\"\n-   - text \"系统管理\"\n-   - text \"反馈记录\"\n-   - text \"通知公告\"\n-   - text \"退出登录\"\n-     - generic \"Close 偏好设置 外观 segmented control 模式 简洁模式 常规模式 使用中 详细模式 字体大小 20 小号 默认 大号 超大号 首页显示内容 案例介绍 推荐问题\"\n+     - generic \"Close 偏好设置 外观 segmented control 模式 简洁模式 常规模式 详细模式 使用中 字体大小 20 小号 默认 大号 超大号 首页显示内容 案例介绍 推荐问题\"\n+       - text \"详细模式\"\n-       - text \"详细模式\"",
+  "pre_snapshot": "[见 record/snapshots/snapshot_007.txt]",
+  "post_snapshot": "[见 record/snapshots/snapshot_008.txt]",
+  "form_state_changes": {
     "changed": {},
     "added": {
       "/html/body/div[3]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/label[1]/input[1]": {
         "value": "on",
         "checked": true
       },
-      "//div[normalize-space(.)='浅色']": {
-        "ariaSelected": "true"
+      "/html/body/div[3]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[4]/div[2]/div[1]/div[1]/div[1]/button[1]": {
+        "ariaChecked": "true"
       },
       "/html/body/div[3]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/label[2]/input[1]": {
         "value": "on",
         "checked": false
       },
-      "//div[normalize-space(.)='深色']": {
-        "ariaSelected": "false"
-      },
-      "/html/body/div[3]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[4]/div[2]/div[1]/div[1]/div[1]/button[1]": {
-        "ariaChecked": "true"
-      },
-      "/html/body/div[3]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[4]/div[2]/div[1]/div[1]/div[2]/button[1]": {
-        "ariaChecked": "true"
+      "//div[normalize-space(.)='浅色']": {
+        "ariaSelected": "true"
       },
       "/html/body/div[3]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[4]/div[2]/div[1]/div[1]/div[3]/button[1]": {
         "ariaChecked": "false"
+      },
+      "//div[normalize-space(.)='深色']": {
+        "ariaSelected": "false"
+      },
+      "/html/body/div[3]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[4]/div[2]/div[1]/div[1]/div[2]/button[1]": {
+        "ariaChecked": "true"
       },
       "/html/body/div[3]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[5]/div[2]/div[1]/button[1]": {
         "ariaChecked": "false"
@@ -122,10 +114,10 @@
     "removed": {},
     "hasChanges": true
   },
-  "formStateChangeText": "[新增] /html/body/div[3]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/label[1]/input[1]: \"[object Object]\"\n[新增] //div[normalize-space(.)='浅色']: \"[object Object]\"\n[新增] /html/body/div[3]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/label[2]/input[1]: \"[object Object]\"\n[新增] //div[normalize-space(.)='深色']: \"[object Object]\"\n[新增] /html/body/div[3]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[4]/div[2]/div[1]/div[1]/div[1]/button[1]: \"[object Object]\"\n[新增] /html/body/div[3]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[4]/div[2]/div[1]/div[1]/div[2]/button[1]: \"[object Object]\"\n[新增] /html/body/div[3]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[4]/div[2]/div[1]/div[1]/div[3]/button[1]: \"[object Object]\"\n[新增] /html/body/div[3]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[5]/div[2]/div[1]/button[1]: \"[object Object]\"",
+  "form_state_change_text": "[新增] /html/body/div[3]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/label[1]/input[1]: \"{'value': 'on', 'checked': True}\"\n[新增] /html/body/div[3]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[4]/div[2]/div[1]/div[1]/div[1]/button[1]: \"{'ariaChecked': 'true'}\"\n[新增] /html/body/div[3]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/label[2]/input[1]: \"{'value': 'on', 'checked': False}\"\n[新增] //div[normalize-space(.)='浅色']: \"{'ariaSelected': 'true'}\"\n[新增] /html/body/div[3]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[4]/div[2]/div[1]/div[1]/div[3]/button[1]: \"{'ariaChecked': 'false'}\"\n[新增] //div[normalize-space(.)='深色']: \"{'ariaSelected': 'false'}\"\n[新增] /html/body/div[3]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[4]/div[2]/div[1]/div[1]/div[2]/button[1]: \"{'ariaChecked': 'true'}\"\n[新增] /html/body/div[3]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[5]/div[2]/div[1]/button[1]: \"{'ariaChecked': 'false'}\"",
   "classification": {
     "category": "other",
-    "elementType": "other",
+    "element_type": "other",
     "hints": []
   }
 }

@@ -1,24 +1,19 @@
 {
   "index": 22,
   "type": "input",
-  "originalType": "click",
-  "inputValue": "有哪些可以问",
+  "original_type": "click",
+  "input_value": "有哪些可以问",
   "element": {
     "tag": "textarea",
-    "id": "chat_input_textarea",
-    "name": null,
-    "type": null,
-    "text": "",
-    "placeholder": "输入内容进行提问",
-    "title": null,
-    "href": null,
     "xpath": "//*[@id='chat_input_textarea']",
-    "label": null
+    "text": "",
+    "id": "chat_input_textarea",
+    "placeholder": "输入内容进行提问"
   },
   "url": "https://tpt.supcon.com/tpt-app/#/home/chat/main?TptSaasUserTenantryId=ATL43NW8",
-  "title": "TPT",
+  "page_title": "TPT",
   "timestamp": 1780573251006,
-  "formStateDelta": {
+  "form_state": {
     "//*[@id='chat_input_textarea']": {
       "value": ""
     },
@@ -64,11 +59,11 @@
       "value": " "
     }
   },
-  "snapshotDiff": "-     - textbox \"输入内容进行提问\"\n+     - textbox \"输入内容进行提问\" [value=\"有哪些可以问\"]",
-  "preSnapshot": "[见 record/snapshots/snapshot_021.txt]",
-  "postSnapshot": "[见 record/snapshots/snapshot_022.txt]",
-  "contextExcerpt": "  - generic\n    - text \"您好\"\n    - text \"，\"\n    - text \"余泽超\"\n    - text \"我能为您做什么？\"\n    - textbox \"输入内容进行提问\"  ← [操作目标]\n    - text \"智能问数专家\"\n    - switch [checked]\n    - image \"语音x36\"\n    - image \"SendOutlined\"\n    - text \"点击使用工业Agent\"",
-  "formStateChanges": {
+  "snapshot_diff": "-     - textbox \"输入内容进行提问\"\n+     - textbox \"输入内容进行提问\" [value=\"有哪些可以问\"]",
+  "pre_snapshot": "[见 record/snapshots/snapshot_021.txt]",
+  "post_snapshot": "[见 record/snapshots/snapshot_022.txt]",
+  "context_excerpt": "  - generic\n    - text \"您好\"\n    - text \"，\"\n    - text \"余泽超\"\n    - text \"我能为您做什么？\"\n    - textbox \"输入内容进行提问\"  ← [操作目标]\n    - text \"智能问数专家\"\n    - switch [checked]\n    - image \"语音x36\"\n    - image \"SendOutlined\"\n    - text \"点击使用工业Agent\"",
+  "form_state_changes": {
     "changed": {},
     "added": {
       "//*[@id='root']/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[3]/button[1]": {
@@ -78,10 +73,10 @@
     "removed": {},
     "hasChanges": true
   },
-  "formStateChangeText": "[新增] //*[@id='root']/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[3]/button[1]: \"[object Object]\"",
+  "form_state_change_text": "[新增] //*[@id='root']/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[3]/button[1]: \"{'ariaChecked': 'true'}\"",
   "classification": {
     "category": "form-input",
-    "elementType": "input",
+    "element_type": "input",
     "hints": [
       "这是一次文本输入操作（由语义归并识别），用户在此元素中输入了 \"有哪些可以问\"。请以此值为准描述操作。"
     ]

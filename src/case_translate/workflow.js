@@ -892,9 +892,7 @@ function deriveFallbackDescription(action) {
     case 'keypress':
       return `按下按键 ${action.key || ''}`.trim();
     case 'input':
-      return action.inputValue === '[MASKED]'
-        ? `在 ${identify} 输入密码（已脱敏）`
-        : `在 ${identify} 输入 ${action.inputValue || ''}`.trim();
+      return `在 ${identify} 输入 ${action.inputValue || ''}`.trim();
     case 'click':
       return `点击 ${identify}`;
     default:
@@ -1021,11 +1019,7 @@ function deriveBasisFromEvidence(action) {
   }
 
   if (action.inputValue) {
-    basis.push(
-      action.inputValue === '[MASKED]'
-        ? 'inputValue: 密码已脱敏'
-        : `inputValue: ${action.inputValue}`,
-    );
+    basis.push(`inputValue: ${action.inputValue}`);
   }
 
   if (action.originalType && action.originalType !== action.type) {
@@ -1071,7 +1065,7 @@ function deriveConfidenceFromEvidence(action) {
   if (Array.isArray(action.classification?.hints) && action.classification.hints.length > 0) {
     score += 0.15;
   }
-  if (action.inputValue && action.inputValue !== '[MASKED]') {
+  if (action.inputValue) {
     score += 0.1;
   }
   const diff = String(action.snapshotDiff || '');

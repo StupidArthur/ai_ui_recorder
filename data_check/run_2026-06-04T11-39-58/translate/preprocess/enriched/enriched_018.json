@@ -3,20 +3,13 @@
   "type": "click",
   "element": {
     "tag": "span",
-    "id": null,
-    "name": null,
-    "type": null,
-    "text": "",
-    "placeholder": null,
-    "title": null,
-    "href": null,
     "xpath": "/html/body/div[3]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[4]/div[2]/div[1]/div[1]/div[3]/button[1]/span[1]",
-    "label": null
+    "text": ""
   },
   "url": "https://tpt.supcon.com/tpt-app/#/home/chat/main?TptSaasUserTenantryId=ATL43NW8",
-  "title": "TPT",
+  "page_title": "TPT",
   "timestamp": 1780573240340,
-  "formStateDelta": {
+  "form_state": {
     "//*[@id='chat_input_textarea']": {
       "value": ""
     },
@@ -85,15 +78,12 @@
       "ariaChecked": "false"
     }
   },
-  "snapshotDiff": "-     - textbox \"裂解炉在线清焦周期缩短：3#裂解炉TLX废锅压差上升速率加快，清焦后仅两周又异常？\"\n+     - textbox \"废热锅炉管束泄漏：1#裂解炉汽包连续三日补水增量超10吨，壳程水质化验重点关注啥？\"\n+     - text \"分离冷箱冻堵风险：甲烷产品分析仪显示CO₂含量跳涨，冷箱哪段管线最可能冰堵？\"\n-     - text \"裂解气压缩机振动异常：机组非驱动端轴振值频繁超过报警阈值，可能是什么原因导致的？\"\n-     - text \"丙烯制冷压缩机喘振：防喘振阀开度突然增大且出口压力波动剧烈，操作参数如何优化？\"\n-     - text \"高压脱丙烷塔法兰泄漏：T-470塔顶液相出口法兰接连出现乙烷渗漏，密封面该重点检查啥？\"\n+     - text \"急冷水塔塔盘堵塞：塔釜重组分采样发现焦粒增多，压差异常升高咋监控分布器状态？\"\n+     - text \"裂解炉在线清焦周期缩短：3#裂解炉TLX废锅压差上升速率加快，清焦后仅两周又异常？\"\n+     - text \"点击使用工业Agent\"\n+     - text \"查看更多\"\n+     - text \"\"\n+     - text \"阀门异常检测-通用\"\n+     - text \"离子膜预测Agent\"\n+     - text \"AI PID整定 Agent\"\n+     - text \"一次盐水折流槽pH智能控制离线\"\n+     - text \"\"\n+     - text \"自定义\"\n-       - switch [unchecked]\n+       - switch [checked]",
-  "preSnapshot": "[见 record/snapshots/snapshot_017.txt]",
-  "postSnapshot": "[见 record/snapshots/snapshot_018.txt]",
-  "contextExcerpt": null,
-  "formStateChanges": null,
-  "formStateChangeText": null,
+  "snapshot_diff": "-     - textbox \"裂解炉在线清焦周期缩短：3#裂解炉TLX废锅压差上升速率加快，清焦后仅两周又异常？\"\n+     - textbox \"废热锅炉管束泄漏：1#裂解炉汽包连续三日补水增量超10吨，壳程水质化验重点关注啥？\"\n+     - text \"分离冷箱冻堵风险：甲烷产品分析仪显示CO₂含量跳涨，冷箱哪段管线最可能冰堵？\"\n-     - text \"裂解气压缩机振动异常：机组非驱动端轴振值频繁超过报警阈值，可能是什么原因导致的？\"\n-     - text \"丙烯制冷压缩机喘振：防喘振阀开度突然增大且出口压力波动剧烈，操作参数如何优化？\"\n-     - text \"高压脱丙烷塔法兰泄漏：T-470塔顶液相出口法兰接连出现乙烷渗漏，密封面该重点检查啥？\"\n+     - text \"急冷水塔塔盘堵塞：塔釜重组分采样发现焦粒增多，压差异常升高咋监控分布器状态？\"\n+     - text \"裂解炉在线清焦周期缩短：3#裂解炉TLX废锅压差上升速率加快，清焦后仅两周又异常？\"\n+     - text \"点击使用工业Agent\"\n+     - text \"查看更多\"\n+     - text \"\"\n+     - text \"阀门异常检测-通用\"\n+     - text \"离子膜预测Agent\"\n+     - text \"AI PID整定 Agent\"\n+     - text \"一次盐水折流槽pH智能控制离线\"\n+     - text \"\"\n+     - text \"自定义\"\n-       - switch [unchecked]\n+       - switch [checked]",
+  "pre_snapshot": "[见 record/snapshots/snapshot_017.txt]",
+  "post_snapshot": "[见 record/snapshots/snapshot_018.txt]",
   "classification": {
     "category": "other",
-    "elementType": "other",
+    "element_type": "other",
     "hints": []
   }
 }

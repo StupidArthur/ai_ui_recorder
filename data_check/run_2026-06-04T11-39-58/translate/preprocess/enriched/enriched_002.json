@@ -1,24 +1,20 @@
 {
   "index": 2,
   "type": "input",
-  "originalType": "click",
-  "inputValue": "[MASKED]",
+  "original_type": "click",
+  "input_value": "Supcon@1304",
   "element": {
     "tag": "input",
-    "id": "pass64",
-    "name": null,
-    "type": "password",
-    "text": "",
-    "placeholder": "请输入密码",
-    "title": null,
-    "href": null,
     "xpath": "//*[@id='pass64']",
-    "label": null
+    "text": "",
+    "id": "pass64",
+    "inputType": "password",
+    "placeholder": "请输入密码"
   },
   "url": "https://tpt.supcon.com/tpt-app/#/login",
-  "title": "TPT",
+  "page_title": "TPT",
   "timestamp": 1780573211264,
-  "formStateDelta": {
+  "form_state": {
     "//*[@id='root']/div/div/div/div/div[1]/div[2]/div[3]/div/div/label[1]/input": {
       "value": "on",
       "checked": true
@@ -44,11 +40,11 @@
       "checked": false
     }
   },
-  "snapshotDiff": "-   - textbox \"请输入密码\" [required]\n+   - textbox \"请输入密码\" [required, value=\"•••••••••••\"]",
-  "preSnapshot": "[见 record/snapshots/snapshot_001.txt]",
-  "postSnapshot": "[见 record/snapshots/snapshot_002.txt]",
-  "contextExcerpt": "- WebArea \"TPT\"\n  - text \"\"\n  - textbox \"请输入用户名\" [required, value=\"15700078644\"]\n  - text \"\"\n  - textbox \"请输入密码\" [required]  ← [操作目标]\n  - image \"eye-invisible\"\n  - checkbox \" \" [unchecked]\n  - text \" \"\n  - text \"勾选即表示您同意并接受\"\n  - text \"隐私政策\"",
-  "formStateChanges": {
+  "snapshot_diff": "-   - textbox \"请输入密码\" [required]\n+   - textbox \"请输入密码\" [required, value=\"•••••••••••\"]",
+  "pre_snapshot": "[见 record/snapshots/snapshot_001.txt]",
+  "post_snapshot": "[见 record/snapshots/snapshot_002.txt]",
+  "context_excerpt": "- WebArea \"TPT\"\n  - text \"\"\n  - textbox \"请输入用户名\" [required, value=\"15700078644\"]\n  - text \"\"\n  - textbox \"请输入密码\" [required]  ← [操作目标]\n  - image \"eye-invisible\"\n  - checkbox \" \" [unchecked]\n  - text \" \"\n  - text \"勾选即表示您同意并接受\"\n  - text \"隐私政策\"",
+  "form_state_changes": {
     "changed": {
       "//*[@id='username']": {
         "from": {
@@ -63,12 +59,12 @@
     "removed": {},
     "hasChanges": true
   },
-  "formStateChangeText": "[变化] //*[@id='username']: \"[object Object]\" → \"[object Object]\"",
+  "form_state_change_text": "[变化] //*[@id='username']: \"{'value': ''}\" → \"{'value': '15700078644'}\"",
   "classification": {
     "category": "form-input",
-    "elementType": "input",
+    "element_type": "input",
     "hints": [
-      "这是一次文本输入操作（由语义归并识别），用户在此元素中输入了 \"[MASKED]\"。请以此值为准描述操作。"
+      "这是一次文本输入操作（由语义归并识别），用户在此元素中输入了 \"Supcon@1304\"。请以此值为准描述操作。"
     ]
   }
 }

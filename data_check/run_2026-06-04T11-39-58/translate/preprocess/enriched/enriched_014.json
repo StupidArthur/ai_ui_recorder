@@ -3,20 +3,13 @@
   "type": "click",
   "element": {
     "tag": "img",
-    "id": null,
-    "name": null,
-    "type": null,
-    "text": "",
-    "placeholder": null,
-    "title": null,
-    "href": null,
     "xpath": "//*[@id='root']/div/div/div/div/div/div[1]/div[1]/div[2]/div[4]/div/div[1]/div[1]/img[2]",
-    "label": null
+    "text": ""
   },
   "url": "https://tpt.supcon.com/tpt-app/#/home/chat/main?TptSaasUserTenantryId=ATL43NW8",
-  "title": "TPT",
+  "page_title": "TPT",
   "timestamp": 1780573233817,
-  "formStateDelta": {
+  "form_state": {
     "//*[@id='chat_input_textarea']": {
       "value": ""
     },
@@ -59,11 +52,10 @@
       "value": " "
     }
   },
-  "snapshotDiff": "+   - text \"余泽超\"\n+   - text \"黄金会员\"\n+   - text \"偏好设置\"\n+   - text \"系统管理\"\n+   - text \"反馈记录\"\n+   - text \"通知公告\"\n+   - text \"退出登录\"",
-  "preSnapshot": "[见 record/snapshots/snapshot_013.txt]",
-  "postSnapshot": "[见 record/snapshots/snapshot_014.txt]",
-  "contextExcerpt": null,
-  "formStateChanges": {
+  "snapshot_diff": "+   - text \"余泽超\"\n+   - text \"黄金会员\"\n+   - text \"偏好设置\"\n+   - text \"系统管理\"\n+   - text \"反馈记录\"\n+   - text \"通知公告\"\n+   - text \"退出登录\"",
+  "pre_snapshot": "[见 record/snapshots/snapshot_013.txt]",
+  "post_snapshot": "[见 record/snapshots/snapshot_014.txt]",
+  "form_state_changes": {
     "changed": {},
     "added": {},
     "removed": {
@@ -71,23 +63,23 @@
         "value": "on",
         "checked": false
       },
-      "//div[normalize-space(.)='浅色']": {
-        "ariaSelected": "false"
+      "/html/body/div[3]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[4]/div[2]/div[1]/div[1]/div[1]/button[1]": {
+        "ariaChecked": "true"
       },
       "/html/body/div[3]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/label[2]/input[1]": {
         "value": "on",
         "checked": true
       },
+      "//div[normalize-space(.)='浅色']": {
+        "ariaSelected": "false"
+      },
+      "/html/body/div[3]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[4]/div[2]/div[1]/div[1]/div[3]/button[1]": {
+        "ariaChecked": "true"
+      },
       "//div[normalize-space(.)='深色']": {
         "ariaSelected": "true"
       },
-      "/html/body/div[3]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[4]/div[2]/div[1]/div[1]/div[1]/button[1]": {
-        "ariaChecked": "true"
-      },
       "/html/body/div[3]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[4]/div[2]/div[1]/div[1]/div[2]/button[1]": {
-        "ariaChecked": "true"
-      },
-      "/html/body/div[3]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[4]/div[2]/div[1]/div[1]/div[3]/button[1]": {
         "ariaChecked": "true"
       },
       "/html/body/div[3]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[5]/div[2]/div[1]/button[1]": {
@@ -96,10 +88,10 @@
     },
     "hasChanges": true
   },
-  "formStateChangeText": "[消失] /html/body/div[3]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/label[1]/input[1]: \"[object Object]\"\n[消失] //div[normalize-space(.)='浅色']: \"[object Object]\"\n[消失] /html/body/div[3]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/label[2]/input[1]: \"[object Object]\"\n[消失] //div[normalize-space(.)='深色']: \"[object Object]\"\n[消失] /html/body/div[3]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[4]/div[2]/div[1]/div[1]/div[1]/button[1]: \"[object Object]\"\n[消失] /html/body/div[3]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[4]/div[2]/div[1]/div[1]/div[2]/button[1]: \"[object Object]\"\n[消失] /html/body/div[3]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[4]/div[2]/div[1]/div[1]/div[3]/button[1]: \"[object Object]\"\n[消失] /html/body/div[3]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[5]/div[2]/div[1]/button[1]: \"[object Object]\"",
+  "form_state_change_text": "[消失] /html/body/div[3]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/label[1]/input[1]: \"{'value': 'on', 'checked': False}\"\n[消失] /html/body/div[3]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[4]/div[2]/div[1]/div[1]/div[1]/button[1]: \"{'ariaChecked': 'true'}\"\n[消失] /html/body/div[3]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/label[2]/input[1]: \"{'value': 'on', 'checked': True}\"\n[消失] //div[normalize-space(.)='浅色']: \"{'ariaSelected': 'false'}\"\n[消失] /html/body/div[3]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[4]/div[2]/div[1]/div[1]/div[3]/button[1]: \"{'ariaChecked': 'true'}\"\n[消失] //div[normalize-space(.)='深色']: \"{'ariaSelected': 'true'}\"\n[消失] /html/body/div[3]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[4]/div[2]/div[1]/div[1]/div[2]/button[1]: \"{'ariaChecked': 'true'}\"\n[消失] /html/body/div[3]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[5]/div[2]/div[1]/button[1]: \"{'ariaChecked': 'true'}\"",
   "classification": {
     "category": "other",
-    "elementType": "other",
+    "element_type": "other",
     "hints": []
   }
 }

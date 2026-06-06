@@ -3,20 +3,13 @@
   "type": "click",
   "element": {
     "tag": "img",
-    "id": null,
-    "name": null,
-    "type": null,
-    "text": "",
-    "placeholder": null,
-    "title": null,
-    "href": null,
     "xpath": "//*[@id='root']/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[2]/div[2]/div[1]/div[2]/div[3]/div[1]/div[1]/div[1]/div[1]/img[1]",
-    "label": null
+    "text": ""
   },
   "url": "https://tpt.supcon.com/tpt-app/#/home/chat/main?TptSaasUserTenantryId=ATL43NW8",
-  "title": "TPT",
+  "page_title": "TPT",
   "timestamp": 1780573265159,
-  "formStateDelta": {
+  "form_state": {
     "//*[@id='chat_input_textarea']": {
       "value": ""
     },
@@ -27,11 +20,10 @@
       "value": " "
     }
   },
-  "snapshotDiff": "-   - text \"点赞\"\n+   - image \"check-circle\"\n+   - text \"感谢您的赞美与肯定\"",
-  "preSnapshot": "[见 record/snapshots/snapshot_023.txt]",
-  "postSnapshot": "[见 record/snapshots/snapshot_024.txt]",
-  "contextExcerpt": null,
-  "formStateChanges": {
+  "snapshot_diff": "-   - text \"点赞\"\n+   - image \"check-circle\"\n+   - text \"感谢您的赞美与肯定\"",
+  "pre_snapshot": "[见 record/snapshots/snapshot_023.txt]",
+  "post_snapshot": "[见 record/snapshots/snapshot_024.txt]",
+  "form_state_changes": {
     "changed": {
       "//*[@id='chat_input_textarea']": {
         "from": {
@@ -48,28 +40,17 @@
       }
     },
     "removed": {
-      "//*[@id='root']/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[3]/button[1]": {
-        "ariaChecked": "true"
-      },
-      "//*[@id='root']/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[2]/div[1]/div[2]/div[2]/div[1]/div[1]/label[1]/input[1]": {
-        "value": "on",
-        "checked": true
-      },
-      "//*[@id='root']/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[2]/div[1]/div[2]/div[2]/div[1]/div[1]/label[1]/div[1]": {
-        "ariaSelected": "true"
-      },
-      "//*[@id='root']/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[2]/div[1]/div[2]/div[2]/div[1]/div[1]/label[2]/input[1]": {
-        "value": "on",
-        "checked": false
-      },
-      "//div[normalize-space(.)='低碳']": {
-        "ariaSelected": "false"
-      },
       "//*[@id='root']/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[2]/div[1]/div[2]/div[2]/div[1]/div[1]/label[3]/input[1]": {
         "value": "on",
         "checked": false
       },
-      "//div[normalize-space(.)='安全']": {
+      "//*[@id='root']/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[3]/button[1]": {
+        "ariaChecked": "true"
+      },
+      "//*[@id='root']/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[2]/div[1]/div[2]/div[2]/div[1]/div[1]/label[1]/div[1]": {
+        "ariaSelected": "true"
+      },
+      "//div[normalize-space(.)='低碳']": {
         "ariaSelected": "false"
       },
       "//*[@id='root']/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[2]/div[1]/div[2]/div[2]/div[1]/div[1]/label[4]/input[1]": {
@@ -79,20 +60,31 @@
       "//div[normalize-space(.)='质量']": {
         "ariaSelected": "false"
       },
+      "//*[@id='root']/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[2]/div[1]/div[2]/div[2]/div[1]/div[1]/label[2]/input[1]": {
+        "value": "on",
+        "checked": false
+      },
       "//*[@id='root']/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[2]/div[1]/div[2]/div[2]/div[1]/div[1]/label[5]/input[1]": {
         "value": "on",
         "checked": false
       },
+      "//*[@id='root']/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[2]/div[1]/div[2]/div[2]/div[1]/div[1]/label[1]/input[1]": {
+        "value": "on",
+        "checked": true
+      },
       "//div[normalize-space(.)='效益']": {
+        "ariaSelected": "false"
+      },
+      "//div[normalize-space(.)='安全']": {
         "ariaSelected": "false"
       }
     },
     "hasChanges": true
   },
-  "formStateChangeText": "[变化] //*[@id='chat_input_textarea']: \"[object Object]\" → \"[object Object]\"\n[新增] //*[@id='root']/div/div/div/div[2]/div[2]/div/div/div[2]/div[1]/div/div[3]/button: \"[object Object]\"\n[消失] //*[@id='root']/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[3]/button[1]: \"[object Object]\"\n[消失] //*[@id='root']/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[2]/div[1]/div[2]/div[2]/div[1]/div[1]/label[1]/input[1]: \"[object Object]\"\n[消失] //*[@id='root']/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[2]/div[1]/div[2]/div[2]/div[1]/div[1]/label[1]/div[1]: \"[object Object]\"\n[消失] //*[@id='root']/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[2]/div[1]/div[2]/div[2]/div[1]/div[1]/label[2]/input[1]: \"[object Object]\"\n[消失] //div[normalize-space(.)='低碳']: \"[object Object]\"\n[消失] //*[@id='root']/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[2]/div[1]/div[2]/div[2]/div[1]/div[1]/label[3]/input[1]: \"[object Object]\"\n[消失] //div[normalize-space(.)='安全']: \"[object Object]\"\n[消失] //*[@id='root']/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[2]/div[1]/div[2]/div[2]/div[1]/div[1]/label[4]/input[1]: \"[object Object]\"\n[消失] //div[normalize-space(.)='质量']: \"[object Object]\"\n[消失] //*[@id='root']/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[2]/div[1]/div[2]/div[2]/div[1]/div[1]/label[5]/input[1]: \"[object Object]\"\n[消失] //div[normalize-space(.)='效益']: \"[object Object]\"",
+  "form_state_change_text": "[变化] //*[@id='chat_input_textarea']: \"{'value': '有哪些可以问'}\" → \"{'value': ''}\"\n[新增] //*[@id='root']/div/div/div/div[2]/div[2]/div/div/div[2]/div[1]/div/div[3]/button: \"{'ariaChecked': 'true'}\"\n[消失] //*[@id='root']/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[2]/div[1]/div[2]/div[2]/div[1]/div[1]/label[3]/input[1]: \"{'value': 'on', 'checked': False}\"\n[消失] //*[@id='root']/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[3]/button[1]: \"{'ariaChecked': 'true'}\"\n[消失] //*[@id='root']/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[2]/div[1]/div[2]/div[2]/div[1]/div[1]/label[1]/div[1]: \"{'ariaSelected': 'true'}\"\n[消失] //div[normalize-space(.)='低碳']: \"{'ariaSelected': 'false'}\"\n[消失] //*[@id='root']/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[2]/div[1]/div[2]/div[2]/div[1]/div[1]/label[4]/input[1]: \"{'value': 'on', 'checked': False}\"\n[消失] //div[normalize-space(.)='质量']: \"{'ariaSelected': 'false'}\"\n[消失] //*[@id='root']/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[2]/div[1]/div[2]/div[2]/div[1]/div[1]/label[2]/input[1]: \"{'value': 'on', 'checked': False}\"\n[消失] //*[@id='root']/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[2]/div[1]/div[2]/div[2]/div[1]/div[1]/label[5]/input[1]: \"{'value': 'on', 'checked': False}\"\n[消失] //*[@id='root']/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[2]/div[1]/div[2]/div[2]/div[1]/div[1]/label[1]/input[1]: \"{'value': 'on', 'checked': True}\"\n[消失] //div[normalize-space(.)='效益']: \"{'ariaSelected': 'false'}\"\n[消失] //div[normalize-space(.)='安全']: \"{'ariaSelected': 'false'}\"",
   "classification": {
     "category": "other",
-    "elementType": "other",
+    "element_type": "other",
     "hints": []
   }
 }

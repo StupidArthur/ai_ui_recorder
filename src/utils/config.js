@@ -153,12 +153,6 @@ export const MERGED_DATA_SUBDIR = 'merged';
  */
 export const DBLCLICK_TIME_THRESHOLD_MS = 500;
 
-/**
- * 密码字段脱敏替代文本
- * 当输入识别检测到 type="password" 的输入框时，用此文本替代真实密码值。
- */
-export const PASSWORD_MASK = '[MASKED]';
-
 // ==================== AI 用例翻译配置 ====================
 
 /**

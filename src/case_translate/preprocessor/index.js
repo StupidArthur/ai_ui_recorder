@@ -6,7 +6,7 @@
  * 将预处理结果写入 preprocessed/ 目录，供 AI 工作流使用。
  *
  * 预处理流程：
- * 1. 批量读取原始 action，执行语义归并（输入识别 + 双击去重 + 密码脱敏）
+ * 1. 批量读取原始 action，执行语义归并（输入识别 + 双击去重）
  *    → 归并报告写入 preprocessed/merged/merge_report.json
  * 2. 计算所有快照对的行级 diff → preprocessed/diffs/
  * 3. 对每个 action：

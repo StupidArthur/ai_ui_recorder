@@ -3,29 +3,21 @@
   "type": "click",
   "element": {
     "tag": "span",
-    "id": null,
-    "name": null,
-    "type": null,
-    "text": "",
-    "placeholder": null,
-    "title": null,
-    "href": null,
     "xpath": "//*[@id='root']/div/div[1]/div[1]/div[1]/span",
-    "label": null
+    "text": ""
   },
   "url": "https://tpt.supcon.com/xpt-super-process-control2/control-config?language=zh-CN&theme=light&token=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySW5mbyI6IntcInVzZXJcIjp7XCJpZFwiOjEzOTkxLFwidXNlcm5hbWVcIjpcIjE1NzAwMDc4NjQ0XCIsXCJuaWNrTmFtZVwiOlwi5L2Z5rO96LaFXCIsXCJ0eXBlXCI6MSxcImNsaWVudElkXCI6XCJhZG1pbi1hcHBcIixcInBob25lXCI6XCIxNTcwMDA3ODY0NFwifSxcInBhcmVudE9yZ1wiOntcImlkXCI6MSxcImNvZGVcIjpcIm9icERlZmF1bHRPcmdcIixcIm5hbWVcIjpcIum7mOiupOe7hOe7h1wifSxcInJvb3RPcmdcIjp7XCJpZFwiOjEsXCJjb2RlXCI6XCJvYnBEZWZhdWx0T3JnXCIsXCJuYW1lXCI6XCLpu5jorqTnu4Tnu4dcIn0sXCJyb2xlc1wiOlt7XCJpZFwiOjQsXCJjb2RlXCI6XCJzeXN0ZW1Sb2xlXCIsXCJuYW1lXCI6XCLnrqHnkIblkZjop5LoibJcIn0se1wiaWRcIjo1LFwiY29kZVwiOlwibm9ybWFsUm9sZVwiLFwibmFtZVwiOlwi5pmu6YCa55So5oi36KeS6ImyXCJ9XX0iLCJ1c2VyX25hbWUiOiIxNTcwMDA3ODY0NCIsIm5pY2tOYW1lIjoi5L2Z5rO96LaFIiwic2NvcGUiOlsiYWxsIl0sImlkIjoxMzk5MSwiZXhwIjoxNzgzMTY1MjE2LCJ0eXBlIjoxLCJhdXRob3JpdGllcyI6WyI1X-aZrumAmueUqOaIt-inkuiJsiIsIjRf566h55CG5ZGY6KeS6ImyIl0sImp0aSI6ImQxNmM1NTQ1LTYyMWItNDk4Mi1iY2M3LWE4Mjc1YzlmZWM1ZCIsImNsaWVudF9pZCI6ImFkbWluLWFwcCJ9.WHtr2JbeGLA7O1SXTedJOQZl9tsyNySonO1X5HO7Ynq88Gz5EuMf2lxaMVcAyA-K3pMSH5Czg9qNsaGhUtJz3cFrHWEThGvSfVUz7M0gNwQvpKO5Jazn6O_t4QFuSel9JY_oVJ9hdaGjEUsRbrxlHOsJKYGYb9Gk5CaCLUG7J2nKHlhqSE3qwzTo5x83gldX2JG082Um0UyX8aL7UADylLljF_sXA73PsOmU5RBEanTlHXcY5JdTszd1Mf2Bm6oh3T_mOqAmqFGQ4Y-9iIUAECCWfgRAP4hitUva3qfKiEfOSkZetq3c7A16ykKiDRC2Rj8eVXQ2JniHhWGk4IxO_A&tpt-token=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySW5mbyI6IntcInVzZXJcIjp7XCJpZFwiOjEzOTkxLFwidXNlcm5hbWVcIjpcIjE1NzAwMDc4NjQ0XCIsXCJuaWNrTmFtZVwiOlwi5L2Z5rO96LaFXCIsXCJ0eXBlXCI6MSxcImNsaWVudElkXCI6XCJhZG1pbi1hcHBcIixcInBob25lXCI6XCIxNTcwMDA3ODY0NFwifSxcInBhcmVudE9yZ1wiOntcImlkXCI6MSxcImNvZGVcIjpcIm9icERlZmF1bHRPcmdcIixcIm5hbWVcIjpcIum7mOiupOe7hOe7h1wifSxcInJvb3RPcmdcIjp7XCJpZFwiOjEsXCJjb2RlXCI6XCJvYnBEZWZhdWx0T3JnXCIsXCJuYW1lXCI6XCLpu5jorqTnu4Tnu4dcIn0sXCJyb2xlc1wiOlt7XCJpZFwiOjQsXCJjb2RlXCI6XCJzeXN0ZW1Sb2xlXCIsXCJuYW1lXCI6XCLnrqHnkIblkZjop5LoibJcIn0se1wiaWRcIjo1LFwiY29kZVwiOlwibm9ybWFsUm9sZVwiLFwibmFtZVwiOlwi5pmu6YCa55So5oi36KeS6ImyXCJ9XX0iLCJ1c2VyX25hbWUiOiIxNTcwMDA3ODY0NCIsIm5pY2tOYW1lIjoi5L2Z5rO96LaFIiwic2NvcGUiOlsiYWxsIl0sImlkIjoxMzk5MSwiZXhwIjoxNzgzMTY1MjE2LCJ0eXBlIjoxLCJhdXRob3JpdGllcyI6WyI1X-aZrumAmueUqOaIt-inkuiJsiIsIjRf566h55CG5ZGY6KeS6ImyIl0sImp0aSI6ImQxNmM1NTQ1LTYyMWItNDk4Mi1iY2M3LWE4Mjc1YzlmZWM1ZCIsImNsaWVudF9pZCI6ImFkbWluLWFwcCJ9.WHtr2JbeGLA7O1SXTedJOQZl9tsyNySonO1X5HO7Ynq88Gz5EuMf2lxaMVcAyA-K3pMSH5Czg9qNsaGhUtJz3cFrHWEThGvSfVUz7M0gNwQvpKO5Jazn6O_t4QFuSel9JY_oVJ9hdaGjEUsRbrxlHOsJKYGYb9Gk5CaCLUG7J2nKHlhqSE3qwzTo5x83gldX2JG082Um0UyX8aL7UADylLljF_sXA73PsOmU5RBEanTlHXcY5JdTszd1Mf2Bm6oh3T_mOqAmqFGQ4Y-9iIUAECCWfgRAP4hitUva3qfKiEfOSkZetq3c7A16ykKiDRC2Rj8eVXQ2JniHhWGk4IxO_A&agentId=019e9270-383d-7000-bac7-6cc8c38b9b6d&agentName=ai_demo&controlDataSource=offline&controlDataGuide=0&TptSaasUserTenantryId=ATL43NW8",
-  "title": "App",
+  "page_title": "App",
   "timestamp": 1780573296838,
-  "formStateDelta": {
+  "form_state": {
     "//input[@name='file']": {
       "value": ""
     }
   },
-  "snapshotDiff": "-   - Iframe \"supgpt-obp-iframe\"\n+   - text \"我的Agent\"\n+   - text \"·\"\n+   - text \"一触即达\"\n+   - text \"下载TPT运行平台\"\n+   - radiogroup \"segmented control\"\n+     - radio \"对话生成\" [unchecked]\n+     - text \"对话生成\"\n+     - radio \"组态生成\" [checked]\n+     - text \"组态生成\"\n+   - text \"全部\"\n+   - text \"模拟\"\n+   - text \"优化\"\n+   - text \"控制\"\n+   - text \"评估\"\n+   - text \"预测\"\n+   - text \"统计\"\n+   - text \"新增分组\"\n+   - image \"plus-circle\"\n+   - text \"新增Agent\"\n+   - image \"上传文件\"\n+   - text \"导入Agent\"\n+   - image \"search\"\n+   - textbox \"搜索Agent\"\n+   - text \"全部\"\n+   - text \"MPC\"\n+   - text \"AI\"\n+   - text \"ai_demo\"\n+   - text \"私有\"\n+   - text \"控制\"\n+   - text \"AI\"\n+   - text \"--\"\n+   - text \"模型配置\"\n+   - text \"未完成\"\n+   - text \"推理验证\"\n+   - text \"启用配置\"\n+   - text \"未完成\"\n+   - image \"stop\"\n+   - text \"\"\n+   - text \"创建时间\"\n+   - text \"2026-06-04 19:41:28\"\n+   - image \"。。。\"\n+   - text \"AI_Control_1\"\n+   - text \"私有\"\n+   - text \"控制\"\n+   - text \"AI\"\n+   - text \"--\"\n+   - text \"模型配置\"\n+   - text \"失败\"\n+   - text \"推理验证\"\n+   - text \"启用配置\"\n+   - text \"未完成\"\n+   - image \"stop\"\n+   - text \"\"\n+   - text \"创建时间\"\n+   - text \"2026-05-28 13:37:58\"\n+   - image \"。。。\"",
-  "preSnapshot": "[见 record/snapshots/snapshot_033.txt]",
-  "postSnapshot": "[见 record/snapshots/snapshot_034.txt]",
-  "contextExcerpt": null,
-  "formStateChanges": {
+  "snapshot_diff": "-   - Iframe \"supgpt-obp-iframe\"\n+   - text \"我的Agent\"\n+   - text \"·\"\n+   - text \"一触即达\"\n+   - text \"下载TPT运行平台\"\n+   - radiogroup \"segmented control\"\n+     - radio \"对话生成\" [unchecked]\n+     - text \"对话生成\"\n+     - radio \"组态生成\" [checked]\n+     - text \"组态生成\"\n+   - text \"全部\"\n+   - text \"模拟\"\n+   - text \"优化\"\n+   - text \"控制\"\n+   - text \"评估\"\n+   - text \"预测\"\n+   - text \"统计\"\n+   - text \"新增分组\"\n+   - image \"plus-circle\"\n+   - text \"新增Agent\"\n+   - image \"上传文件\"\n+   - text \"导入Agent\"\n+   - image \"search\"\n+   - textbox \"搜索Agent\"\n+   - text \"全部\"\n+   - text \"MPC\"\n+   - text \"AI\"\n+   - text \"ai_demo\"\n+   - text \"私有\"\n+   - text \"控制\"\n+   - text \"AI\"\n+   - text \"--\"\n+   - text \"模型配置\"\n+   - text \"未完成\"\n+   - text \"推理验证\"\n+   - text \"启用配置\"\n+   - text \"未完成\"\n+   - image \"stop\"\n+   - text \"\"\n+   - text \"创建时间\"\n+   - text \"2026-06-04 19:41:28\"\n+   - image \"。。。\"\n+   - text \"AI_Control_1\"\n+   - text \"私有\"\n+   - text \"控制\"\n+   - text \"AI\"\n+   - text \"--\"\n+   - text \"模型配置\"\n+   - text \"失败\"\n+   - text \"推理验证\"\n+   - text \"启用配置\"\n+   - text \"未完成\"\n+   - image \"stop\"\n+   - text \"\"\n+   - text \"创建时间\"\n+   - text \"2026-05-28 13:37:58\"\n+   - image \"。。。\"",
+  "pre_snapshot": "[见 record/snapshots/snapshot_033.txt]",
+  "post_snapshot": "[见 record/snapshots/snapshot_034.txt]",
+  "form_state_changes": {
     "changed": {},
     "added": {
       "//input[@name='file']": {
@@ -37,24 +29,17 @@
         "value": "on",
         "checked": false
       },
-      "//*[@id='root']/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/label[1]/div[1]": {
-        "ariaSelected": "false"
+      "/html/body/div[4]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[6]/div[2]/div[1]/div[2]/div[1]/div[1]/div[1]/label[2]/span[1]/input[1]": {
+        "value": "0",
+        "checked": true
       },
       "//*[@id='root']/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/label[2]/input[1]": {
         "value": "on",
         "checked": true
       },
-      "//*[@id='root']/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/label[2]/div[1]": {
-        "ariaSelected": "true"
-      },
-      "//input[@placeholder='搜索Agent']": {
-        "value": ""
-      },
-      "//textarea[@name='hiddenTextarea']": {
-        "value": " "
-      },
-      "//input[@placeholder='输入Agent 名称']": {
-        "value": "ai_demo"
+      "//*[@id='rc_select_1']": {
+        "value": "ai_equip",
+        "ariaExpanded": "false"
       },
       "//textarea[@placeholder='输入Agent 描述']": {
         "value": ""
@@ -62,14 +47,6 @@
       "//*[@id='rc_select_0']": {
         "value": "",
         "ariaExpanded": "false"
-      },
-      "//*[@id='rc_select_1']": {
-        "value": "ai_equip",
-        "ariaExpanded": "false"
-      },
-      "/html/body/div[4]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[5]/div[1]/div[2]/div[1]/div[1]/div[1]/label[1]/span[1]/input[1]": {
-        "value": "1",
-        "checked": false
       },
       "/html/body/div[4]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[5]/div[1]/div[2]/div[1]/div[1]/div[1]/label[2]/span[1]/input[1]": {
         "value": "0",
@@ -79,29 +56,44 @@
         "value": "offline",
         "checked": true
       },
-      "/html/body/div[4]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[6]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/label[2]/span[1]/input[1]": {
-        "value": "online",
-        "checked": false
+      "//*[@id='rc_select_2']": {
+        "value": "",
+        "ariaExpanded": "false"
+      },
+      "//input[@placeholder='输入Agent 名称']": {
+        "value": "ai_demo"
+      },
+      "//textarea[@name='hiddenTextarea']": {
+        "value": " "
       },
       "/html/body/div[4]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[6]/div[2]/div[1]/div[2]/div[1]/div[1]/div[1]/label[1]/span[1]/input[1]": {
         "value": "1",
         "checked": false
       },
-      "/html/body/div[4]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[6]/div[2]/div[1]/div[2]/div[1]/div[1]/div[1]/label[2]/span[1]/input[1]": {
-        "value": "0",
-        "checked": true
+      "//*[@id='root']/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/label[1]/div[1]": {
+        "ariaSelected": "false"
       },
-      "//*[@id='rc_select_2']": {
-        "value": "",
-        "ariaExpanded": "false"
+      "/html/body/div[4]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[6]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/label[2]/span[1]/input[1]": {
+        "value": "online",
+        "checked": false
+      },
+      "//input[@placeholder='搜索Agent']": {
+        "value": ""
+      },
+      "/html/body/div[4]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[5]/div[1]/div[2]/div[1]/div[1]/div[1]/label[1]/span[1]/input[1]": {
+        "value": "1",
+        "checked": false
+      },
+      "//*[@id='root']/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/label[2]/div[1]": {
+        "ariaSelected": "true"
       }
     },
     "hasChanges": true
   },
-  "formStateChangeText": "[新增] //input[@name='file']: \"[object Object]\"\n[消失] //*[@id='root']/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/label[1]/input[1]: \"[object Object]\"\n[消失] //*[@id='root']/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/label[1]/div[1]: \"[object Object]\"\n[消失] //*[@id='root']/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/label[2]/input[1]: \"[object Object]\"\n[消失] //*[@id='root']/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/label[2]/div[1]: \"[object Object]\"\n[消失] //input[@placeholder='搜索Agent']: \"[object Object]\"\n[消失] //textarea[@name='hiddenTextarea']: \"[object Object]\"\n[消失] //input[@placeholder='输入Agent 名称']: \"[object Object]\"\n[消失] //textarea[@placeholder='输入Agent 描述']: \"[object Object]\"\n[消失] //*[@id='rc_select_0']: \"[object Object]\"\n[消失] //*[@id='rc_select_1']: \"[object Object]\"\n[消失] /html/body/div[4]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[5]/div[1]/div[2]/div[1]/div[1]/div[1]/label[1]/span[1]/input[1]: \"[object Object]\"\n[消失] /html/body/div[4]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[5]/div[1]/div[2]/div[1]/div[1]/div[1]/label[2]/span[1]/input[1]: \"[object Object]\"\n[消失] /html/body/div[4]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[6]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/label[1]/span[1]/input[1]: \"[object Object]\"\n[消失] /html/body/div[4]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[6]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/label[2]/span[1]/input[1]: \"[object Object]\"\n[消失] /html/body/div[4]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[6]/div[2]/div[1]/div[2]/div[1]/div[1]/div[1]/label[1]/span[1]/input[1]: \"[object Object]\"\n[消失] /html/body/div[4]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[6]/div[2]/div[1]/div[2]/div[1]/div[1]/div[1]/label[2]/span[1]/input[1]: \"[object Object]\"\n[消失] //*[@id='rc_select_2']: \"[object Object]\"",
+  "form_state_change_text": "[新增] //input[@name='file']: \"{'value': ''}\"\n[消失] //*[@id='root']/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/label[1]/input[1]: \"{'value': 'on', 'checked': False}\"\n[消失] /html/body/div[4]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[6]/div[2]/div[1]/div[2]/div[1]/div[1]/div[1]/label[2]/span[1]/input[1]: \"{'value': '0', 'checked': True}\"\n[消失] //*[@id='root']/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/label[2]/input[1]: \"{'value': 'on', 'checked': True}\"\n[消失] //*[@id='rc_select_1']: \"{'value': 'ai_equip', 'ariaExpanded': 'false'}\"\n[消失] //textarea[@placeholder='输入Agent 描述']: \"{'value': ''}\"\n[消失] //*[@id='rc_select_0']: \"{'value': '', 'ariaExpanded': 'false'}\"\n[消失] /html/body/div[4]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[5]/div[1]/div[2]/div[1]/div[1]/div[1]/label[2]/span[1]/input[1]: \"{'value': '0', 'checked': True}\"\n[消失] /html/body/div[4]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[6]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/label[1]/span[1]/input[1]: \"{'value': 'offline', 'checked': True}\"\n[消失] //*[@id='rc_select_2']: \"{'value': '', 'ariaExpanded': 'false'}\"\n[消失] //input[@placeholder='输入Agent 名称']: \"{'value': 'ai_demo'}\"\n[消失] //textarea[@name='hiddenTextarea']: \"{'value': ' '}\"\n[消失] /html/body/div[4]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[6]/div[2]/div[1]/div[2]/div[1]/div[1]/div[1]/label[1]/span[1]/input[1]: \"{'value': '1', 'checked': False}\"\n[消失] //*[@id='root']/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/label[1]/div[1]: \"{'ariaSelected': 'false'}\"\n[消失] /html/body/div[4]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[6]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/label[2]/span[1]/input[1]: \"{'value': 'online', 'checked': False}\"\n[消失] //input[@placeholder='搜索Agent']: \"{'value': ''}\"\n[消失] /html/body/div[4]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/div[5]/div[1]/div[2]/div[1]/div[1]/div[1]/label[1]/span[1]/input[1]: \"{'value': '1', 'checked': False}\"\n[消失] //*[@id='root']/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/label[2]/div[1]: \"{'ariaSelected': 'true'}\"",
   "classification": {
     "category": "other",
-    "elementType": "other",
+    "element_type": "other",
     "hints": []
   }
 }

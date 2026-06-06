@@ -70,3 +70,19 @@ coverage/
 *.bak
 *.swp
 *.swo
+
+# Binary / compiled / packaged
+*.exe
+*.dll
+*.so
+*.dylib
+*.pyd
+*.zip
+*.whl
+*.egg
+*.tar.gz
+*.tgz
+
+# YAML configs (含本地 LLM 配置和第三方规格文件)
+*.yaml
+*.yml

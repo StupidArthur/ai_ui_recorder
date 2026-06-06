@@ -15,7 +15,7 @@
       "rule": "input-recognize",
       "from": "click",
       "to": "input",
-      "inputValue": "[MASKED]"
+      "inputValue": "Supcon@1304"
     },
     {
       "index": 22,

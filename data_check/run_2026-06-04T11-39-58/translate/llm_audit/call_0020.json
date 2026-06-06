@@ -1,17 +1,34 @@
 {
   "id": "call_0020",
   "phase": "phase4",
-  "label": "agent txt chunk steps 36~38",
+  "label": "chunk 1~20",
   "extra": {
     "stepIndices": [
-      36,
-      37,
-      38
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20
     ],
-    "round": 3
+    "round": 1
   },
-  "startedAt": "2026-06-04T15:05:59.844Z",
-  "finishedAt": "2026-06-04T15:06:02.988Z",
+  "startedAt": "2026-06-06T05:53:05.261319+00:00",
+  "finishedAt": "2026-06-06T05:53:19.416501+00:00",
   "request": {
     "model": "MiniMax-M2.7-highspeed",
     "temperature": 0.1,
@@ -19,26 +36,82 @@
     "messages": [
       {
         "role": "system",
-        "content": "# Role: 资深 Web UI 自动化 Agent 测试用例编写专家\r\n\r\n## Profile\r\n- **Author**: @yuzechao\r\n- **Version**: 2.0\r\n- **Language**: 中文\r\n- **Description**: 将结构化步骤按业务逻辑聚合为供无视觉 Agent 执行的逻辑步骤，输出 XML（非 JSON），由程序渲染为 case_4_agents.txt。\r\n- **背景**: 下游 Agent 仅依赖文本中的 DOM 特征定位。输入为本窗纯文本步骤（动作 + 界面响应）。\r\n\r\n## Goals\r\n- 输出**唯一** `<agent_chunk>` XML，含逻辑步骤与 `totalConsume`。\r\n- 每条 `micro` 含可执行级定位描述（可见文案、placeholder、输入值）。\r\n- `totalConsume` = 各 `logical_step@consume` 之和，且 ≤ 本窗输入步数。\r\n\r\n## Constraints\r\n- **禁止 JSON**；禁止 Markdown 代码围栏。\r\n- **机器只读标签内内容**：核心内容必须写在 XML 标签内；标签外废话将被丢弃。\r\n- **严禁跳步**：弹窗须先写打开再写窗内操作。\r\n- **强 DOM 定位**：禁止「点击某个按钮」等笼统描述。\r\n- 无法形成闭环的尾部步骤可丢弃，不计入 `consume`。\r\n\r\n## Output Format\r\n\r\n```xml\r\n<agent_chunk totalConsume=\"5\">\r\n  <use_case name=\"用例名称\" purpose=\"测试目的\"/>\r\n  <logical_step consume=\"4\">\r\n    <name>完成用户登录</name>\r\n    <micro>在「请输入用户名」输入 15700078644</micro>\r\n    <micro>点击「立即登录」按钮</micro>\r\n  </logical_step>\r\n  <logical_step consume=\"1\">\r\n    <name>打开用户菜单</name>\r\n    <micro>点击右上角用户头像图标</micro>\r\n  </logical_step>\r\n</agent_chunk>\r\n```\r\n\r\n| 节点 | 说明 |\r\n|------|------|\r\n| `agent_chunk@totalConsume` | 本窗消耗底层步骤总数 |\r\n| `use_case` | 首轮必填 name/purpose；后续滑窗可省略 |\r\n| `logical_step@consume` | 该逻辑步骤消耗的底层步数 |\r\n| `micro` | 可执行微观动作，可多行 |\r\n\r\n## Workflows\r\n1. 阅读纯文本步骤流。\r\n2. 划分 logical_step，编写 micro。\r\n3. 统计 consume 之和 → totalConsume。\r\n4. 仅输出 XML，立即结束。\r\n\r\n## Initialization\r\n我是 case→agents 聚合 Agent。请提供本窗纯文本步骤。我只输出 `<agent_chunk>` XML，不含 JSON。"
+        "content": "# Role: 资深 Web UI 自动化 Agent 测试用例编写专家\n\n## Profile\n- **Author**: @yuzechao\n- **Version**: 2.0\n- **Language**: 中文\n- **Description**: 将结构化步骤按业务逻辑聚合为供无视觉 Agent 执行的逻辑步骤，输出 XML（非 JSON），由程序渲染为 case_4_agents.txt。\n- **背景**: 下游 Agent 仅依赖文本中的 DOM 特征定位。输入为本窗纯文本步骤（动作 + 界面响应）。\n\n## Goals\n- 输出**唯一** `<agent_chunk>` XML，含逻辑步骤与 `totalConsume`。\n- 每条 `micro` 含可执行级定位描述（可见文案、placeholder、输入值）。\n- `totalConsume` = 各 `logical_step@consume` 之和，且 ≤ 本窗输入步数。\n\n## Constraints\n- **禁止 JSON**；禁止 Markdown 代码围栏。\n- **机器只读标签内内容**：核心内容必须写在 XML 标签内；标签外废话将被丢弃。\n- **严禁跳步**：弹窗须先写打开再写窗内操作。\n- **强 DOM 定位**：禁止「点击某个按钮」等笼统描述。\n- 无法形成闭环的尾部步骤可丢弃，不计入 `consume`。\n\n## Output Format\n\n```xml\n<agent_chunk totalConsume=\"5\">\n  <use_case name=\"用例名称\" purpose=\"测试目的\"/>\n  <logical_step consume=\"4\">\n    <name>完成用户登录</name>\n    <micro>在「请输入用户名」输入 15700078644</micro>\n    <micro>点击「立即登录」按钮</micro>\n  </logical_step>\n  <logical_step consume=\"1\">\n    <name>打开用户菜单</name>\n    <micro>点击右上角用户头像图标</micro>\n  </logical_step>\n</agent_chunk>\n```\n\n| 节点 | 说明 |\n|------|------|\n| `agent_chunk@totalConsume` | 本窗消耗底层步骤总数 |\n| `use_case` | 首轮必填 name/purpose；后续滑窗可省略 |\n| `logical_step@consume` | 该逻辑步骤消耗的底层步数 |\n| `micro` | 可执行微观动作，可多行 |\n\n## Workflows\n1. 阅读纯文本步骤流。\n2. 划分 logical_step，编写 micro。\n3. 统计 consume 之和 → totalConsume。\n4. 仅输出 XML，立即结束。\n\n## Initialization\n我是 case→agents 聚合 Agent。请提供本窗纯文本步骤。我只输出 `<agent_chunk>` XML，不含 JSON。"
       },
       {
         "role": "user",
-        "content": "请根据以下按时间顺序排列的底层步骤记录（纯文本），进行业务逻辑聚合并输出 <agent_chunk> XML：\n\n步骤 36:\n- 动作: 点击\"返回确认目标\"按钮\n- 界面响应: 无可见变化\n\n步骤 37:\n- 动作: 点击文本为\"下载模板\"的按钮\n- 界面响应: 无可见变化\n\n步骤 38:\n- 动作: 点击触发文件下载的链接\n- 界面响应: 无可见变化"
+        "content": "请根据以下按时间顺序排列的底层步骤记录（纯文本），进行业务逻辑聚合并输出 <agent_chunk> XML：\n\n步骤 1:\n- 动作: 在「请输入用户名」文本框中输入手机号\n- 界面响应: 输入框内容由空变为「15700078644」，表单状态已更新\n\n步骤 2:\n- 动作: 在「请输入密码」密码框中输入密码\n- 界面响应: 密码框内容由空变为掩码形式（•••••••••••），表单状态已更新\n\n步骤 3:\n- 动作: 点击协议勾选区域\n- 界面响应: 无可见变化\n\n步骤 4:\n- 动作: 在同意协议复选框中点击勾选\n- 界面响应: 复选框从未选中状态变为已选中状态\n\n步骤 5:\n- 动作: 点击「立即登录」按钮\n- 界面响应: 登录表单消失，页面跳转到工作台界面，显示「我的对话」「我的」「Agent」「我的应用」「我的数据」「我的模型」等导航项，以及用户信息「余泽超」「14000」\n\n步骤 6:\n- 动作: 点击用户头像图片\n- 界面响应: 页面左侧滑出用户菜单面板，显示「余泽超」「黄金会员」「偏好设置」「系统管理」「反馈记录」「通知公告」「退出登录」等选项\n\n步骤 7:\n- 动作: 点击用户菜单中的「偏好设置」选项\n- 界面响应: 弹出偏好设置面板，显示外观（浅色/深色切换）、模式（简洁/常规/详细模式）、字体大小滑块（当前值20）、首页显示内容开关（案例介绍、推荐问题）、Agent显示所有对话过程开关、「恢复默认设置」按钮\n\n步骤 8:\n- 动作: 点击模式选项区域中的某项\n- 界面响应: 模式选择状态发生变化，「详细模式」不再标记为「使用中」状态\n\n步骤 9:\n- 动作: 点击「显示所有对话过程」开关按钮\n- 界面响应: 该开关从未选中状态变为已选中状态\n\n步骤 10:\n- 动作: 点击推荐问题列表中的某项\n- 界面响应: 聊天输入框内容更新为新的推荐问题，界面出现Agent入口区域（工业Agent、各类Agent名称列表），「显示所有对话过程」开关变为选中状态\n\n步骤 11:\n- 动作: 点击「深色」主题选项\n- 界面响应: 无可见变化\n\n步骤 12:\n- 动作: 点击深色主题单选按钮\n- 界面响应: 浅色主题单选按钮取消选中，深色主题单选按钮变为选中状态，界面恢复为初始推荐问题列表\n\n步骤 13:\n- 动作: 点击「Close」关闭按钮\n- 界面响应: 偏好设置面板关闭，聊天输入框恢复为空，推荐问题区域重新显示\n\n步骤 14:\n- 动作: 点击用户头像图片区域\n- 界面响应: 页面右侧弹出用户菜单，显示用户名「余泽超」、会员等级「黄金会员」及「偏好设置」「系统管理」「反馈记录」「通知公告」「退出登录」等菜单项\n\n步骤 15:\n- 动作: 点击「偏好设置」菜单项\n- 界面响应: 用户菜单关闭，偏好设置面板重新展开，当前主题为深色模式，各开关保持选中状态\n\n步骤 16:\n- 动作: 点击「恢复默认设置」按钮\n- 界面响应: 偏好设置重置：主题由深色切换为浅色，多个开关项（案例介绍、推荐问题等）由选中状态变为取消选中，推荐问题列表内容已刷新，用户菜单区域关闭\n\n步骤 17:\n- 动作: 点击推荐问题列表区域\n- 界面响应: 推荐问题列表内容更新，偏好设置面板中「详细模式」标签移至「使用中」右侧\n\n步骤 18:\n- 动作: 点击偏好设置面板中第3个开关按钮\n- 界面响应: 该开关由取消选中变为选中状态，首页显示内容恢复显示工业Agent入口、查看更多及多个Agent卡片（阀门异常检测-通用、离子膜预测Agent、AI PID整定 Agent等）\n\n步骤 19:\n- 动作: 点击「关闭」按钮关闭偏好设置面板\n- 界面响应: 偏好设置面板已关闭，页面恢复至主界面状态\n\n步骤 20:\n- 动作: 点击「专家模式」标签\n- 界面响应: 页面新增显示多个AI专家卡片，包括AI操作优化专家、AI复杂控制专家、AI回路整定专家、AI生产参数预测专家、预测控制专家、回路整定专家、能耗瓶颈分析专家、AI换热网络优化专家、工业知识专家、报表分析专家、智能问数专家等"
       }
     ]
   },
   "response": {
-    "raw": "<think>\n用户提供了3个底层步骤，需要我聚合成逻辑步骤并输出XML。\n\n分析这3个步骤：\n- 步骤36: 点击\"返回确认目标\"按钮\n- 步骤37: 点击文本为\"下载模板\"的按钮\n- 步骤38: 点击触发文件下载的链接\n\n这3个步骤都是与\"下载模板\"功能相关的操作，可以聚合为一个逻辑步骤：下载模板文件。\n\nconsume = 3（因为有3个底层步骤）\n\n输出XML：\n</think>\n\n```xml\n<agent_chunk totalConsume=\"3\">\n  <use_case name=\"下载模板文件\" purpose=\"获取导入数据模板\"/>\n  <logical_step consume=\"3\">\n    <name>下载导入模板</name>\n    <micro>点击「返回确认目标」按钮</micro>\n    <micro>点击文本为「下载模板」的按钮</micro>\n    <micro>点击触发文件下载的链接</micro>\n  </logical_step>\n</agent_chunk>\n```"
+    "raw": "<think>\n用户要求我根据提供的纯文本步骤记录，进行业务逻辑聚合并输出 `<agent_chunk>` XML。\n\n让我分析这些步骤：\n\n1. **登录流程（步骤1-5）**：\n   - 步骤1：在用户名输入框输入15700078644\n   - 步骤2：在密码输入框输入密码\n   - 步骤3-4：勾选协议复选框\n   - 步骤5：点击登录按钮\n   这一组consume=5\n\n2. **打开用户菜单（步骤6）**：\n   - 步骤6：点击用户头像\n   这一组consume=1\n\n3. **偏好设置-初次打开与模式切换（步骤7-9）**：\n   - 步骤7：点击\"偏好设置\"\n   - 步骤8：切换模式选项\n   - 步骤9：点击\"显示所有对话过程\"开关\n   这一组consume=3\n\n4. **推荐问题与Agent入口（步骤10）**：\n   - 步骤10：点击推荐问题\n   这一组consume=1\n\n5. **主题切换-深色模式（步骤11-13）**：\n   - 步骤11-12：切换到深色主题\n   - 步骤13：关闭偏好设置面板\n   这一组consume=3\n\n6. **重新打开偏好设置（步骤14-15）**：\n   - 步骤14：点击用户头像\n   - 步骤15：点击偏好设置菜单项\n   这一组consume=2\n\n7. **恢复默认设置（步骤16-19）**：\n   - 步骤16：点击恢复默认设置\n   - 步骤17-19：调整开关并关闭面板\n   这一组consume=4\n\n8. **专家模式标签（步骤20）**：\n   - 步骤20：点击专家模式标签\n   这一组consume=1\n\ntotalConsume = 5+1+3+1+3+2+4+1 = 20\n\n验证步骤完整性：\n- 登录环节占5个步骤（1-5）\n- 用户菜单操作占1个步骤（6）\n- 偏好设置初次配置占3个步骤（7-9）\n- 推荐问题选择占1个步骤（10）\n- 深色主题应用占3个步骤（11-13）\n- 偏好设置重新访问占2个步骤（14-15）\n- 系统重置占4个步骤（16-19）\n- 专家模式激活占1个步骤（20）\n\n总计20个步骤完整覆盖所有操作流程。\n</think>\n\n```xml\n<agent_chunk totalConsume=\"20\">\n  <use_case name=\"用户登录与偏好设置管理\" purpose=\"验证用户登录流程及偏好设置功能\"/>\n  <logical_step consume=\"5\">\n    <name>完成用户登录</name>\n    <micro>在「请输入用户名」文本框中输入 15700078644</micro>\n    <micro>在「请输入密码」密码框中输入密码</micro>\n    <micro>点击协议勾选区域以勾选同意协议复选框</micro>\n    <micro>点击「立即登录」按钮</micro>\n  </logical_step>\n  <logical_step consume=\"1\">\n    <name>打开用户菜单</name>\n    <micro>点击用户头像图片区域</micro>\n  </logical_step>\n  <logical_step consume=\"3\">\n    <name>进入偏好设置并切换模式</name>\n    <micro>点击用户菜单中的「偏好设置」选项</micro>\n    <micro>点击模式选项区域中的某项切换模式</micro>\n    <micro>点击「显示所有对话过程」开关按钮</micro>\n  </logical_step>\n  <logical_step consume=\"1\">\n    <name>选择推荐问题进入Agent入口</name>\n    <micro>点击推荐问题列表中的某项</micro>\n  </logical_step>\n  <logical_step consume=\"3\">\n    <name>切换深色主题并关闭面板</name>\n    <micro>点击「深色」主题选项区域</micro>\n    <micro>点击深色主题单选按钮</micro>\n    <micro>点击「Close」关闭按钮</micro>\n  </logical_step>\n  <logical_step consume=\"2\">\n    <name>重新打开用户菜单并进入偏好设置</name>\n    <micro>点击用户头像图片区域弹出用户菜单</micro>\n    <micro>点击用户菜单中的「偏好设置」菜单项</micro>\n  </logical_step>\n  <logical_step consume=\"4\">\n    <name>恢复默认设置并关闭面板</name>\n    <micro>点击「恢复默认设置」按钮</micro>\n    <micro>点击推荐问题列表区域刷新列表</micro>\n    <micro>点击偏好设置面板中第3个开关按钮恢复显示内容</micro>\n    <micro>点击「关闭」按钮关闭偏好设置面板</micro>\n  </logical_step>\n  <logical_step consume=\"1\">\n    <name>切换至专家模式</name>\n    <micro>点击「专家模式」标签</micro>\n  </logical_step>\n</agent_chunk>\n```"
   },
   "outcome": {
-    "ok": true,
+    "ok": [
+      {
+        "logicalName": "完成用户登录",
+        "microActions": [
+          "完成用户登录"
+        ],
+        "consumeStepCount": 5
+      },
+      {
+        "logicalName": "打开用户菜单",
+        "microActions": [
+          "打开用户菜单"
+        ],
+        "consumeStepCount": 1
+      },
+      {
+        "logicalName": "进入偏好设置并切换模式",
+        "microActions": [
+          "进入偏好设置并切换模式"
+        ],
+        "consumeStepCount": 3
+      },
+      {
+        "logicalName": "选择推荐问题进入Agent入口",
+        "microActions": [
+          "选择推荐问题进入Agent入口"
+        ],
+        "consumeStepCount": 1
+      },
+      {
+        "logicalName": "切换深色主题并关闭面板",
+        "microActions": [
+          "切换深色主题并关闭面板"
+        ],
+        "consumeStepCount": 3
+      },
+      {
+        "logicalName": "重新打开用户菜单并进入偏好设置",
+        "microActions": [
+          "重新打开用户菜单并进入偏好设置"
+        ],
+        "consumeStepCount": 2
+      },
+      {
+        "logicalName": "恢复默认设置并关闭面板",
+        "microActions": [
+          "恢复默认设置并关闭面板"
+        ],
+        "consumeStepCount": 4
+      },
+      {
+        "logicalName": "切换至专家模式",
+        "microActions": [
+          "切换至专家模式"
+        ],
+        "consumeStepCount": 1
+      }
+    ],
     "problems": [],
     "details": {
-      "useCaseName": "下载模板文件",
-      "agentStepCount": 1,
-      "totalConsume": 3,
-      "safeConsume": 3,
-      "rawConsume": 3
+      "useCaseName": "用户登录与偏好设置管理",
+      "agentStepCount": 8,
+      "totalConsume": 20,
+      "safeConsume": 20
     }
   }
 }

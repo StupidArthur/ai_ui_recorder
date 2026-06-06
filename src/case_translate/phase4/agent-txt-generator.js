@@ -28,7 +28,7 @@ function formatStepAsMicroAction(step) {
   const target = step.target || '目标元素';
   switch (step.actionKind) {
     case 'input': {
-      const val = step.inputText === '[MASKED]' ? '******' : (step.inputText || '');
+      const val = step.inputText || '';
       return val ? `在「${target}」输入 ${val}` : `在「${target}」输入内容`;
     }
     case 'keyPress':

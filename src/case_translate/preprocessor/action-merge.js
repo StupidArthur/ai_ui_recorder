@@ -10,8 +10,6 @@
  *    - 将 type 从 "click" 改为 "input"，附加 inputValue 字段
  * 2. 双击去重（低优先级）：合并浏览器双击产生的冗余 click 事件
  *    - 浏览器双击依次触发 click → click → dblclick，仅保留 dblclick
- * 3. 密码脱敏：对 type="password" 输入框识别出的输入值自动遮蔽
- *
  * 另外提供噪声检测函数 detectNoise()，供 preprocessor/index.js
  * 在 enrichment 阶段（diff 已计算后）调用标记无意义的 action。
  *
@@ -23,7 +21,6 @@
 
 import {
   DBLCLICK_TIME_THRESHOLD_MS,
-  PASSWORD_MASK,
 } from '../../utils/config.js';
 
 /**
@@ -54,7 +51,7 @@ function xpathKeyFromId(id) {
 /**
  * 对原始 action 数组进行语义归并
  *
- * 执行顺序：双击去重 → 输入识别（含密码脱敏）
+ * 执行顺序：双击去重 → 输入识别
  * 不改变数组长度，仅修改 action 的 type / 附加字段 / skip 标记。
  *
  * @param {Array<Object>} rawActions - 从 action_NNN.json 读取的原始 action 对象数组
@@ -81,7 +78,7 @@ export function mergeActions(rawActions, options = {}) {
   // 规则 3：双击去重（先执行，避免冗余 click 影响输入识别判断）
   deduplicateDoubleClicks(actions, report, log);
 
-  // 规则 1：输入识别（含密码脱敏）
+  // 规则 1：输入识别
   recognizeInputActions(actions, report, log);
 
   if (log) {
@@ -181,13 +178,7 @@ function recognizeInputActions(actions, report, log) {
     // 确认为输入操作
     curr.originalType = curr.type;
     curr.type = 'input';
-
-    // 密码脱敏
-    if (inputType === 'password') {
-      curr.inputValue = PASSWORD_MASK;
-    } else {
-      curr.inputValue = nextValue;
-    }
+    curr.inputValue = nextValue;
 
     report.inputRecognized++;
     report.details.push({
@@ -199,8 +190,7 @@ function recognizeInputActions(actions, report, log) {
     });
 
     if (log) {
-      const displayValue = inputType === 'password' ? PASSWORD_MASK : nextValue;
-      log.info(`  action ${curr.index}: click → input "${displayValue}" (${formKey})`);
+      log.info(`  action ${curr.index}: click → input "${nextValue}" (${formKey})`);
     }
   }
 }

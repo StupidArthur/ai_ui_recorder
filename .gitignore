@@ -60,11 +60,17 @@ playwright-report/
 blob-report/
 
 # Local config (私有的 API 配置)
-config/ai.local.json
+**/config/ai.local.json
 
 # Coverage
 coverage/
 .nyc_output/
+
+# Analysis data (对比分析产物)
+ana_data/
+
+# Claude Code
+.claude/
 
 # Misc
 *.bak
@@ -86,3 +92,13 @@ coverage/
 # YAML configs (含本地 LLM 配置和第三方规格文件)
 *.yaml
 *.yml
+
+# recorder_translate_server (FastAPI Web 服务)
+recorder_translate_server/uploads/
+recorder_translate_server/results/
+recorder_translate_server/frontend/dist/
+recorder_translate_server/frontend/node_modules/
+recorder_translate_server/frontend/.vite/
+recorder_translate_server/frontend/.env*
+recorder_translate_server/frontend/src/.umi/
+recorder_translate_server/.venv/

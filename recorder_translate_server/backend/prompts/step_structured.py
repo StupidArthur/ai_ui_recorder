@@ -47,4 +47,4 @@ def build_user_prompt(enriched_actions_batch: list, recent_steps: list) -> str:
 注意：以下共有 {action_count} 个动作。你必须输出 {action_count} 个解析结果。
 
 {"".join(action_blocks)}
-请立即开始解析，并严格按照 System Prompt 的 Output Format 输出 JSON 对象。"""
+请立即开始解析，并严格按照 System Prompt 的 Output Format 仅输出 XML，不要输出任何其他解释性文本。"""

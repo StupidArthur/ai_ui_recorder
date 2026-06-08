@@ -1,7 +1,9 @@
 # Dependencies
-node_modules/
+# 注:Node 工程的 node_modules/ 已下沉到 recorder/node_modules/,见 recorder/.gitignore
+# 根目录的 node_modules/ 保留兜底,避免旧残留污染工作树
 
 # Build outputs
+# 注:Node 工程的 build/ dist/ 已下沉到 recorder/build/ dist/,见 recorder/.gitignore
 build/
 dist/
 release/

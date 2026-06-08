@@ -1,0 +1,6 @@
+# Node 工程产物(2026-06 重构后,Node 工程根下沉到 recorder/)
+node_modules/
+dist/
+output/
+release/
+*.log

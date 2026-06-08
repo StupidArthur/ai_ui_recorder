@@ -1,8 +1,0 @@
-{
-  "totalCalls": 23,
-  "okCalls": 23,
-  "problemCalls": 0,
-  "auditDir": "G:\\github\\ai_ui_recorder\\data_check\\run_2026-06-04T11-39-58\\translate\\llm_audit",
-  "indexFile": "G:\\github\\ai_ui_recorder\\data_check\\run_2026-06-04T11-39-58\\translate\\llm_audit\\index.json",
-  "problemsFile": "G:\\github\\ai_ui_recorder\\data_check\\run_2026-06-04T11-39-58\\translate\\llm_audit\\problems.json"
-}

@@ -1,2 +1,0 @@
--   - textbox "请输入用户名" [required]
-+   - textbox "请输入用户名" [required, value="15700078644"]

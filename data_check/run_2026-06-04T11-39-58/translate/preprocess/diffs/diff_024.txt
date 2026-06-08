@@ -1,3 +1,0 @@
--   - text "点赞"
-+   - image "check-circle"
-+   - text "感谢您的赞美与肯定"

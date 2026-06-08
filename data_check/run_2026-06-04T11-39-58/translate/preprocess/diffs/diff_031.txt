@@ -1,4 +1,0 @@
--     - generic "Close Agent * Agent 名称 输入Agent 名称 Agent 描述 输入Agent 描述 * Agent 类型 控制   * 对应装置 对应装置   * 您是否已有模型 是   否   * 数据来源"
-+     - generic "Close Agent * Agent 名称 ai_demo Agent 描述 输入Agent 描述 * Agent 类型 控制   * 对应装置 对应装置   * 您是否已有模型 是   否   * 数据来源"
--       - textbox "输入Agent 名称"
-+       - textbox "输入Agent 名称" [value="ai_demo"]

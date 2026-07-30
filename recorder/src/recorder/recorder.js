@@ -243,6 +243,9 @@ export class Recorder {
    * @param {string} url - 目标页面 URL
    */
   async start(url) {
+    // 保存录制工具配置的初始 URL（未被重定向），供翻译工具作为 agents.txt 起始 URL
+    this._initialUrl = url;
+
     // 初始化输出目录和日志
     this.outputPaths = createOutputDirs(this.outputBaseDir);
     this.log = createLogger(this.outputPaths.logFile, {
@@ -699,6 +702,7 @@ export class Recorder {
       recordStartTime: new Date(this._recordStartTime).toISOString(),
       recordEndTime: new Date().toISOString(),
       totalActions: this._actionIndex,
+      initialUrl: this._initialUrl || '',
       targetUrl: firstSummary?.url || '',
       startPageTitle: firstSummary?.page || '',
       pageCount: pageSet.size,

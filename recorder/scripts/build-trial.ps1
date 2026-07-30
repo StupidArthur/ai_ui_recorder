@@ -1,9 +1,12 @@
 $ErrorActionPreference = "Stop"
-$DebugLogPath = "g:\gitee\ai_ui_recorder\.cursor\debug.log"
+$DebugLogPath = "G:\github\ai_ui_recorder\recorder\dist\build-debug.log"
 $DebugLogDir = Split-Path -Parent $DebugLogPath
 
-# 工程根目录 = scripts/ 上一级 = recorder/
-$ProjectRoot = Split-Path $PSScriptRoot -Parent
+# recorder 目录 = scripts/ 上一级
+$RecorderDir = Split-Path $PSScriptRoot -Parent
+
+# 工程根目录 = recorder/ 上一级 = 仓库根
+$ProjectRoot = Split-Path $RecorderDir -Parent
 
 # release 输出根(为与 release/translate/ (Python 翻译 EXE) 对齐,本 Node EXE 输出到 release/recorder/)
 $ReleaseDir = Join-Path $ProjectRoot "release/recorder"
@@ -37,13 +40,13 @@ function Write-AgentDebugLog {
 #endregion
 
 Write-Host "[1/3] Clean old artifacts..." -ForegroundColor Cyan
-if (Test-Path "$ProjectRoot/dist") { Remove-Item "$ProjectRoot/dist" -Recurse -Force }
+if (Test-Path "$RecorderDir/dist") { Remove-Item "$RecorderDir/dist" -Recurse -Force }
 if (Test-Path "$ProjectRoot/release") { Remove-Item "$ProjectRoot/release" -Recurse -Force }
 New-Item -ItemType Directory -Path $ReleaseDir -Force | Out-Null
 
 #region agent log
 Write-AgentDebugLog "H3" "recorder/scripts/build-trial.ps1:42" "before build:bundle" @{
-  hasDist = (Test-Path "$ProjectRoot/dist")
+  hasDist = (Test-Path "$RecorderDir/dist")
   hasRelease = (Test-Path "$ProjectRoot/release")
 }
 #endregion
@@ -55,11 +58,11 @@ $bundleExitCode = $LASTEXITCODE
 #region agent log
 Write-AgentDebugLog "H3" "recorder/scripts/build-trial.ps1:54" "after build:bundle" @{
   exitCode = $bundleExitCode
-  hasBundle = (Test-Path "$ProjectRoot/dist/app.bundle.cjs")
+  hasBundle = (Test-Path "$RecorderDir/dist/app.bundle.cjs")
 }
 #endregion
 
-if ($bundleExitCode -ne 0 -or -not (Test-Path "$ProjectRoot/dist/app.bundle.cjs")) {
+if ($bundleExitCode -ne 0 -or -not (Test-Path "$RecorderDir/dist/app.bundle.cjs")) {
   Write-Host "Build bundle failed, abort packaging." -ForegroundColor Red
   exit 1
 }
@@ -77,11 +80,11 @@ Write-AgentDebugLog "H5" "recorder/scripts/build-trial.ps1:70" "pkg target selec
 #region agent log
 Write-AgentDebugLog "H7" "recorder/scripts/build-trial.ps1:78" "pkg runner selected" @{
   hostNodeVersion = (node -v)
-  runner = "npx -y node@18 $ProjectRoot/node_modules/pkg/lib-es5/bin.js"
+  runner = "npx -y node@18 $RecorderDir/node_modules/pkg/lib-es5/bin.js"
 }
 #endregion
 
-$pkgOutput = & npx -y node@18 "$ProjectRoot/node_modules/pkg/lib-es5/bin.js" "$ProjectRoot/dist/app.bundle.cjs" --target $pkgTarget --output "$ReleaseDir/ai-ui-recorder-trial.exe" 2>&1
+$pkgOutput = & npx -y node@18 "$RecorderDir/node_modules/pkg/lib-es5/bin.js" "$RecorderDir/dist/app.bundle.cjs" --target $pkgTarget --output "$ReleaseDir/ai-ui-recorder-trial.exe" 2>&1
 $pkgExitCode = $LASTEXITCODE
 
 if ($pkgOutput) {
@@ -134,9 +137,10 @@ if (Test-Path $localChromeZipPath) {
 }
 
 Write-Host "[5/5] Copy static + config template..." -ForegroundColor Cyan
-Copy-Item -Path "$ProjectRoot/src/dashboard/static" -Destination "$ReleaseDir/static" -Recurse -Force
-Copy-Item -Path "$ProjectRoot/src/case_translate/prompts/md" -Destination "$ReleaseDir/prompts/md" -Recurse -Force
-Copy-Item -Path "$ProjectRoot/src/case_translate/prompts/README.md" -Destination "$ReleaseDir/prompts/README.md" -Force
+Copy-Item -Path "$RecorderDir/package.json" -Destination "$ReleaseDir/package.json" -Force
+Copy-Item -Path "$RecorderDir/src/dashboard/static" -Destination "$ReleaseDir/static" -Recurse -Force
+Copy-Item -Path "$RecorderDir/src/case_translate/prompts/md" -Destination "$ReleaseDir/prompts/md" -Recurse -Force
+Copy-Item -Path "$RecorderDir/src/case_translate/prompts/README.md" -Destination "$ReleaseDir/prompts/README.md" -Force
 New-Item -ItemType Directory -Path "$ReleaseDir/config" -Force | Out-Null
 
 # AI 配置模板(以 release1/config/ai.local.json 的 baseUrl/model 为标准):

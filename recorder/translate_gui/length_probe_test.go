@@ -16,7 +16,7 @@ import (
 // 运行：go test -tags=integration -run TestInputLengthSweep -v -timeout 45m
 // 可选环境变量：
 //   AI_CONFIG_PATH  指定 ai.local.json
-//   LENGTH_PROBE_MODELS  逗号分隔模型名，默认 MiniMax-M3,MiniMax-M2.7-highspeed
+//   LENGTH_PROBE_MODELS  逗号分隔模型名，默认 MiniMax-M3
 //   LENGTH_PROBE_TARGETS  逗号分隔 user 字符目标，默认 2000,8000,15000,22000
 
 func TestInputLengthSweep(t *testing.T) {
@@ -149,7 +149,7 @@ func probeModels() []string {
 	if v := strings.TrimSpace(os.Getenv("LENGTH_PROBE_MODELS")); v != "" {
 		return splitCSV(v)
 	}
-	return []string{"MiniMax-M3", "MiniMax-M2.7-highspeed"}
+	return []string{"MiniMax-M3"}
 }
 
 func probeTargets() []int {

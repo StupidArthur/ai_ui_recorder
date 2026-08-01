@@ -50,16 +50,15 @@ func (a *App) ListRuns(outputDir string) []RunInfo {
 			continue
 		}
 		fullPath := filepath.Join(outputDir, name)
-		run := RunInfo{DirName: name, FullPath: fullPath}
+		run := RunInfo{DirName: name, FullPath: fullPath, Title: "TPT"}
 		if metaData, err := os.ReadFile(filepath.Join(fullPath, MetaFilename)); err == nil {
 			var meta Meta
 			if json.Unmarshal(metaData, &meta) == nil {
-				run.Title = meta.Title
 				run.StartedAt = meta.StartedAt
 				run.ActionCount = meta.ActionCount
 			}
 		}
-		if _, err := os.Stat(filepath.Join(fullPath, RunTranslateSubdir, "phase2", "cases.md")); err == nil {
+		if _, err := os.Stat(getTranslatePaths(fullPath).AgentsTxt); err == nil {
 			run.Translated = true
 		}
 		runs = append(runs, run)
@@ -94,6 +93,9 @@ func (a *App) StartTranslate(runDir string) (result TranslateResult) {
 	if _, err := os.Stat(runDir); err != nil {
 		return TranslateResult{Success: false, Message: "目录不存在: " + runDir}
 	}
+	if err := validateRecordingData(runDir); err != nil {
+		return TranslateResult{Success: false, Message: "录制数据校验失败: " + err.Error(), RunDir: runDir}
+	}
 
 	// 尽早设置 crash.log 路径：保证后续任何阶段（含预处理、Phase 1~4、各 goroutine）的 panic 都能落盘
 	SetCrashLogPath(filepath.Join(runDir, RunTranslateSubdir, "logs", "crash.log"))
@@ -106,10 +108,14 @@ func (a *App) StartTranslate(runDir string) (result TranslateResult) {
 	transPaths := getTranslatePaths(runDir)
 	if _, err := os.Stat(transPaths.TranslateDir); err == nil {
 		historyDir := filepath.Join(runDir, "translate_history")
-		os.MkdirAll(historyDir, 0755)
-		timestamp := time.Now().Format("2006-01-02_15-04-05")
+		if err := os.MkdirAll(historyDir, 0755); err != nil {
+			return TranslateResult{Success: false, Message: "创建翻译历史目录失败: " + err.Error(), RunDir: runDir}
+		}
+		timestamp := time.Now().Format("2006-01-02_15-04-05.000")
 		archiveName := "translate_" + timestamp
-		os.Rename(transPaths.TranslateDir, filepath.Join(historyDir, archiveName))
+		if err := os.Rename(transPaths.TranslateDir, filepath.Join(historyDir, archiveName)); err != nil {
+			return TranslateResult{Success: false, Message: "归档上一次翻译结果失败: " + err.Error(), RunDir: runDir}
+		}
 	}
 	logger = NewLogger(transPaths.GenerateLog, a.progressCh)
 	defer logger.Close()
@@ -200,10 +206,10 @@ func (a *App) GetRunDetail(runDir string) map[string]interface{} {
 func (a *App) listTranslateFiles(runDir string) []map[string]string {
 	transPaths := getTranslatePaths(runDir)
 	files := []map[string]string{
-		{"name": "Phase 2 用例", "path": "translate/phase2/cases.md", "type": "markdown"},
-		{"name": "Phase 2 兜底", "path": "translate/phase2/cases_fallback.md", "type": "markdown"},
+		{"name": "Case 切片", "path": "translate/phase2/case_slices.json", "type": "json"},
 		{"name": "覆盖核对", "path": "translate/phase2/coverage.md", "type": "markdown"},
-		{"name": "Agent TXT", "path": "translate/phase4/agents.txt", "type": "text"},
+		{"name": "执行用例", "path": "translate/phase3/agents.txt", "type": "text"},
+		{"name": "Case 表格 / 测试记录", "path": "translate/phase4/cases.md", "type": "markdown"},
 		{"name": "结构化步骤", "path": "translate/phase1/structured_steps.json", "type": "json"},
 		{"name": "翻译日志", "path": "translate/logs/generate.log", "type": "text"},
 	}

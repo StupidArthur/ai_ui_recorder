@@ -1,11 +1,18 @@
 {
   "name": "web-ui-case-translator",
-  "outputfilename": "web-ui-case-translator-v0.2.0",
+  "outputfilename": "web-ui-case-translator-v0.2.1",
   "frontend:install": "npm install",
   "frontend:build": "npm run build",
   "frontend:dev:watcher": "npm run dev",
   "frontend:dev:serverUrl": "auto",
   "author": {
     "name": "yuzechao"
+  },
+  "info": {
+    "companyName": "",
+    "productName": "AI 用例翻译工具",
+    "productVersion": "0.2.1",
+    "copyright": "",
+    "comments": "TPT UI 录制数据翻译工具"
   }
 }

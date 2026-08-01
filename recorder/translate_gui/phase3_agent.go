@@ -2,17 +2,15 @@ package main
 
 import (
 	"fmt"
-	"os"
 	"strings"
 )
 
-func renderAgentCase(runDir string, steps []StructuredStep, slices []CaseSlice, logger *Logger) string {
+func renderAgentCase(runDir string, steps []StructuredStep, slices []CaseSlice, logger *Logger) (string, error) {
 	logger.Infof("[Phase 3] renderAgentCase 开始：steps=%d, slices=%d", len(steps), len(slices))
 	transPaths := getTranslatePaths(runDir)
 
 	if len(slices) == 0 {
-		logger.Warn("[Phase 3] 无切片，跳过生成 agents.txt")
-		return ""
+		return "", fmt.Errorf("[Phase 3] 无有效切片，无法生成 agents.txt")
 	}
 
 	effectiveSteps := filterEffectiveStepsForPhase2(steps)
@@ -59,20 +57,32 @@ func renderAgentCase(runDir string, steps []StructuredStep, slices []CaseSlice, 
 	}
 
 	content := strings.TrimSpace(finalTxt.String())
-	os.WriteFile(transPaths.AgentsTxt, []byte(content), 0644)
+	if err := textWriteFile(transPaths.AgentsTxt, content); err != nil {
+		return "", fmt.Errorf("[Phase 3] 写入 agents.txt 失败: %w", err)
+	}
 
 	logger.Infof("[Phase 3] agents.txt 生成成功 (%d 个逻辑步骤)，文件: %s", len(slices), transPaths.AgentsTxt)
-	return transPaths.AgentsTxt
+	return transPaths.AgentsTxt, nil
 }
 
 func renderAgentMicro(step StructuredStep) string {
-	action := strings.TrimSpace(step.Description)
-	if action == "" {
-		action = "(无动作描述)"
-	}
+	action := renderStepAction(step)
 	assertText := strings.TrimSpace(step.AssertText)
 	if assertText == "" || assertText == "无可见变化" {
 		return action
 	}
 	return fmt.Sprintf("%s，确认%s", action, assertText)
+}
+
+func renderStepAction(step StructuredStep) string {
+	action := strings.TrimSpace(step.Description)
+	if action == "" {
+		action = "(无动作描述)"
+	}
+	key := strings.TrimSpace(step.Key)
+	if step.ActionKind == "keyPress" && key != "" &&
+		!strings.Contains(strings.ToLower(action), strings.ToLower(key)) {
+		action += fmt.Sprintf("（按键：%s）", key)
+	}
+	return action
 }

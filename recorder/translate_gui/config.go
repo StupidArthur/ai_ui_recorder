@@ -63,5 +63,5 @@ const Phase1Concurrency = 4
 
 // ==================== 默认模型 ====================
 
-const DefaultModelName = "MiniMax-M2.7-highspeed"
+const DefaultModelName = "MiniMax-M3"
 const DefaultBaseUrl = "https://api.minimaxi.com/v1"

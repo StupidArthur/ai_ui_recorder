@@ -45,7 +45,11 @@ func LoadAIConfig() AIConfig {
 				cfg.APIKey = v
 			}
 			if v := strings.TrimSpace(raw["model"]); v != "" {
-				cfg.Model = v
+				if strings.Contains(strings.ToLower(v), "highspeed") {
+					cfg.Model = DefaultModelName
+				} else {
+					cfg.Model = v
+				}
 			}
 		}
 	}

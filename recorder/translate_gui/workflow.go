@@ -45,25 +45,20 @@ func runWorkflow(runDir string, enrichedActions []EnrichedAction, client *LLMCli
 	logger.Info(fmt.Sprintf("[Phase 2] 完成，共 %d 个切片，耗时 %.1fs", len(slices), phase2Elapsed))
 	logger.Progress("phase2", "done", fmt.Sprintf("%d 个切片", len(slices)), 60)
 
-	// ========== Phase 3 + Phase 4: 并发渲染 ==========
-	logger.Info("[Phase 3/4] 正在并发渲染 Agent 用例和人类用例...")
+	// ========== Phase 3 + Phase 4: 渲染最终产物 ==========
+	logger.Info("[Phase 3/4] 正在渲染 Agent 用例和人类用例...")
 	logger.Progress("phase3", "start", "", 65)
 	logger.Progress("phase4", "start", "", 65)
 	phase34Start := time.Now()
 
-	var wg sync.WaitGroup
-	wg.Add(2)
-	SafeGo(logger, "phase3-renderAgentCase", func() {
-		defer wg.Done()
-		renderAgentCase(runDir, steps, slices, logger)
-		logger.Progress("phase3", "done", "", 85)
-	})
-	SafeGo(logger, "phase4-renderHumanCase", func() {
-		defer wg.Done()
-		renderHumanCase(runDir, steps, slices, logger)
-		logger.Progress("phase4", "done", "", 95)
-	})
-	wg.Wait()
+	if _, err := renderAgentCase(runDir, steps, slices, logger); err != nil {
+		return err
+	}
+	logger.Progress("phase3", "done", "", 85)
+	if _, err := renderHumanCase(runDir, steps, slices, logger); err != nil {
+		return err
+	}
+	logger.Progress("phase4", "done", "", 95)
 
 	phase34Elapsed := time.Since(phase34Start).Seconds()
 	logger.Info(fmt.Sprintf("[Phase 3/4] 渲染完成，耗时 %.1fs", phase34Elapsed))
@@ -73,7 +68,9 @@ func runWorkflow(runDir string, enrichedActions []EnrichedAction, client *LLMCli
 	logger.Info(fmt.Sprintf("AI 翻译总耗时: %.1fs", totalElapsed))
 	logger.Progress("done", "complete", "翻译完成", 100)
 
-	auditor.Finalize()
+	if err := auditor.Finalize(); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -84,8 +81,6 @@ func runPhase1(enrichedActions []EnrichedAction, client *LLMClient, logger *Logg
 	var steps []StructuredStep
 	var errors []ExtractError
 	var llmRawBatches []LlmRawBatch
-	var previousTimestamp int64
-	var prevMu sync.Mutex
 
 	flushArtifacts := func() {
 		mu.Lock()
@@ -114,12 +109,7 @@ func runPhase1(enrichedActions []EnrichedAction, client *LLMClient, logger *Logg
 		for i := 0; i < Phase1BatchSize && cursor+i < totalActions; i++ {
 			ea := enrichedActions[cursor+i]
 			if ea.Classification.Category == "skipped" || ea.IsNoise {
-				prevMu.Lock()
-				interval := computeIntervalFromPreviousMs(ea.Action.Timestamp, previousTimestamp)
-				previousTimestamp = normalizeTimestamp(ea.Action.Timestamp, previousTimestamp)
-				prevMu.Unlock()
-
-				fallback := buildFallbackStructuredStep(ea, ea.Index, "", interval)
+				fallback := buildFallbackStructuredStep(ea, ea.Index, "", nil)
 				mu.Lock()
 				steps = append(steps, fallback)
 				mu.Unlock()
@@ -158,20 +148,21 @@ func runPhase1(enrichedActions []EnrichedAction, client *LLMClient, logger *Logg
 			sem <- struct{}{}
 			defer func() { <-sem }()
 
-			processPhase1Batch(b.actions, client, logger, auditor, &mu, &prevMu, &steps, &errors, &llmRawBatches, &previousTimestamp, idx)
+			processPhase1Batch(b.actions, client, logger, auditor, &mu, &steps, &errors, &llmRawBatches, idx)
 			flushArtifacts()
 		})
 	}
 	wg.Wait()
 	sort.Slice(steps, func(i, j int) bool { return steps[i].ID < steps[j].ID })
+	recomputeStepIntervals(steps, enrichedActions)
 	flushArtifacts()
 
 	return steps, errors
 }
 
 func processPhase1Batch(actionBatch []EnrichedAction, client *LLMClient, logger *Logger, auditor *LlmAuditor,
-	mu *sync.Mutex, prevMu *sync.Mutex, steps *[]StructuredStep, errors *[]ExtractError,
-	llmRawBatches *[]LlmRawBatch, previousTimestamp *int64, batchIdx int) {
+	mu *sync.Mutex, steps *[]StructuredStep, errors *[]ExtractError,
+	llmRawBatches *[]LlmRawBatch, batchIdx int) {
 
 	// 防御性 recover：把数据驱动的 panic 转化为整批 fallback，
 	// 避免一个 batch 的异常把整个翻译进程带走（未 recover 的 goroutine panic 会直接退出进程）。
@@ -189,10 +180,8 @@ func processPhase1Batch(actionBatch []EnrichedAction, client *LLMClient, logger 
 				batchStart, batchEnd, r, buf[:n],
 			))
 
-			prevMu.Lock()
 			for _, ea := range actionBatch {
-				interval := computeIntervalFromPreviousMs(ea.Action.Timestamp, *previousTimestamp)
-				fallback := buildFallbackStructuredStep(ea, ea.Index, fmt.Sprintf("panic: %v", r), interval)
+				fallback := buildFallbackStructuredStep(ea, ea.Index, fmt.Sprintf("panic: %v", r), nil)
 				mu.Lock()
 				*steps = append(*steps, fallback)
 				*errors = append(*errors, ExtractError{
@@ -201,9 +190,7 @@ func processPhase1Batch(actionBatch []EnrichedAction, client *LLMClient, logger 
 					Reason: fmt.Sprintf("%v", r),
 				})
 				mu.Unlock()
-				*previousTimestamp = normalizeTimestamp(ea.Action.Timestamp, *previousTimestamp)
 			}
-			prevMu.Unlock()
 		}
 	}()
 
@@ -226,17 +213,13 @@ func processPhase1Batch(actionBatch []EnrichedAction, client *LLMClient, logger 
 		auditor.Record("phase1", batchIdx, false, "", "", durationMs, err.Error())
 
 		// 整批 fallback
-		prevMu.Lock()
 		for _, ea := range actionBatch {
-			interval := computeIntervalFromPreviousMs(ea.Action.Timestamp, *previousTimestamp)
-			fallback := buildFallbackStructuredStep(ea, ea.Index, err.Error(), interval)
+			fallback := buildFallbackStructuredStep(ea, ea.Index, err.Error(), nil)
 			mu.Lock()
 			*steps = append(*steps, fallback)
 			*errors = append(*errors, ExtractError{Index: ea.Index, Type: "batch-exception-fallback", Reason: err.Error()})
 			mu.Unlock()
-			*previousTimestamp = normalizeTimestamp(ea.Action.Timestamp, *previousTimestamp)
 		}
-		prevMu.Unlock()
 		return
 	}
 
@@ -249,7 +232,6 @@ func processPhase1Batch(actionBatch []EnrichedAction, client *LLMClient, logger 
 	batchResult := parseBatchXmlSteps(rawReply, actionBatch, nil)
 
 	// 处理解析成功的步骤
-	prevMu.Lock()
 	for _, parsed := range batchResult.ParsedSteps {
 		var matchedAction *EnrichedAction
 		for i := range actionBatch {
@@ -261,12 +243,10 @@ func processPhase1Batch(actionBatch []EnrichedAction, client *LLMClient, logger 
 		if matchedAction == nil {
 			continue
 		}
-		interval := computeIntervalFromPreviousMs(matchedAction.Action.Timestamp, *previousTimestamp)
-		step := normalizeStructuredStep(parsed, *matchedAction, parsed.ID, interval)
+		step := normalizeStructuredStep(parsed, *matchedAction, parsed.ID, nil)
 		mu.Lock()
 		*steps = append(*steps, step)
 		mu.Unlock()
-		*previousTimestamp = normalizeTimestamp(matchedAction.Action.Timestamp, *previousTimestamp)
 	}
 
 	// 处理失败的步骤（逐条 fallback）
@@ -284,7 +264,6 @@ func processPhase1Batch(actionBatch []EnrichedAction, client *LLMClient, logger 
 			}
 		}
 		if matchedAction != nil {
-			interval := computeIntervalFromPreviousMs(matchedAction.Action.Timestamp, *previousTimestamp)
 			reason := "批次 XML 解析失败或结构不匹配"
 			for _, e := range batchResult.Errors {
 				if e.Index == failedIdx {
@@ -292,15 +271,29 @@ func processPhase1Batch(actionBatch []EnrichedAction, client *LLMClient, logger 
 					break
 				}
 			}
-			fallback := buildFallbackStructuredStep(*matchedAction, failedIdx, reason, interval)
+			fallback := buildFallbackStructuredStep(*matchedAction, failedIdx, reason, nil)
 			mu.Lock()
 			*steps = append(*steps, fallback)
 			*errors = append(*errors, ExtractError{Index: failedIdx, Type: "batch-fallback", Reason: reason})
 			mu.Unlock()
-			*previousTimestamp = normalizeTimestamp(matchedAction.Action.Timestamp, *previousTimestamp)
 		}
 	}
-	prevMu.Unlock()
+}
+
+// recomputeStepIntervals 在所有并发批次完成并按 action index 排序后统一计算时间间隔。
+// interval 是录制顺序属性，不能依赖 LLM 批次的响应完成顺序。
+func recomputeStepIntervals(steps []StructuredStep, enrichedActions []EnrichedAction) {
+	timestamps := make(map[int]int64, len(enrichedActions))
+	for _, action := range enrichedActions {
+		timestamps[action.Index] = action.Action.Timestamp
+	}
+
+	var previousTimestamp int64
+	for i := range steps {
+		currentTimestamp := timestamps[steps[i].ID]
+		steps[i].IntervalFromPreviousMs = computeIntervalFromPreviousMs(currentTimestamp, previousTimestamp)
+		previousTimestamp = normalizeTimestamp(currentTimestamp, previousTimestamp)
+	}
 }
 
 // ==================== Phase 2 (legacy, 已迁移至 phase2_slice.go) ====================
@@ -319,7 +312,7 @@ func normalizeStructuredStep(parsed StructuredStep, ea EnrichedAction, actionInd
 		ActionKind:             actionKind,
 		Target:                 deriveTarget(ea),
 		InputText:              deriveInputText(ea),
-		Key:                    "",
+		Key:                    strings.TrimSpace(ea.Action.Key),
 		AssertText:             toSingleLineText(parsed.AssertText),
 		Confidence:             0.7,
 		IntervalFromPreviousMs: interval,
@@ -359,6 +352,7 @@ func buildFallbackStructuredStep(ea EnrichedAction, actionIndex int, reason stri
 		ActionKind:             deriveFallbackActionKind(ea.Action.Type),
 		Target:                 deriveTarget(ea),
 		InputText:              deriveInputText(ea),
+		Key:                    strings.TrimSpace(ea.Action.Key),
 		Confidence:             0.4,
 		IntervalFromPreviousMs: interval,
 		URL:                    strings.TrimSpace(ea.Action.URL),
@@ -430,6 +424,9 @@ func deriveFallbackDescription(ea EnrichedAction) string {
 	case "rightclick":
 		return "右键点击 " + identify
 	case "keypress":
+		if key := strings.TrimSpace(ea.Action.Key); key != "" {
+			return "按下 " + key + " 键"
+		}
 		return "按下按键"
 	case "input":
 		return "在 " + identify + " 输入"

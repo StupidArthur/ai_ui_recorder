@@ -1,42 +1,22 @@
 package main
 
 import (
-	"os"
-	"path/filepath"
 	"strings"
 	"testing"
 )
 
-// TestComputeDiffWithContext 验证改进后的 computeDiff 在 switch 变化行周围保留了上下文行（开关名称）。
 func TestComputeDiffWithContext(t *testing.T) {
-	runDir := `G:\github\ai_ui_recorder\release\recorder\output\run_2026-06-23T02-35-19\record`
+	pre := "group 推荐问题\nswitch [unchecked]\ntext 其他设置\n"
+	post := "group 推荐问题\nswitch [checked]\ntext 其他设置\n"
 
-	cases := []struct {
-		idx          int
-		expectSwitch string
-	}{
-		{8, `推荐问题`},
-		{9, `显示所有对话过程`},
+	diff := computeDiff(pre, post)
+	if !strings.Contains(diff, "推荐问题") {
+		t.Fatalf("diff 未保留变化行的控件上下文:\n%s", diff)
 	}
-
-	for _, c := range cases {
-		pre, err1 := os.ReadFile(filepath.Join(runDir, "snapshots", "snapshot_"+padIndex(c.idx-1)+".txt"))
-		post, err2 := os.ReadFile(filepath.Join(runDir, "snapshots", "snapshot_"+padIndex(c.idx)+".txt"))
-		if err1 != nil || err2 != nil {
-			t.Fatalf("读 snapshot_%d 失败: %v / %v", c.idx, err1, err2)
-		}
-		diff := computeDiff(string(pre), string(post))
-		t.Logf("===== 步骤 %d diff（期望含开关名「%s」）=====", c.idx, c.expectSwitch)
-		t.Logf("%s", diff)
-
-		if !strings.Contains(diff, c.expectSwitch) {
-			t.Errorf("步骤 %d diff 未包含开关名「%s」", c.idx, c.expectSwitch)
-		} else {
-			t.Logf("✓ 步骤 %d diff 已包含开关名「%s」", c.idx, c.expectSwitch)
-		}
-
-		if !strings.Contains(diff, "switch [checked]") && !strings.Contains(diff, "switch [unchecked]") {
-			t.Errorf("步骤 %d diff 未包含 switch 变化行", c.idx)
-		}
+	if !strings.Contains(diff, "- switch [unchecked]") {
+		t.Fatalf("diff 未包含 switch 删除行:\n%s", diff)
+	}
+	if !strings.Contains(diff, "+ switch [checked]") {
+		t.Fatalf("diff 未包含 switch 新增行:\n%s", diff)
 	}
 }

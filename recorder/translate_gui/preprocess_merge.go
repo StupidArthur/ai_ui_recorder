@@ -11,11 +11,11 @@ import (
 // ==================== 语义归并 ====================
 
 type MergeReport struct {
-	TotalOriginal   int            `json:"totalOriginal"`
-	InputRecognized int            `json:"inputRecognized"`
-	DblclickDeduped int            `json:"dblclickDeduped"`
-	NoiseMarked     int            `json:"noiseMarked"`
-	Details         []MergeDetail  `json:"details"`
+	TotalOriginal   int           `json:"totalOriginal"`
+	InputRecognized int           `json:"inputRecognized"`
+	DblclickDeduped int           `json:"dblclickDeduped"`
+	NoiseMarked     int           `json:"noiseMarked"`
+	Details         []MergeDetail `json:"details"`
 }
 
 type MergeDetail struct {
@@ -30,17 +30,17 @@ type MergeDetail struct {
 
 // mergedAction 归并后的 action（带 skip 标记）
 type mergedAction struct {
-	Index        int                    `json:"index"`
-	Type         string                 `json:"type"`
-	OriginalType string                 `json:"originalType,omitempty"`
-	InputValue   string                 `json:"inputValue,omitempty"`
-	Element      map[string]interface{} `json:"element"`
-	Key          string                 `json:"key,omitempty"`
-	URL          string                 `json:"url,omitempty"`
-	Title        string                 `json:"title,omitempty"`
-	Timestamp    int64                  `json:"timestamp"`
+	Index          int                    `json:"index"`
+	Type           string                 `json:"type"`
+	OriginalType   string                 `json:"originalType,omitempty"`
+	InputValue     string                 `json:"inputValue,omitempty"`
+	Element        map[string]interface{} `json:"element"`
+	Key            string                 `json:"key,omitempty"`
+	URL            string                 `json:"url,omitempty"`
+	Title          string                 `json:"title,omitempty"`
+	Timestamp      int64                  `json:"timestamp"`
 	FormStateDelta map[string]interface{} `json:"formStateDelta"`
-	Skip         string                 `json:"skip,omitempty"`
+	Skip           string                 `json:"skip,omitempty"`
 }
 
 func mergeActions(rawActions []ActionFile) ([]mergedAction, MergeReport) {
@@ -51,7 +51,7 @@ func mergeActions(rawActions []ActionFile) ([]mergedAction, MergeReport) {
 			Index:          a.Index,
 			Type:           a.Action.Type,
 			Element:        a.Action.Element,
-			Key:            getString(a.Action.Element, "key"),
+			Key:            a.Action.Key,
 			URL:            a.Action.URL,
 			Title:          a.Action.Title,
 			Timestamp:      a.Action.Timestamp,
@@ -379,6 +379,7 @@ func parseActionFile(data []byte, fallbackIndex int) (ActionFile, error) {
 	var flat struct {
 		Index     int                    `json:"index"`
 		Type      string                 `json:"type"`
+		Key       string                 `json:"key"`
 		Timestamp int64                  `json:"timestamp"`
 		Element   map[string]interface{} `json:"element"`
 		FormState map[string]interface{} `json:"formStateDelta"`
@@ -397,6 +398,7 @@ func parseActionFile(data []byte, fallbackIndex int) (ActionFile, error) {
 			Index: idx,
 			Action: RawAction{
 				Type:      flat.Type,
+				Key:       flat.Key,
 				Timestamp: flat.Timestamp,
 				Element:   flat.Element,
 				FormState: flat.FormState,

@@ -2,65 +2,87 @@ package main
 
 import (
 	"fmt"
-	"os"
 	"strings"
 )
 
-func renderHumanCase(runDir string, steps []StructuredStep, slices []CaseSlice, logger *Logger) string {
+// renderHumanCase 将 Phase 3 同源的结构化步骤按 Phase 2 CaseSlice 分组，
+// 输出可同时作为测试用例和录制测试记录的 Markdown 表格。
+func renderHumanCase(runDir string, steps []StructuredStep, slices []CaseSlice, logger *Logger) (string, error) {
 	logger.Infof("[Phase 4] renderHumanCase 开始：steps=%d, slices=%d", len(steps), len(slices))
 	transPaths := getTranslatePaths(runDir)
 
 	if len(slices) == 0 {
-		logger.Warn("[Phase 4] 无切片，跳过生成 cases.md")
-		return ""
+		return "", fmt.Errorf("[Phase 4] 无有效切片，无法生成 cases.md")
 	}
 
 	effectiveSteps := filterEffectiveStepsForPhase2(steps)
 
 	var md strings.Builder
-	md.WriteString("# 录制流程测试用例归纳\n\n")
+	md.WriteString("# TPT 测试用例与测试记录\n\n")
+	md.WriteString("> “结果”来自录制过程中的实际观察，并作为后续回归执行的预期基线。\n")
 
-	for i, sl := range slices {
-		if i > 0 {
-			md.WriteString("\n\n---\n\n")
+	for caseIndex, slice := range slices {
+		md.WriteString("\n")
+		if caseIndex > 0 {
+			md.WriteString("---\n\n")
 		}
 
-		name := sl.Name
+		name := strings.TrimSpace(slice.Name)
 		if name == "" {
-			name = fmt.Sprintf("测试用例 %d", i+1)
+			name = fmt.Sprintf("测试用例 %d", caseIndex+1)
 		}
-		md.WriteString(fmt.Sprintf("# 测试用例：%s\n\n", name))
+		md.WriteString(fmt.Sprintf("## Case %d：%s\n\n", caseIndex+1, name))
 
-		purpose := sl.Purpose
-		if purpose == "" {
-			purpose = "（未提供测试目的）"
+		if purpose := strings.TrimSpace(slice.Purpose); purpose != "" {
+			md.WriteString("**测试目的：** " + purpose + "\n\n")
 		}
-		md.WriteString("## 1. 业务背景与初始状态\n\n")
-		md.WriteString(purpose + "\n\n")
 
-		md.WriteString("## 2. 测试步骤流\n\n")
+		md.WriteString("| 序号 | 操作 | 结果（录制实况 / 预期基线） |\n")
+		md.WriteString("|---:|---|---|\n")
 
-		for _, s := range effectiveSteps {
-			if s.ID >= sl.StartStep && s.ID <= sl.EndStep {
-				action := strings.TrimSpace(s.Description)
-				if action == "" {
-					action = "(无动作描述)"
-				}
-				obs := strings.TrimSpace(s.UiChange)
-				if obs == "" {
-					obs = "无可见变化"
-				}
-
-				md.WriteString(fmt.Sprintf("### [步骤 %d] %s\n\n", s.ID, action))
-				md.WriteString(fmt.Sprintf("- **执行动作**：%s\n", action))
-				md.WriteString(fmt.Sprintf("- **状态验证**：%s\n\n", obs))
+		rowIndex := 0
+		for _, step := range effectiveSteps {
+			if step.ID < slice.StartStep || step.ID > slice.EndStep {
+				continue
 			}
+			rowIndex++
+			action := escapeTableCell(renderStepAction(step))
+			result := escapeTableCell(renderStepResult(step))
+			md.WriteString(fmt.Sprintf("| %d | %s | %s |\n", rowIndex, action, result))
+		}
+
+		if rowIndex == 0 {
+			md.WriteString("| 1 | （无有效操作步骤） |  |\n")
 		}
 	}
 
 	content := strings.TrimRight(md.String(), " \t\n\r\v\f") + "\n"
-	os.WriteFile(transPaths.CasesMd, []byte(content), 0644)
+	if err := textWriteFile(transPaths.CasesMd, content); err != nil {
+		return "", fmt.Errorf("[Phase 4] 写入 cases.md 失败: %w", err)
+	}
 
-	logger.Infof("[Phase 4] cases.md 生成成功 (%d 个用例)，文件: %s", len(slices), transPaths.CasesMd)
-	return transPaths.CasesMd
+	logger.Infof("[Phase 4] cases.md 生成成功 (%d 个 Case)，文件: %s", len(slices), transPaths.CasesMd)
+	return transPaths.CasesMd, nil
+}
+
+func renderStepResult(step StructuredStep) string {
+	if result := normalizeRecordedResult(step.AssertText); result != "" {
+		return result
+	}
+	return normalizeRecordedResult(step.UiChange)
+}
+
+func normalizeRecordedResult(value string) string {
+	result := strings.TrimSpace(value)
+	if result == "" {
+		return ""
+	}
+
+	normalized := strings.TrimSpace(strings.TrimRight(result, "。.!！"))
+	switch normalized {
+	case "无可见变化", "无明显变化", "无界面变化", "无 UI 变化", "无UI变化", "无":
+		return ""
+	default:
+		return result
+	}
 }

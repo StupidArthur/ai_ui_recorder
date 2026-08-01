@@ -52,6 +52,7 @@ func buildPhase1UserPrompt(batch []EnrichedAction, recentSteps []StructuredStep)
 func buildPhase1ActionJSON(action EnrichedAction) string {
 	obj := map[string]interface{}{
 		"type":           action.Action.Type,
+		"key":            action.Action.Key,
 		"timestamp":      action.Action.Timestamp,
 		"element":        action.Action.Element,
 		"localContext":   action.Context,

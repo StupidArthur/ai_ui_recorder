@@ -1,4 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react"
+import ReactMarkdown from "react-markdown"
+import remarkGfm from "remark-gfm"
 import { Button } from "./components/ui/button"
 import { Badge } from "./components/ui/badge"
 import { Input } from "./components/ui/input"
@@ -20,6 +22,9 @@ interface TranslateProgress {
   detail: string
   percent: number
 }
+
+const AGENT_RESULT_PATH = "translate/phase3/agents.txt"
+const CASE_RESULT_PATH = "translate/phase4/cases.md"
 
 export default function App() {
   const [outputDir, setOutputDir] = useState("")
@@ -77,10 +82,17 @@ export default function App() {
       if (finalLog) setLogText(finalLog)
       if (result.success) {
         setProgress({ phase: "done", step: "complete", detail: "翻译完成", percent: 100 })
-        // 翻译完成后默认显示日志，用户可点击文件按钮切换查看内容
-        setResultFile("")
-        setResultContent("")
-        refreshRuns()
+        const caseContent = await api.readFile(selectedRun.fullPath, CASE_RESULT_PATH)
+        if (caseContent) {
+          setResultFile(CASE_RESULT_PATH)
+          setResultContent(caseContent)
+        } else {
+          const agentContent = await api.readFile(selectedRun.fullPath, AGENT_RESULT_PATH)
+          setResultFile(AGENT_RESULT_PATH)
+          setResultContent(agentContent || "(暂无翻译结果)")
+        }
+        setSelectedRun((current) => current ? { ...current, translated: true } : current)
+        await refreshRuns()
       } else {
         setProgress({ phase: "error", step: "error", detail: result.message, percent: 0 })
       }
@@ -94,7 +106,13 @@ export default function App() {
     setSelectedRun(run)
     setResultContent("")
     setResultFile("")
-    // 选中录制时默认显示日志，用户可点击文件按钮切换查看内容
+    if (run.translated) {
+      const caseContent = await api.readFile(run.fullPath, CASE_RESULT_PATH)
+      if (caseContent) {
+        setResultFile(CASE_RESULT_PATH)
+        setResultContent(caseContent)
+      }
+    }
   }
 
   const loadFile = async (relPath: string) => {
@@ -107,7 +125,7 @@ export default function App() {
   const phaseLabel = (phase: string) => {
     const map: Record<string, string> = {
       init: "初始化", phase1: "Phase 1 结构化", phase2: "Phase 2 切分用例",
-      phase3: "Phase 3 Agent用例", phase4: "Phase 4 人类用例", done: "完成", error: "错误",
+      phase3: "Phase 3 执行用例", phase4: "Phase 4 Case表格", done: "完成", error: "错误",
     }
     return map[phase] || phase
   }
@@ -211,8 +229,8 @@ export default function App() {
                   {[
                     { label: "切片结果", path: "translate/phase2/case_slices.json" },
                     { label: "覆盖核对", path: "translate/phase2/coverage.md" },
-                    { label: "Agent TXT", path: "translate/phase3/agents.txt" },
-                    { label: "人类用例", path: "translate/phase4/cases.md" },
+                    { label: "执行用例", path: AGENT_RESULT_PATH },
+                    { label: "Case 表格", path: CASE_RESULT_PATH },
                     { label: "结构化步骤", path: "translate/phase1/structured_steps.json" },
                   ].map((f) => (
                     <Button key={f.path} size="sm" variant={resultFile === f.path ? "default" : "outline"} onClick={() => loadFile(f.path)}>
@@ -227,9 +245,17 @@ export default function App() {
 
               {/* 合并查看区：选中文件看内容，不选看日志 */}
               <div className="flex-1 overflow-hidden p-4">
-                <pre ref={viewerRef} className="text-xs h-full overflow-y-auto whitespace-pre-wrap font-mono bg-secondary/30 rounded-md p-4">
-                  {resultContent || logText || "(暂无内容)"}
-                </pre>
+                {resultFile.endsWith(".md") ? (
+                  <div className="markdown-view h-full overflow-y-auto bg-white border rounded-md px-8 py-6">
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                      {resultContent || "(暂无内容)"}
+                    </ReactMarkdown>
+                  </div>
+                ) : (
+                  <pre ref={viewerRef} className="text-xs h-full overflow-y-auto whitespace-pre-wrap font-mono bg-secondary/30 rounded-md p-4">
+                    {resultContent || logText || "(暂无内容)"}
+                  </pre>
+                )}
               </div>
             </>
           ) : (
@@ -245,7 +271,7 @@ export default function App() {
 
       {/* 右下角署名 */}
       <div className="absolute bottom-2 right-3 text-xs text-muted-foreground pointer-events-none select-none">
-        v0.2.0 designed by @yuzechao
+        v0.2.1 designed by @yuzechao
       </div>
     </div>
   )

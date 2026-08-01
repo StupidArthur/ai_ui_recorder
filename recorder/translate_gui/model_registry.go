@@ -9,7 +9,7 @@ import "sort"
 // 均由注册表自动处理。
 //
 // 支持的供应商及模型：
-//   - MiniMax: M2.7-highspeed[thinking], M3, M3[thinking]
+//   - MiniMax: M3, M3[thinking]
 //   - Xiaomi MiMo: mimo-v2.5-pro, mimo-v2.5-pro[thinking]
 //   - DeepSeek: deepseek-v4-pro, deepseek-v4-pro[thinking]
 
@@ -25,13 +25,6 @@ type modelConfig struct {
 // modelRegistry 模型注册表，key 为对外展示的模型名（前端下拉框用）。
 var modelRegistry = map[string]modelConfig{
 	// ---- MiniMax 系列 ----
-	"MiniMax-M2.7-highspeed[thinking]": {
-		APIModel:       "MiniMax-M2.7-highspeed",
-		URL:            "https://api.minimax.chat/v1",
-		Thinking:       "",
-		ReasoningSplit: true,
-		MaxTokens:      196608,
-	},
 	"MiniMax-M3": {
 		APIModel:       "MiniMax-M3",
 		URL:            "https://api.minimax.chat/v1",

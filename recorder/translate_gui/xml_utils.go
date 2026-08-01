@@ -1,10 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -50,6 +52,7 @@ func preprocessLlmXmlOutput(raw string) string {
 type LlmAuditor struct {
 	Dir     string
 	Records []LlmAuditRecord
+	mu      sync.Mutex
 }
 
 func NewLlmAuditor(dir string) *LlmAuditor {
@@ -68,13 +71,23 @@ func (a *LlmAuditor) Record(phase string, batchIndex int, success bool, input, o
 		Error:       errMsg,
 		Timestamp:   time.Now(),
 	}
+	a.mu.Lock()
 	a.Records = append(a.Records, rec)
+	a.mu.Unlock()
 }
 
-func (a *LlmAuditor) Finalize() {
-	if len(a.Records) == 0 {
-		return
+func (a *LlmAuditor) Finalize() error {
+	a.mu.Lock()
+	records := make([]LlmAuditRecord, len(a.Records))
+	copy(records, a.Records)
+	a.mu.Unlock()
+
+	if len(records) == 0 {
+		return nil
 	}
-	data := mustJSONIndent(a.Records)
-	os.WriteFile(filepath.Join(a.Dir, "llm_audit.json"), data, 0644)
+	data := mustJSONIndent(records)
+	if err := os.WriteFile(filepath.Join(a.Dir, "llm_audit.json"), data, 0644); err != nil {
+		return fmt.Errorf("写入 LLM 审计文件失败: %w", err)
+	}
+	return nil
 }

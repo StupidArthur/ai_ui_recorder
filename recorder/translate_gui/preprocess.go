@@ -70,6 +70,7 @@ func preprocess(runDir string, logger *Logger) ([]EnrichedAction, Meta, error) {
 				Index: i,
 				Action: RawAction{
 					Type:      action.Type,
+					Key:       action.Key,
 					Timestamp: action.Timestamp,
 					Element:   action.Element,
 					URL:       action.URL,
@@ -110,6 +111,7 @@ func preprocess(runDir string, logger *Logger) ([]EnrichedAction, Meta, error) {
 			Index: i,
 			Action: RawAction{
 				Type:      action.Type,
+				Key:       action.Key,
 				Timestamp: action.Timestamp,
 				Element:   action.Element,
 				FormState: action.FormStateDelta,
@@ -167,6 +169,7 @@ func buildEnrichedForFile(e EnrichedAction, i int) map[string]interface{} {
 	return map[string]interface{}{
 		"index":            e.Index,
 		"type":             e.Action.Type,
+		"key":              e.Action.Key,
 		"element":          e.Action.Element,
 		"timestamp":        e.Action.Timestamp,
 		"formStateDelta":   e.Action.FormState,

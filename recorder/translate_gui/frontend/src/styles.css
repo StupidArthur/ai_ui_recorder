@@ -27,6 +27,52 @@
   }
 }
 
+@layer components {
+  .markdown-view {
+    @apply text-sm leading-7 text-foreground;
+  }
+
+  .markdown-view h1 {
+    @apply mb-5 border-b pb-3 text-2xl font-bold tracking-tight;
+  }
+
+  .markdown-view h2 {
+    @apply mb-3 mt-8 text-xl font-semibold tracking-tight;
+  }
+
+  .markdown-view p {
+    @apply my-3;
+  }
+
+  .markdown-view blockquote {
+    @apply my-4 border-l-4 border-primary/30 bg-secondary/50 px-4 py-2 text-muted-foreground;
+  }
+
+  .markdown-view table {
+    @apply my-4 w-full border-collapse overflow-hidden rounded-md text-left;
+  }
+
+  .markdown-view th {
+    @apply border bg-secondary px-4 py-2.5 font-semibold;
+  }
+
+  .markdown-view td {
+    @apply border px-4 py-2.5 align-top;
+  }
+
+  .markdown-view tr:nth-child(even) td {
+    @apply bg-secondary/20;
+  }
+
+  .markdown-view hr {
+    @apply my-8 border-border;
+  }
+
+  .markdown-view strong {
+    @apply font-semibold;
+  }
+}
+
 @layer base {
   * {
     @apply border-border;

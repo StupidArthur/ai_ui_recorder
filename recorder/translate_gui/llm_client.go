@@ -145,14 +145,6 @@ func (c *LLMClient) CallChatDetailed(messages []chatMessage, temperature float64
 	return nil, fmt.Errorf("LLM 调用彻底失败，已重试 %d 次: %w", LlmMaxRetries, lastErr)
 }
 
-func (c *LLMClient) doChat(payload []byte) (string, error) {
-	result, err := c.doChatDetailed(payload)
-	if err != nil {
-		return "", err
-	}
-	return result.Content, nil
-}
-
 func (c *LLMClient) doChatDetailed(payload []byte) (*ChatCallResult, error) {
 	url := c.BaseURL + "/chat/completions"
 	req, err := http.NewRequest("POST", url, bytes.NewReader(payload))

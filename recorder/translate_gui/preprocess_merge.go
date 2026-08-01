@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
-	"sort"
 	"strings"
 )
 
@@ -340,16 +339,6 @@ func padIndex(i int) string {
 		return "0" + intToStr(int64(i))
 	}
 	return intToStr(int64(i))
-}
-
-// sortedKeys 返回 map 的排序 key
-func sortedKeys(m map[string]interface{}) []string {
-	keys := make([]string, 0, len(m))
-	for k := range m {
-		keys = append(keys, k)
-	}
-	sort.Strings(keys)
-	return keys
 }
 
 // readActionFiles 批量读取 action 文件

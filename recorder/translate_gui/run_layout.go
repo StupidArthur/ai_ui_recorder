@@ -1,8 +1,10 @@
 package main
 
 import (
+	"encoding/json"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 // ==================== 目录名常量 ====================
@@ -34,6 +36,21 @@ const TranslateLlmAuditRel = RunTranslateSubdir + "/llm_audit"
 
 func getMetaPath(runDir string) string {
 	return filepath.Join(runDir, MetaFilename)
+}
+
+func readTargetURLFromMeta(runDir string) string {
+	data, err := os.ReadFile(getMetaPath(runDir))
+	if err != nil {
+		return ""
+	}
+	var meta Meta
+	if err := json.Unmarshal(data, &meta); err != nil {
+		return ""
+	}
+	if initialURL := strings.TrimSpace(meta.InitialURL); initialURL != "" {
+		return initialURL
+	}
+	return strings.TrimSpace(meta.TargetURL)
 }
 
 type RecordPaths struct {

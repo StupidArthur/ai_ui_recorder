@@ -14,8 +14,6 @@ var embeddedPrompts embed.FS
 const (
 	Phase1Name = "phase1"
 	Phase2Name = "phase2"
-	Phase3Name = "phase3"
-	Phase4Name = "phase4"
 )
 
 // phaseToFile phase -> 内置文件名（Phase 3/4 纯程序渲染，无 prompt）
@@ -76,20 +74,6 @@ func ListPrompts() []PromptInfo {
 		})
 	}
 	return result
-}
-
-func phaseDisplay(phase string) string {
-	switch phase {
-	case Phase1Name:
-		return "Phase 1 (format-step)"
-	case Phase2Name:
-		return "Phase 2 (slice-case)"
-	case Phase3Name:
-		return "Phase 3 (format-agent-case)"
-	case Phase4Name:
-		return "Phase 4 (format-human-case)"
-	}
-	return phase
 }
 
 func trimPrompt(s string) string {

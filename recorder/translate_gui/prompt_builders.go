@@ -79,16 +79,3 @@ func buildPhase2UserPrompt(windowStepsPlainText, indexListText string) string {
 
 请按原子业务目标切分为多个 slice，每个 slice 覆盖一个独立的业务闭环。从窗口第一个步骤开始，顺序扫描，每检测到业务闭环就输出一个 <slice>。仅输出 <slices> XML，不要 Markdown，不要 JSON。`, windowStepsPlainText, indexListText)
 }
-
-// ==================== Legacy Phase 4 Prompt（旧 phase4.go 引用） ====================
-
-func buildPhase4SystemPrompt() string {
-	content, _ := LoadPrompt(Phase4Name)
-	return trimPrompt(content)
-}
-
-func buildPhase4UserPrompt(stepsPlainText string) string {
-	return fmt.Sprintf(`请根据以下按时间顺序排列的底层步骤记录（纯文本），进行业务逻辑聚合并输出 <agent_chunk> XML：
-
-%s`, stepsPlainText)
-}

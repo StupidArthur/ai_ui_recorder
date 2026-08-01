@@ -32,36 +32,6 @@ func hasClosingTag(text, closeTagLiteral string) bool {
 	return strings.Contains(strings.ToLower(text), strings.ToLower(closeTagLiteral))
 }
 
-// clampWindowConsume 钳制滑动窗口消费步数
-func clampWindowConsume(rawConsume interface{}, windowLength int) (safeConsume int, rawConsumeInt int, clampReason string) {
-	winLen := windowLength
-	if winLen < 1 {
-		winLen = 1
-	}
-	parsed := toInt64(rawConsume)
-	hasNum := parsed != 0 || rawConsume != nil
-	raw := int(parsed)
-
-	clampReason = ""
-	if !hasNum || raw <= 0 {
-		clampReason = "zero-consume-clamped"
-	} else if raw > winLen {
-		clampReason = "over-consume-clamped"
-	}
-
-	safeConsume = raw
-	if !hasNum || raw < 1 {
-		safeConsume = 1
-	}
-	if safeConsume > winLen {
-		safeConsume = winLen
-	}
-	if safeConsume < 1 {
-		safeConsume = 1
-	}
-	return safeConsume, raw, clampReason
-}
-
 // maxSlidingWindowRounds 滑动窗口最大允许轮次
 func maxSlidingWindowRounds(totalItems, windowSize int) int {
 	total := totalItems

@@ -5,16 +5,14 @@ import (
 	"os"
 	"path/filepath"
 	stdruntime "runtime"
-	"strings"
 	"sync"
 	"time"
 )
 
 // Logger 日志器，同时写文件和内存（供前端读取）
 type Logger struct {
-	mu      sync.Mutex
-	file    *os.File
-	lines   []string
+	mu         sync.Mutex
+	file       *os.File
 	progressCh chan TranslateProgress
 }
 
@@ -32,7 +30,6 @@ func (l *Logger) write(level, msg string) {
 	line := fmt.Sprintf("[%s] %s %s", ts, level, msg)
 	l.mu.Lock()
 	defer l.mu.Unlock()
-	l.lines = append(l.lines, line)
 	if l.file != nil {
 		l.file.WriteString(line + "\n")
 	}
@@ -52,10 +49,6 @@ func (l *Logger) Error(msg string) {
 
 func (l *Logger) Infof(format string, args ...interface{}) {
 	l.Info(fmt.Sprintf(format, args...))
-}
-
-func (l *Logger) Warnf(format string, args ...interface{}) {
-	l.Warn(fmt.Sprintf(format, args...))
 }
 
 func (l *Logger) Errorf(format string, args ...interface{}) {
@@ -78,27 +71,6 @@ func (l *Logger) Close() {
 	if l.file != nil {
 		l.file.Close()
 	}
-}
-
-func (l *Logger) Lines() []string {
-	l.mu.Lock()
-	defer l.mu.Unlock()
-	out := make([]string, len(l.lines))
-	copy(out, l.lines)
-	return out
-}
-
-func (l *Logger) Tail(n int) string {
-	l.mu.Lock()
-	defer l.mu.Unlock()
-	if len(l.lines) == 0 {
-		return ""
-	}
-	start := len(l.lines) - n
-	if start < 0 {
-		start = 0
-	}
-	return strings.Join(l.lines[start:], "\n")
 }
 
 // ==================== 崩溃兜底 ====================

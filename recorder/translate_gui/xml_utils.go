@@ -34,19 +34,6 @@ func cleanMarkdownFence(text string) string {
 	return trimmed
 }
 
-// ==================== LLM XML 预处理 ====================
-
-var reCodeFence = regexp.MustCompile("(?is)^```(?:json|markdown|xml)?\\s*\\n([\\s\\S]*?)\\n```\\s*$")
-
-// preprocessLlmXmlOutput 清理 LLM 输出，提取 XML 正文。
-func preprocessLlmXmlOutput(raw string) string {
-	cleaned := cleanMarkdownFence(raw)
-	if m := reCodeFence.FindStringSubmatch(cleaned); m != nil {
-		cleaned = strings.TrimSpace(m[1])
-	}
-	return cleaned
-}
-
 // ==================== LLM 审计 ====================
 
 type LlmAuditor struct {

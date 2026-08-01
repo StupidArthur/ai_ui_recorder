@@ -1,10 +1,7 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
-	"os"
-	"path/filepath"
 	"sort"
 	"strings"
 	"sync"
@@ -522,25 +519,3 @@ func stepsToXmlRows(steps []StructuredStep) []StepXmlRow {
 	}
 	return rows
 }
-
-func intSliceToStr(arr []int) string {
-	parts := make([]string, len(arr))
-	for i, v := range arr {
-		parts[i] = intToStr(int64(v))
-	}
-	return strings.Join(parts, ", ")
-}
-
-func toSingleLine(value string) string {
-	return toSingleLineText(value)
-}
-
-// writeJsonIncremental 兼容函数
-func writeJsonIncremental(path string, data interface{}) {
-	jsonWriteFile(path, data)
-}
-
-// ensureUnused 防止 import 未使用
-var _ = filepath.Join
-var _ = json.Marshal
-var _ = os.WriteFile

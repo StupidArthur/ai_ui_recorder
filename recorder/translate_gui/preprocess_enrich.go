@@ -123,7 +123,7 @@ func abs(x int) int {
 // ==================== formState 差异 ====================
 
 type FormStateChanges struct {
-	Changed    map[string]FormChange `json:"changed"`
+	Changed    map[string]FormChange  `json:"changed"`
 	Added      map[string]interface{} `json:"added"`
 	Removed    map[string]interface{} `json:"removed"`
 	HasChanges bool                   `json:"hasChanges"`
@@ -165,32 +165,6 @@ func computeFormStateChanges(prevFormState, currFormState map[string]interface{}
 			result.Removed[key] = prevVal
 			result.HasChanges = true
 		}
-	}
-	return result
-}
-
-func formatFormStateChanges(changes FormStateChanges) string {
-	if !changes.HasChanges {
-		return ""
-	}
-	var lines []string
-	for _, key := range sortedKeys(toInterfaceMap(changes.Changed)) {
-		c := changes.Changed[key]
-		lines = append(lines, "[变化] "+key+": \""+toString(c.From)+"\" → \""+toString(c.To)+"\"")
-	}
-	for _, key := range sortedKeys(changes.Added) {
-		lines = append(lines, "[新增] "+key+": \""+toString(changes.Added[key])+"\"")
-	}
-	for _, key := range sortedKeys(changes.Removed) {
-		lines = append(lines, "[消失] "+key+": \""+toString(changes.Removed[key])+"\"")
-	}
-	return strings.Join(lines, "\n")
-}
-
-func toInterfaceMap(m map[string]FormChange) map[string]interface{} {
-	result := map[string]interface{}{}
-	for k, v := range m {
-		result[k] = v
 	}
 	return result
 }

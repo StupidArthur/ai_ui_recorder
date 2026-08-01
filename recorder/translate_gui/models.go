@@ -38,14 +38,14 @@ type ActionFile struct {
 // ==================== 预处理产物 ====================
 
 type EnrichedAction struct {
-	Index           int                    `json:"index"`
-	Action          RawAction              `json:"action"`
-	Diff            string                 `json:"diff"`
-	Context         string                 `json:"context"`
-	FormStateDelta  map[string]interface{} `json:"formStateDelta"`
-	Classification  ActionClassification   `json:"classification"`
-	IsNoise         bool                   `json:"isNoise"`
-	MergedFrom      []int                  `json:"mergedFrom,omitempty"`
+	Index          int                    `json:"index"`
+	Action         RawAction              `json:"action"`
+	Diff           string                 `json:"diff"`
+	Context        string                 `json:"context"`
+	FormStateDelta map[string]interface{} `json:"formStateDelta"`
+	Classification ActionClassification   `json:"classification"`
+	IsNoise        bool                   `json:"isNoise"`
+	MergedFrom     []int                  `json:"mergedFrom,omitempty"`
 }
 
 type ActionClassification struct {
@@ -58,24 +58,24 @@ type ActionClassification struct {
 
 // StructuredStep Phase 1 产出的结构化步骤（与 JS 版 workflow 内部结构对齐）
 type StructuredStep struct {
-	ID                    int      `json:"index"`
-	Status                string   `json:"status"`
-	Description           string   `json:"description"`
-	UiChange              string   `json:"uiChange"`
-	Page                  string   `json:"page"`
-	Basis                 []string `json:"basis"`
-	ActionKind            string   `json:"actionKind"`
-	Target                string   `json:"target"`
-	InputText             string   `json:"inputText"`
-	Key                   string   `json:"key"`
-	AssertText            string   `json:"assertText"`
-	Confidence            float64  `json:"confidence"`
+	ID                     int      `json:"index"`
+	Status                 string   `json:"status"`
+	Description            string   `json:"description"`
+	UiChange               string   `json:"uiChange"`
+	Page                   string   `json:"page"`
+	Basis                  []string `json:"basis"`
+	ActionKind             string   `json:"actionKind"`
+	Target                 string   `json:"target"`
+	InputText              string   `json:"inputText"`
+	Key                    string   `json:"key"`
+	AssertText             string   `json:"assertText"`
+	Confidence             float64  `json:"confidence"`
 	IntervalFromPreviousMs *int64   `json:"intervalFromPreviousMs"`
-	URL                   string   `json:"url"`
-	SourceType            string   `json:"sourceType"`
-	IsSkip                bool     `json:"-"`
-	IsNoise               bool     `json:"-"`
-	IsFallback            bool     `json:"-"`
+	URL                    string   `json:"url"`
+	SourceType             string   `json:"sourceType"`
+	IsSkip                 bool     `json:"-"`
+	IsNoise                bool     `json:"-"`
+	IsFallback             bool     `json:"-"`
 }
 
 // ==================== Phase 2 Case Slice ====================
@@ -86,30 +86,6 @@ type CaseSlice struct {
 	Consume   int    `json:"consume"`
 	Name      string `json:"name"`
 	Purpose   string `json:"purpose"`
-}
-
-// ==================== Phase 2 Case (legacy) ====================
-
-type Case struct {
-	Index             int    `json:"index"`
-	Title             string `json:"title"`
-	Precondition      string `json:"precondition"`
-	Steps             string `json:"steps"`
-	Expected          string `json:"expected"`
-	Markdown          string `json:"markdown"`
-	ConsumeStepCount  int    `json:"consumeStepCount"`
-	ConsumedStepIDs   []int  `json:"consumedStepIDs"`
-	IsFallback        bool   `json:"isFallback"`
-}
-
-// ==================== Phase 4 Agent Chunk ====================
-
-type AgentChunk struct {
-	Index       int    `json:"index"`
-	Title       string `json:"title"`
-	Precondition string `json:"precondition"`
-	Steps       string `json:"steps"`
-	Expected    string `json:"expected"`
 }
 
 // ==================== LLM 审计 ====================
@@ -162,9 +138,9 @@ type TranslateProgress struct {
 }
 
 type TranslateResult struct {
-	Success  bool   `json:"success"`
-	Message  string `json:"message"`
-	RunDir   string `json:"runDir"`
+	Success bool   `json:"success"`
+	Message string `json:"message"`
+	RunDir  string `json:"runDir"`
 }
 
 type PromptInfo struct {

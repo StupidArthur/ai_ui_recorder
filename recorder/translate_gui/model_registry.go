@@ -4,7 +4,7 @@ import "sort"
 
 // ==================== 模型注册表 ====================
 //
-// 参考 recorder/llm_client/llm_client.go 的设计，统一管理多家 LLM 供应商的技术差异。
+// 统一管理多家 LLM 供应商的技术差异。
 // 调用方只需关注模型名，其余细节（端点、thinking、reasoning_split、max_tokens）
 // 均由注册表自动处理。
 //

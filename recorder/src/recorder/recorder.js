@@ -2,7 +2,7 @@
  * recorder.js - 统一录制器核心类（完美快照模型 v2）
  *
  * Recorder 管理浏览器生命周期、事件回调、快照轮询和分文件存储。
- * 只负责采集原始数据，不做任何数据"理解"（diff 等预处理由 case_translate 模块完成）。
+ * 只负责采集原始数据，不做任何数据“理解”；下游语义处理由 Go/Wails 翻译工具完成。
  *
  * 核心设计：
  * - 周期轮询（300ms）后台拍摄 AX 快照，缓存在内存，action 到达时直接使用缓存快照
@@ -267,10 +267,6 @@ export class Recorder {
     if (bundledChromiumExecutablePath) {
       this.log.info(`已启用本地 Chromium 可执行文件: ${bundledChromiumExecutablePath}`);
     }
-    // #region agent log
-    fetch('http://127.0.0.1:7437/ingest/b6f22578-0783-4760-bc6b-7d2c7bfce5db',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'fb16c5'},body:JSON.stringify({sessionId:'fb16c5',runId:'pre-fix',hypothesisId:'H10',location:'recorder/src/recorder/recorder.js:start:runtimeVersion',message:'recorder runtime version before launch',data:{nodeVersion:process.version,hasLocalChrome:!!bundledChromiumExecutablePath},timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
-
     try {
       // ---------- 启动浏览器 ----------
       this.log.info('启动 Chromium 浏览器...');
@@ -297,9 +293,6 @@ export class Recorder {
         this.log.info(`本地 Chromium 启动参数: chromiumSandbox=false, ${launchOptions.args.join(', ')}`);
       }
 
-      // #region agent log
-      fetch('http://127.0.0.1:7437/ingest/b6f22578-0783-4760-bc6b-7d2c7bfce5db',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'fb16c5'},body:JSON.stringify({sessionId:'fb16c5',runId:'pre-fix',hypothesisId:'H4',location:'recorder/src/recorder/recorder.js:start:beforeLaunch',message:'before chromium.launch',data:{executablePath:launchOptions.executablePath||null,chromiumSandbox:launchOptions.chromiumSandbox,args:launchOptions.args||[],remainingMcpEnvKeys:Object.keys(process.env||{}).filter(k=>k.startsWith('PLAYWRIGHT_MCP_'))},timestamp:Date.now()})}).catch(()=>{});
-      // #endregion
       this.browser = await chromium.launch(launchOptions);
 
       // ---------- 创建浏览器上下文 ----------
@@ -394,9 +387,6 @@ export class Recorder {
       }
 
     } catch (error) {
-      // #region agent log
-      fetch('http://127.0.0.1:7437/ingest/b6f22578-0783-4760-bc6b-7d2c7bfce5db',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'fb16c5'},body:JSON.stringify({sessionId:'fb16c5',runId:'pre-fix',hypothesisId:'H4',location:'recorder/src/recorder/recorder.js:start:catch',message:'recorder start failed',data:{errorName:error?.name||'',errorMessage:error?.message||'',stackHead:(error?.stack||'').split('\\n').slice(0,6).join('\\n')},timestamp:Date.now()})}).catch(()=>{});
-      // #endregion
       this.log.error('启动失败', error);
       await this._cleanup();
       throw error;
@@ -565,7 +555,7 @@ export class Recorder {
     await this._cleanup();
 
     this.log.info('录制器已停止');
-    this.log.info('如需 AI 生成测试用例，请运行: node src/case_translate');
+    this.log.info('录制数据可交给 Go/Wails 翻译工具处理');
     this._stopping = false;
   }
 
@@ -839,7 +829,7 @@ export class Recorder {
     this.activePage = null;
 
     this.log.info('录制器已停止（浏览器关闭触发）');
-    this.log.info('如需 AI 生成测试用例，请运行: node src/case_translate');
+    this.log.info('录制数据可交给 Go/Wails 翻译工具处理');
     this._stopping = false;
   }
 

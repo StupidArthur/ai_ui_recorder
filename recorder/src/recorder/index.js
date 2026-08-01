@@ -9,8 +9,7 @@
  * 主停止方式：用户关闭浏览器窗口
  * 备用停止方式：Ctrl+C
  *
- * 录制完成后，如需 AI 生成测试用例，请运行:
- *   node src/case_translate
+ * 录制完成后，使用 recorder/translate_gui 中的 Go/Wails 工具生成测试用例。
  *
  * 运行方式：
  *   node src/recorder

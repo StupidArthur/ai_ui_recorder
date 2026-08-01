@@ -1,5 +1,7 @@
 # 交互记录
 
+> 历史档案：本文记录过往方案和实现演进，其中部分 Node/Python 翻译路径已经删除。当前架构以 `doc/README.md`、`doc/design.md` 和 `doc/translate_design.md` 为准。
+
 ## 2026-06-04 交互：run 目录结构重组
 
 ### 操作概述

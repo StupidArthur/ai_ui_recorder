@@ -54,9 +54,6 @@ function openBrowser(url) {
  */
 async function run(port = DASHBOARD_PORT) {
   try {
-    // #region agent log
-    fetch('http://127.0.0.1:7437/ingest/b6f22578-0783-4760-bc6b-7d2c7bfce5db',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'fb16c5'},body:JSON.stringify({sessionId:'fb16c5',runId:'pre-fix',hypothesisId:'H10',location:'recorder/src/dashboard/index.js:run:beforeImportServer',message:'dashboard runtime version before import server',data:{nodeVersion:process.version},timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
     const { createServer } = await import('./server.js');
     const server = await createServer(port);
     const url = `http://localhost:${port}`;

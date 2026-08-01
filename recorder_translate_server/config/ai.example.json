@@ -1,5 +1,0 @@
-{
-    "baseUrl": "https://api.minimax.chat/v1",
-    "apiKey": "sk-your-api-key-here",
-    "model": "MiniMax-M2.7-highspeed"
-}

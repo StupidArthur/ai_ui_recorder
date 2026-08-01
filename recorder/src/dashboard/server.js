@@ -3,7 +3,7 @@
  *
  * 提供以下能力：
  * - 静态文件服务（index.html 等）
- * - RESTful API（录制控制、AI 翻译控制、录制历史查阅）
+ * - RESTful API（录制控制、录制历史查阅）
  * - SSE（Server-Sent Events）实时日志推送
  *
  * 不引入任何外部 HTTP 框架，仅使用 Node.js 内置 http 模块。
@@ -12,7 +12,6 @@
  *   GET  /api/status              - 获取当前状态和配置
  *   POST /api/record/start        - 开始录制
  *   POST /api/record/stop         - 停止录制
- *   POST /api/translate/start     - 开始 AI 翻译
  *   GET  /api/runs                - 获取所有录制历史列表
  *   GET  /api/runs/:runId/files   - 列出该 run 下可预览的「给人看」产物（白名单且已生成）
  *   GET  /api/runs/:runId/file    - 读取指定录制目录下的文件
@@ -28,11 +27,6 @@ import {
   TARGET_URL,
   OUTPUT_BASE_DIR,
   META_FILENAME,
-  AI_STEPS_STRUCTURED_FILENAME,
-  AI_CASES_FILENAME,
-  AI_STEPS_ERRORS_FILENAME,
-  TRANSLATE_AGENT_TXT_FILENAME,
-  GENERATE_LOG_FILENAME,
   DASHBOARD_PREVIEW_FILES,
 } from '../utils/config.js';
 
@@ -104,7 +98,6 @@ const MIME_TYPES = {
 const AppState = {
   IDLE: 'idle',
   RECORDING: 'recording',
-  TRANSLATING: 'translating',
 };
 
 /** 当前应用状态 */
@@ -113,7 +106,7 @@ let currentState = AppState.IDLE;
 /** 当前 Recorder 实例（录制中有效） */
 let currentRecorder = null;
 
-/** 当前录制的 runDir（录制完成后保留，供翻译使用） */
+/** 当前录制的 runDir（录制完成后保留，供历史列表使用） */
 let lastRunDir = null;
 
 /** SSE 客户端连接集合 */
@@ -121,7 +114,6 @@ const sseClients = new Set();
 
 /** 延迟加载模块缓存（避免 dashboard 启动即触发 Playwright 加载） */
 let RecorderClass = null;
-let generateFn = null;
 
 // ==================== SSE 日志广播 ====================
 
@@ -226,12 +218,6 @@ function getRunsList() {
       const runDir = path.join(outputDir, name);
       const metaFile = path.join(runDir, META_FILENAME);
       const hasMeta = fs.existsSync(metaFile);
-      const hasSteps = fs.existsSync(path.join(runDir, AI_STEPS_STRUCTURED_FILENAME));
-      const hasCases = fs.existsSync(path.join(runDir, AI_CASES_FILENAME));
-      const hasStepErrors = fs.existsSync(path.join(runDir, AI_STEPS_ERRORS_FILENAME));
-      const hasAgentTxt = fs.existsSync(path.join(runDir, TRANSLATE_AGENT_TXT_FILENAME));
-      const hasGenerateLog = fs.existsSync(path.join(runDir, GENERATE_LOG_FILENAME));
-
       let meta = null;
       if (hasMeta) {
         try {
@@ -243,11 +229,6 @@ function getRunsList() {
         id: name,
         dir: runDir,
         hasMeta,
-        hasSteps,
-        hasCases,
-        hasStepErrors,
-        hasAgentTxt,
-        hasGenerateLog,
         totalActions: meta?.totalActions || 0,
         targetUrl: meta?.targetUrl || '',
         recordStartTime: meta?.recordStartTime || '',
@@ -266,24 +247,8 @@ function getRunsList() {
  */
 async function ensureRecorderModuleLoaded() {
   if (!RecorderClass) {
-    // #region agent log
-    fetch('http://127.0.0.1:7437/ingest/b6f22578-0783-4760-bc6b-7d2c7bfce5db',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'fb16c5'},body:JSON.stringify({sessionId:'fb16c5',runId:'pre-fix',hypothesisId:'H3',location:'recorder/src/dashboard/server.js:ensureRecorderModuleLoaded:beforeImport',message:'before import recorder module',data:{remainingMcpEnvKeys:Object.keys(process.env||{}).filter(k=>k.startsWith('PLAYWRIGHT_MCP_'))},timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
     const recorderModule = await import('../recorder/recorder.js');
     RecorderClass = recorderModule.Recorder;
-    // #region agent log
-    fetch('http://127.0.0.1:7437/ingest/b6f22578-0783-4760-bc6b-7d2c7bfce5db',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'fb16c5'},body:JSON.stringify({sessionId:'fb16c5',runId:'pre-fix',hypothesisId:'H3',location:'recorder/src/dashboard/server.js:ensureRecorderModuleLoaded:afterImport',message:'after import recorder module',data:{recorderLoaded:!!RecorderClass},timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
-  }
-}
-
-/**
- * 按需加载翻译模块
- */
-async function ensureTranslateModuleLoaded() {
-  if (!generateFn) {
-    const translateModule = await import('../case_translate/index.js');
-    generateFn = translateModule.generate;
   }
 }
 
@@ -349,9 +314,6 @@ async function handleRecordStart(req, res) {
     });
 
   } catch (error) {
-    // #region agent log
-    fetch('http://127.0.0.1:7437/ingest/b6f22578-0783-4760-bc6b-7d2c7bfce5db',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'fb16c5'},body:JSON.stringify({sessionId:'fb16c5',runId:'pre-fix',hypothesisId:'H5',location:'recorder/src/dashboard/server.js:handleRecordStart:catch',message:'record start failed in api handler',data:{errorName:error?.name||'',errorMessage:error?.message||'',stackHead:(error?.stack||'').split('\\n').slice(0,4).join('\\n')},timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
     currentState = AppState.IDLE;
     currentRecorder = null;
     sendError(res, 500, `启动录制失败: ${error.message}`);
@@ -382,104 +344,6 @@ async function handleRecordStop(req, res) {
     currentState = AppState.IDLE;
     currentRecorder = null;
     sendError(res, 500, `停止录制失败: ${error.message}`);
-  }
-}
-
-/**
- * POST /api/translate/start - 开始 AI 翻译
- */
-async function handleTranslateStart(req, res) {
-  if (currentState !== AppState.IDLE) {
-    return sendError(res, 400, `当前状态为 ${currentState}，无法开始翻译`);
-  }
-
-  try {
-    const body = await readBody(req);
-
-    // 确定目标录制目录
-    let metaFilePath = null;
-    if (body.runId) {
-      metaFilePath = path.join(OUTPUT_BASE_DIR, body.runId, META_FILENAME);
-    }
-    // 不传 runId 则由 generate 自动查找最近一次
-
-    // Micro-batching 配置参数
-    const phase1BatchSize = parseInt(body.phase1BatchSize) || 3;
-    const phaseWindowSize = parseInt(body.phaseWindowSize) || 20;
-
-    await ensureTranslateModuleLoaded();
-
-    const { pingLlm, LLM_PING_FAIL_MESSAGE } = await import('../case_translate/ai-client.js');
-    const pingTs = new Date().toISOString();
-    broadcastLog({
-      level: 'INFO',
-      message: '正在检测 LLM 连通性...',
-      timestamp: pingTs,
-      logLine: `[${pingTs}] [INFO] 正在检测 LLM 连通性...`,
-    });
-
-    try {
-      await pingLlm();
-    } catch (pingError) {
-      const failMsg = pingError?.message || LLM_PING_FAIL_MESSAGE;
-      const failTs = new Date().toISOString();
-      broadcastLog({
-        level: 'ERROR',
-        message: failMsg,
-        timestamp: failTs,
-        logLine: `[${failTs}] [ERROR] ${failMsg}`,
-      });
-      if (pingError?.detail) {
-        const detailTs = new Date().toISOString();
-        broadcastLog({
-          level: 'WARN',
-          message: `探活详情: ${pingError.detail}`,
-          timestamp: detailTs,
-          logLine: `[${detailTs}] [WARN] 探活详情: ${pingError.detail}`,
-        });
-      }
-      return sendError(res, 503, failMsg);
-    }
-
-    currentState = AppState.TRANSLATING;
-    broadcastStateChange(AppState.TRANSLATING);
-
-    sendJSON(res, 200, { message: 'AI 翻译已开始' });
-
-    // 异步执行翻译（探活已在上方完成）
-    try {
-      const result = await generateFn(metaFilePath, {
-        onLog: broadcastLog,
-        phase1BatchSize,
-        phaseWindowSize,
-        skipLlmPing: true,
-      });
-      currentState = AppState.IDLE;
-
-      // 构建状态消息（包含兜底提示）
-      const fallbackApplied = result.fallbackApplied || false;
-      const statusMessage = fallbackApplied
-        ? 'AI 翻译完成（⚠ 本次触发 Phase 2 兜底补全）'
-        : 'AI 翻译完成';
-
-      broadcastStateChange(AppState.IDLE, {
-        message: statusMessage,
-        stepsFile: result.stepsFile,
-        casesFile: result.casesFile,
-        casesFallbackFile: result.casesFallbackFile || null,
-        fallbackApplied,
-        fallbackMissingIndices: result.fallbackIndices || [],
-      });
-    } catch (error) {
-      currentState = AppState.IDLE;
-      broadcastStateChange(AppState.IDLE, {
-        message: `AI 翻译失败: ${error.message}`,
-      });
-    }
-
-  } catch (error) {
-    currentState = AppState.IDLE;
-    sendError(res, 500, `启动翻译失败: ${error.message}`);
   }
 }
 
@@ -620,12 +484,6 @@ function handleAPI(req, res, pathname, searchParams) {
   // POST /api/record/stop
   if (pathname === '/api/record/stop' && req.method === 'POST') {
     handleRecordStop(req, res);
-    return true;
-  }
-
-  // POST /api/translate/start
-  if (pathname === '/api/translate/start' && req.method === 'POST') {
-    handleTranslateStart(req, res);
     return true;
   }
 

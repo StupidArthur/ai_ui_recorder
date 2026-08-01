@@ -1,35 +1,5 @@
-export namespace main {
+export namespace domain {
 	
-	export class AIConfig {
-	    baseUrl: string;
-	    apiKey: string;
-	    model: string;
-	
-	    static createFrom(source: any = {}) {
-	        return new AIConfig(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.baseUrl = source["baseUrl"];
-	        this.apiKey = source["apiKey"];
-	        this.model = source["model"];
-	    }
-	}
-	export class ModelInfo {
-	    name: string;
-	    baseUrl: string;
-	
-	    static createFrom(source: any = {}) {
-	        return new ModelInfo(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.name = source["name"];
-	        this.baseUrl = source["baseUrl"];
-	    }
-	}
 	export class PromptInfo {
 	    phase: string;
 	    name: string;
@@ -139,3 +109,37 @@ export namespace main {
 
 }
 
+export namespace llm {
+
+	export class AIConfig {
+	    baseUrl: string;
+	    apiKey: string;
+	    model: string;
+
+	    static createFrom(source: any = {}) {
+	        return new AIConfig(source);
+	    }
+
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.baseUrl = source["baseUrl"];
+	        this.apiKey = source["apiKey"];
+	        this.model = source["model"];
+	    }
+	}
+	export class ModelInfo {
+	    name: string;
+	    baseUrl: string;
+
+	    static createFrom(source: any = {}) {
+	        return new ModelInfo(source);
+	    }
+
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.baseUrl = source["baseUrl"];
+	    }
+	}
+
+}

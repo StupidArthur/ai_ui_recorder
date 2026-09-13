@@ -54,16 +54,15 @@ run_<timestamp>/
 
 ## 4. 翻译端
 
-翻译端位于 `recorder/translate_gui/`，内部流程：
+翻译端位于 `translate_gui/`，内部流程：
 
 1. 校验 `meta.json`、actions 和 snapshots。
 2. 合并噪声动作，计算前后快照差异与表单变化。
 3. Phase 1：生成结构化步骤。
 4. Phase 2：按连续业务范围切分 Case。
-5. Phase 3：生成可执行的 Agent 文本。
-6. Phase 4：把结构化步骤渲染为 Markdown Case 表格。
+5. Phase 3：从同一组 Step 和 Case 确定性生成兼容 Agent 文本、debugger 录制生成版和 Markdown Case 表格。
 
-Phase 4 的“结果”列表示录制中观察到的实际结果，同时可作为后续回归测试的预期基线。没有独立结果的步骤保持空白。
+Phase 3 不调用模型。三种格式必须保留相同的操作事实和顺序；“结果”来自录制观察，没有独立结果的步骤保持空白。debugger 产物明确标记为录制生成版，缺失信息交由下游调试确认。
 
 ## 5. 错误边界
 
@@ -78,4 +77,3 @@ Phase 4 的“结果”列表示录制中观察到的实际结果，同时可作
 - Go 翻译端版本同时写入前端显示、`frontend/package.json`、`wails.json` 和 Windows VersionInfo。
 - EXE、`dist/`、`release/`、`output/` 与依赖目录不提交到 Git。
 - 每次发布前至少执行 Node 语法/构建检查、`go test ./...`、前端生产构建和 Wails 打包检查。
-

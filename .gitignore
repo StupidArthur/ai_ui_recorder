@@ -1,4 +1,5 @@
 # Dependencies
+node_modules/
 # 注:Node 工程的 node_modules/ 已下沉到 recorder/node_modules/,见 recorder/.gitignore
 # 根目录的 node_modules/ 保留兜底,避免旧残留污染工作树
 
@@ -8,6 +9,8 @@ build/
 dist/
 release/
 release1/
+data/
+on_delete/
 
 # Output generated files (录制产物)
 output/
@@ -25,11 +28,11 @@ dist/
 build/
 
 # Wails Windows version metadata is source configuration, not a build artifact.
-!recorder/translate_gui/build/
-recorder/translate_gui/build/*
-!recorder/translate_gui/build/windows/
-recorder/translate_gui/build/windows/*
-!recorder/translate_gui/build/windows/info.json
+!translate_gui/build/
+translate_gui/build/*
+!translate_gui/build/windows/
+translate_gui/build/windows/*
+!translate_gui/build/windows/info.json
 
 # Virtual environments
 venv/
@@ -60,6 +63,7 @@ playwright-trace/
 *.tmp
 *.temp
 .cache/
+.tmp-translation-eval-*/
 *.crdownload
 *.part
 
@@ -102,12 +106,4 @@ ana_data/
 *.yaml
 *.yml
 
-# recorder_translate_server (FastAPI Web 服务)
-recorder_translate_server/uploads/
-recorder_translate_server/results/
-recorder_translate_server/frontend/dist/
-recorder_translate_server/frontend/node_modules/
-recorder_translate_server/frontend/.vite/
-recorder_translate_server/frontend/.env*
-recorder_translate_server/frontend/src/.umi/
-recorder_translate_server/.venv/
+# Archived modules, local data and generated files are kept outside version control.

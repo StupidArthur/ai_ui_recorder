@@ -21,9 +21,10 @@
 - 左侧列表准确显示已翻译状态，标题统一为 `TPT`。
 - 模型配置集中管理，默认支持 MiniMax-M3 不思考模式。
 - `key` 等关键操作字段必须贯穿 action、结构化步骤、Prompt 和最终产物。
-- Phase 3 生成可供执行 Agent 使用的文本。
-- Phase 4 按 Case 输出 Markdown 表格，操作与结果分列；没有结果时允许空白。
-- 翻译完成后默认渲染 Phase 4，缺失时回退 Phase 3。
+- Phase 3 根据同一组 Step 和 Case 生成 Agent 文本、debugger Markdown 和人类可读表格，不再单设 Phase 4。
+- debugger Markdown 必须标明“录制生成版”，操作与预期就近分离；无录制证据时不得补猜。
+- 人类可读表格按 Case 输出，操作与结果分列；没有结果时允许空白。
+- 翻译完成后默认渲染 debugger Markdown，并兼容读取旧 Phase 4 表格。
 - 任一关键输出写盘失败时不得显示翻译成功。
 
 ## 4. 数据契约验收
@@ -43,7 +44,8 @@
 - `translate/phase1/structured_steps.json`：结构化步骤完整且编号稳定。
 - `translate/phase2/case_slices.json`：每个切片消费步数大于零，覆盖全部有效步骤。
 - `translate/phase3/agents.txt`：保留必要的操作目标、文本、按键和验证信息。
-- `translate/phase4/cases.md`：每个 Case 有独立表格，包含序号、操作、结果三列。
+- `translate/phase3/runnable_case.md`：符合 debugger 层级和操作/预期格式，标明录制生成版。
+- `translate/phase3/cases.md`：每个 Case 有独立表格，包含序号、操作、结果三列。
 - `translate/llm_audit/`：记录模型调用结果，但不包含 API Key。
 
 ## 6. 发布验收

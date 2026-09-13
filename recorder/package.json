@@ -7,7 +7,6 @@
     "dashboard": "node src/dashboard",
     "record": "node src/recorder",
     "record:electron": "node src/recorder/electron-cli.js",
-    "build:electron-recorder": "powershell -ExecutionPolicy Bypass -File scripts/build-electron-recorder.ps1",
     "app": "node src/app",
     "build:bundle": "node build/esbuild.config.mjs",
     "build:trial": "powershell -ExecutionPolicy Bypass -File scripts/build-trial.ps1",

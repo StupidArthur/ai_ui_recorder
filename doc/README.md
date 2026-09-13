@@ -3,7 +3,7 @@
 本仓库只维护两条产品主线：
 
 1. `recorder/`：Node.js + Playwright 录制端，采集用户操作、AX 快照和表单状态。
-2. `recorder/translate_gui/`：Go + Wails 翻译端，读取录制目录并生成 Agent 执行文本和人类可读 Case 表格。
+2. `translate_gui/`：Go + Wails 翻译端，读取录制目录并生成 Agent 执行文本和人类可读 Case 表格。
 
 两者只通过 `output/run_*/` 文件目录交互。录制端不调用模型，翻译端不控制浏览器。
 
@@ -27,14 +27,13 @@ npm run record
 录制端可用的打包命令：
 
 ```powershell
-npm run build:electron-recorder
 npm run build:trial
 ```
 
 ### Go/Wails 翻译端
 
 ```powershell
-cd recorder/translate_gui
+cd translate_gui
 go test ./...
 wails dev
 ```
@@ -56,7 +55,8 @@ Node.js 录制
   -> output/run_<timestamp>/record/snapshots/snapshot_N.txt
   -> Go/Wails 翻译
   -> output/run_<timestamp>/translate/phase3/agents.txt
-  -> output/run_<timestamp>/translate/phase4/cases.md
+  -> output/run_<timestamp>/translate/phase3/runnable_case.md
+  -> output/run_<timestamp>/translate/phase3/cases.md
 ```
 
 核心契约是：`action_N` 的操作前状态为 `snapshot_{N-1}`，操作后状态为 `snapshot_N`。
@@ -64,20 +64,16 @@ Node.js 录制
 ## 目录结构
 
 ```text
-recorder/
-  src/recorder/          Node.js 录制核心
-  src/dashboard/         录制控制与历史查看
-  src/utils/             录制配置、日志和目录布局
-  translate_gui/         Go/Wails 翻译工具
-  scripts/               录制端构建与诊断脚本
-doc/
-  recording_data_spec.md 上下游数据契约
-  design.md              总体设计
-  translate_design.md    Go 翻译端设计
-  user_manual.md         使用手册
+recorder/                 Node.js + Playwright 录制模块
+translate_gui/            Go + Wails 翻译模块
+doc/                      设计、数据契约和使用文档
+dev-skill/                开发流程说明
+on_delete/                已停用模块和临时文件的可恢复归档
+output/, ana_data/        录制输出和分析数据
+release/                  发布产物
 ```
 
-旧 Node 翻译链和 Python/FastAPI 翻译服务已经移除，不再作为兼容入口维护。
+录制与翻译是当前维护的产品模块。`on_delete/` 是隔离归档区，不参与构建或运行，也尚未做物理删除；其中包括旧模型调试脚本。
 
 ## 文档入口
 

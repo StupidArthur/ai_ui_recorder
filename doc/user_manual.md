@@ -29,14 +29,6 @@ npm run record
 npm run build:trial
 ```
 
-Electron 应用录制包：
-
-```powershell
-npm run build:electron-recorder
-```
-
-分发离线录制包时，EXE 必须和构建脚本准备的 Chromium 目录一起复制。
-
 ## 2. 翻译端
 
 ### 2.1 开发环境
@@ -44,7 +36,7 @@ npm run build:electron-recorder
 要求 Go、Wails CLI、Node.js 和 WebView2 Runtime。
 
 ```powershell
-cd recorder/translate_gui
+cd translate_gui
 wails dev
 ```
 
@@ -53,17 +45,17 @@ wails dev
 1. 在界面选择录制输出根目录，通常是 `recorder/output` 或打包程序旁的 `output`。
 2. 从左侧选择一个 `run_*` 记录。
 3. 选择模型并填写 Base URL、API Key 等配置。
-4. 点击翻译并等待四个阶段完成。
-5. 翻译完成后，右侧默认显示 Phase 4 Case 表格；也可切换查看 Phase 3 Agent 文本和中间产物。
+4. 点击翻译并等待三个阶段完成。
+5. 翻译完成后，右侧默认显示 Phase 3 录制生成版；也可切换查看 Agent 文本、Case 表格和中间产物。
 
 ### 2.3 生产打包
 
 ```powershell
-cd recorder/translate_gui
+cd translate_gui
 wails build -clean
 ```
 
-产物位于 `recorder/translate_gui/build/bin/`。
+产物位于 `translate_gui/build/bin/`。
 
 ## 3. 输出说明
 
@@ -80,12 +72,14 @@ run_<timestamp>/
     preprocess/
     phase1/structured_steps.json
     phase2/case_slices.json
-    phase3/agents.txt
-    phase4/cases.md
+    phase3/
+      agents.txt
+      runnable_case.md
+      cases.md
     llm_audit/
 ```
 
-需要交给执行 Agent 时使用 `phase3/agents.txt`；需要人工阅读、评审或记录测试结果时使用 `phase4/cases.md`。
+需要交给 web-ui-case-debugger 调试时使用 `phase3/runnable_case.md`；兼容执行 Agent 时使用 `phase3/agents.txt`；人工阅读、评审或记录结果时使用 `phase3/cases.md`。
 
 ## 4. 常见问题
 
@@ -123,10 +117,9 @@ npm run build:bundle
 Go 翻译端：
 
 ```powershell
-cd recorder/translate_gui
+cd translate_gui
 go test ./...
 
 cd frontend
 npm run build
 ```
-

@@ -11,6 +11,8 @@ run_<timestamp>/
 │   ├── screenshots/                # 可选
 │   └── recorder.log
 └── translate/                      # Go/Wails 翻译端写入
+    ├── attempt.json                # 本次翻译已启动
+    ├── completed.json              # 全部必需产物成功后写入
     ├── logs/generate.log
     ├── preprocess/
     │   ├── diffs/
@@ -20,8 +22,10 @@ run_<timestamp>/
     ├── phase2/
     │   ├── case_slices.json
     │   └── coverage.md
-    ├── phase3/agents.txt
-    ├── phase4/cases.md
+    ├── phase3/
+    │   ├── agents.txt
+    │   ├── runnable_case.md
+    │   └── cases.md
     └── llm_audit/
 ```
 
@@ -32,3 +36,5 @@ run_<timestamp>/
 3. `meta.json` 保留在 run 根目录，作为发现录制记录的锚点。
 4. `action_N` 的 pre snapshot 为 `snapshot_{N-1}`，post snapshot 为 `snapshot_N`。
 5. 原始录制数据不可被翻译端覆盖。
+6. 新翻译只生成 Phase 1～3；旧记录中的 `phase4/cases.md` 保持可读，不要求迁移。
+7. 新版记录只有存在 `completed.json` 才显示为已翻译；部分产物不能代替完成标志。

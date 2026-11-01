@@ -206,8 +206,18 @@ export class Recorder {
 
     // ========== 完美快照模型 v2 新增 ==========
 
-    /** @type {string|null} 最新轮询缓存的快照文本 */
+    /** @type {Object|null} 最新轮询缓存的快照记录（文本 + 采样时间窗） */
     this._cachedSnapshot = null;
+
+    /** @type {number} AX 快照采样序号 */
+    this._snapshotSequence = 0;
+
+    /** @type {boolean} 是否存在正在执行的快照采样 */
+    this._snapshotPollInFlight = false;
+
+    /** @type {WeakMap<import('playwright').Page, number>} 页面会话身份 */
+    this._pageIdentity = new WeakMap();
+    this._pageSequence = 0;
 
     /** @type {NodeJS.Timeout|null} 轮询定时器 */
     this._pollTimer = null;
@@ -345,7 +355,7 @@ export class Recorder {
       this.log.info('拍摄初始页面快照（snapshot_000）...');
       const initialSnapshot = await this._takeSnapshot();
       if (initialSnapshot) {
-        this._saveSnapshot(initialSnapshot);
+        this._saveSnapshot(initialSnapshot, { role: 'initial' });
         this._cachedSnapshot = initialSnapshot;
         this.log.info('初始快照已保存');
       } else {
@@ -456,7 +466,7 @@ export class Recorder {
       this.log.info('拍摄初始页面快照（snapshot_000）...');
       const initialSnapshot = await this._takeSnapshot();
       if (initialSnapshot) {
-        this._saveSnapshot(initialSnapshot);
+        this._saveSnapshot(initialSnapshot, { role: 'initial' });
         this._cachedSnapshot = initialSnapshot;
         this.log.info('初始快照已保存');
       } else {
@@ -535,10 +545,20 @@ export class Recorder {
       this.log.warn(`终态快照拍摄失败，使用最后缓存: ${error.message}`);
     }
 
-    // 3. 为 pendingAction 补上终态 postSnapshot
+    // 3. 为 pendingAction 补上终态 postSnapshot，并记录采样相对事件的时间关系
     if (this._pendingAction && finalSnapshot) {
-      this._saveSnapshot(finalSnapshot);
-      this.log.info(`终态快照已保存为 snapshot_${String(this._snapshotIndex - 1).padStart(3, '0')}`);
+      const lastEventAt = Number(this._pendingAction.action?.timestamp || 0);
+      const boundaryStatus = finalSnapshot.captureStartedAt >= lastEventAt
+        ? 'after_last_action'
+        : (finalSnapshot.captureCompletedAt > lastEventAt ? 'overlaps_last_action' : 'before_last_action');
+      const finalIndex = this._saveSnapshot(finalSnapshot, {
+        role: 'final',
+        previousActionIndex: this._pendingAction.actionIndex,
+        intervalStartAt: lastEventAt,
+        boundaryStatus,
+      });
+      this._setActionPostSnapshot(this._pendingAction.actionIndex, finalIndex);
+      this.log.info(`终态快照已保存为 snapshot_${String(finalIndex).padStart(3, '0')} [${boundaryStatus}]`);
     } else if (this._pendingAction) {
       this.log.warn('最后一个操作缺少 postSnapshot（无可用快照）');
     }
@@ -571,8 +591,9 @@ export class Recorder {
     this.log.info(`启动快照轮询，间隔 ${SNAPSHOT_POLL_INTERVAL_MS}ms`);
 
     this._pollTimer = setInterval(async () => {
-      if (!this.isRecording) return;
+      if (!this.isRecording || this._snapshotPollInFlight) return;
 
+      this._snapshotPollInFlight = true;
       try {
         const snapshot = await this._takeSnapshot();
         if (snapshot) {
@@ -580,6 +601,8 @@ export class Recorder {
         }
       } catch (error) {
         // 轮询失败静默忽略，保持上一次缓存
+      } finally {
+        this._snapshotPollInFlight = false;
       }
     }, SNAPSHOT_POLL_INTERVAL_MS);
   }
@@ -610,16 +633,36 @@ export class Recorder {
       const page = this.activePage;
       if (!page) return null;
 
+      const captureSequence = ++this._snapshotSequence;
+      const captureStartedAt = Date.now();
+      const pageUrl = page.url();
+      const pageId = this._pageIdentity.get(page) || null;
       const rawSnapshot = await page.accessibility.snapshot({
         interestingOnly: true,
       });
+      const captureCompletedAt = Date.now();
 
       if (!rawSnapshot) return null;
 
       const pruned = pruneSnapshot(rawSnapshot);
       if (!pruned) return null;
 
-      return snapshotToText(pruned);
+      let pageTitle = '';
+      try {
+        pageTitle = await page.title();
+      } catch (_) {
+        // 页面可能在快照完成后关闭
+      }
+
+      return {
+        text: snapshotToText(pruned),
+        captureSequence,
+        captureStartedAt,
+        captureCompletedAt,
+        pageId,
+        url: pageUrl,
+        title: pageTitle,
+      };
     } catch (error) {
       // 快照失败静默处理
       return null;
@@ -635,15 +678,72 @@ export class Recorder {
    * @returns {number} 保存时使用的快照编号
    * @private
    */
-  _saveSnapshot(snapshotText) {
+  _saveSnapshot(snapshotRecord, boundary = {}) {
     const index = this._snapshotIndex;
     const filename = `snapshot_${String(index).padStart(3, '0')}.txt`;
     const filepath = path.join(this.outputPaths.snapshotsDir, filename);
+    const record = typeof snapshotRecord === 'string'
+      ? { text: snapshotRecord }
+      : snapshotRecord;
 
-    fs.writeFileSync(filepath, snapshotText, 'utf-8');
+    fs.writeFileSync(filepath, record.text || '', 'utf-8');
+
+    const metadata = {
+      index,
+      file: filename,
+      captureSequence: record.captureSequence ?? null,
+      captureStartedAt: record.captureStartedAt ?? null,
+      captureCompletedAt: record.captureCompletedAt ?? null,
+      captureDurationMs: Number.isFinite(record.captureStartedAt) && Number.isFinite(record.captureCompletedAt)
+        ? record.captureCompletedAt - record.captureStartedAt
+        : null,
+      pageId: record.pageId ?? null,
+      url: record.url || '',
+      title: record.title || '',
+      ...boundary,
+    };
+    const metadataPath = path.join(
+      this.outputPaths.snapshotsDir,
+      `snapshot_${String(index).padStart(3, '0')}.meta.json`,
+    );
+    try {
+      fs.writeFileSync(metadataPath, JSON.stringify(metadata, null, 2), 'utf-8');
+    } catch (error) {
+      this.log.warn(`快照时间元数据写入失败 snapshot_${String(index).padStart(3, '0')}: ${error.message}`);
+    }
+
     this._snapshotIndex++;
-
     return index;
+  }
+
+  _snapshotBoundaryStatus(snapshot, intervalStartAt, intervalEndAt) {
+    if (!snapshot || !Number.isFinite(snapshot.captureStartedAt) || !Number.isFinite(snapshot.captureCompletedAt)) {
+      return 'unknown';
+    }
+    if (snapshot.captureStartedAt >= intervalStartAt && snapshot.captureCompletedAt <= intervalEndAt) {
+      return 'inside_interval';
+    }
+    if (snapshot.captureStartedAt < intervalStartAt && snapshot.captureCompletedAt > intervalStartAt) {
+      return 'overlaps_previous_action';
+    }
+    if (snapshot.captureStartedAt < intervalEndAt && snapshot.captureCompletedAt > intervalEndAt) {
+      return 'overlaps_next_action';
+    }
+    if (snapshot.captureCompletedAt <= intervalStartAt) return 'before_interval';
+    if (snapshot.captureStartedAt >= intervalEndAt) return 'after_interval';
+    return 'uncertain';
+  }
+
+  _setActionPostSnapshot(actionIndex, snapshotIndex) {
+    const filename = `action_${String(actionIndex).padStart(3, '0')}.json`;
+    const filepath = path.join(this.outputPaths.actionsDir, filename);
+    try {
+      const actionData = JSON.parse(fs.readFileSync(filepath, 'utf-8'));
+      actionData.postSnapshotIndex = snapshotIndex;
+      fs.writeFileSync(filepath, JSON.stringify(actionData, null, 2), 'utf-8');
+    } catch (error) {
+      this.log.warn(`操作 #${actionIndex} 的 postSnapshot 索引回写失败: ${error.message}`);
+    }
   }
 
   /**
@@ -653,7 +753,7 @@ export class Recorder {
    * @param {number} actionIndex - 操作编号（1-based）
    * @private
    */
-  _saveAction(action, actionIndex) {
+  _saveAction(action, actionIndex, preSnapshotIndex = null) {
     const filename = `action_${String(actionIndex).padStart(3, '0')}.json`;
     const filepath = path.join(this.outputPaths.actionsDir, filename);
 
@@ -667,6 +767,9 @@ export class Recorder {
       timestamp: action.timestamp,
       formStateDelta: action.formStateDelta || null,
     };
+    if (Number.isInteger(preSnapshotIndex)) {
+      actionData.preSnapshotIndex = preSnapshotIndex;
+    }
 
     fs.writeFileSync(filepath, JSON.stringify(actionData, null, 2), 'utf-8');
   }
@@ -697,6 +800,8 @@ export class Recorder {
       startPageTitle: firstSummary?.page || '',
       pageCount: pageSet.size,
       snapshotPollIntervalMs: SNAPSHOT_POLL_INTERVAL_MS,
+      snapshotCount: this._snapshotIndex,
+      temporalEvidenceVersion: 1,
       convention: 'action_N: pre=snapshot_{N-1}, post=snapshot_{N}',
       actionSummary: this._actionSummaryList,
     };
@@ -739,20 +844,40 @@ export class Recorder {
         this._stripDOMContextFields(action.element);
       }
 
-      // 混合策略：仅在有前一个 pending action 时才保存缓存快照
-      // 这份快照 = post(前一个 action) = pre(当前 action)
-      // 第一个 action 的 pre 是 snapshot_000（start 时已保存），不需要额外保存
-      if (this._pendingAction && this._cachedSnapshot) {
-        this._saveSnapshot(this._cachedSnapshot);
-        this.log.info(`[操作 #${actionIndex}] 快照 snapshot_${String(this._snapshotIndex - 1).padStart(3, '0')} 已保存（post of #${this._pendingAction.actionIndex}, pre of #${actionIndex}）`);
-      } else if (!this._pendingAction) {
+      // 相邻操作共享同一边界快照：post(前一操作) = pre(当前操作)。
+      // 同时记录快照采样区间相对两次事件时间戳的位置，避免把跨边界采样误认为确定证据。
+      const previousPending = this._pendingAction;
+      let preSnapshotIndex = previousPending ? null : 0;
+      if (previousPending && this._cachedSnapshot) {
+        const intervalStartAt = Number(previousPending.action?.timestamp || 0);
+        const intervalEndAt = Number(action.timestamp || 0);
+        const boundaryStatus = this._snapshotBoundaryStatus(
+          this._cachedSnapshot,
+          intervalStartAt,
+          intervalEndAt,
+        );
+        const snapshotIndex = this._saveSnapshot(this._cachedSnapshot, {
+          role: 'action_boundary',
+          previousActionIndex: previousPending.actionIndex,
+          nextActionIndex: actionIndex,
+          intervalStartAt,
+          intervalEndAt,
+          boundaryStatus,
+        });
+        this._setActionPostSnapshot(previousPending.actionIndex, snapshotIndex);
+        preSnapshotIndex = snapshotIndex;
+        if (boundaryStatus !== 'inside_interval') {
+          this.log.warn(`[操作 #${actionIndex}] 边界快照时间关系不确定: ${boundaryStatus}`);
+        }
+        this.log.info(`[操作 #${actionIndex}] 快照 snapshot_${String(snapshotIndex).padStart(3, '0')} 已保存（post of #${previousPending.actionIndex}, pre of #${actionIndex}, ${boundaryStatus}）`);
+      } else if (!previousPending) {
         this.log.info(`[操作 #${actionIndex}] 首个操作，pre = snapshot_000（已保存）`);
       } else {
         this.log.warn(`[操作 #${actionIndex}] 无缓存快照可用`);
       }
 
-      // 保存 action JSON
-      this._saveAction(action, actionIndex);
+      // 保存 action JSON，并显式记录其 preSnapshot 索引
+      this._saveAction(action, actionIndex, preSnapshotIndex);
       this.log.info(`[操作 #${actionIndex}] action_${String(actionIndex).padStart(3, '0')}.json 已保存`);
 
       // 记录操作摘要（用于 meta.json）
@@ -765,7 +890,7 @@ export class Recorder {
       });
 
       // 更新 pendingAction
-      this._pendingAction = { actionIndex, action };
+      this._pendingAction = { actionIndex, action, preSnapshotIndex };
 
       // 调度截图
       if (SCREENSHOT_ENABLED) {
@@ -810,8 +935,18 @@ export class Recorder {
 
     // 用缓存快照作为终态
     if (this._pendingAction && this._cachedSnapshot) {
-      this._saveSnapshot(this._cachedSnapshot);
-      this.log.info(`终态快照已保存为 snapshot_${String(this._snapshotIndex - 1).padStart(3, '0')}`);
+      const lastEventAt = Number(this._pendingAction.action?.timestamp || 0);
+      const boundaryStatus = this._cachedSnapshot.captureStartedAt >= lastEventAt
+        ? 'after_last_action'
+        : (this._cachedSnapshot.captureCompletedAt > lastEventAt ? 'overlaps_last_action' : 'before_last_action');
+      const finalIndex = this._saveSnapshot(this._cachedSnapshot, {
+        role: 'final',
+        previousActionIndex: this._pendingAction.actionIndex,
+        intervalStartAt: lastEventAt,
+        boundaryStatus,
+      });
+      this._setActionPostSnapshot(this._pendingAction.actionIndex, finalIndex);
+      this.log.info(`终态快照已保存为 snapshot_${String(finalIndex).padStart(3, '0')} [${boundaryStatus}]`);
     }
 
     this.log.info(`共录制 ${this._actionIndex} 个操作`);
@@ -867,6 +1002,10 @@ export class Recorder {
    * @private
    */
   _registerPage(page) {
+    if (!this._pageIdentity.has(page)) {
+      this._pageIdentity.set(page, ++this._pageSequence);
+    }
+
     const updatePageMap = () => {
       try {
         const url = page.url();

@@ -37,8 +37,10 @@ type mergedAction struct {
 	Key            string                 `json:"key,omitempty"`
 	URL            string                 `json:"url,omitempty"`
 	Title          string                 `json:"title,omitempty"`
-	Timestamp      int64                  `json:"timestamp"`
-	FormStateDelta map[string]interface{} `json:"formStateDelta"`
+	Timestamp         int64                  `json:"timestamp"`
+	PreSnapshotIndex  *int                   `json:"preSnapshotIndex,omitempty"`
+	PostSnapshotIndex *int                   `json:"postSnapshotIndex,omitempty"`
+	FormStateDelta    map[string]interface{} `json:"formStateDelta"`
 	Skip           string                 `json:"skip,omitempty"`
 }
 
@@ -53,8 +55,10 @@ func mergeActions(rawActions []ActionFile) ([]mergedAction, MergeReport) {
 			Key:            a.Action.Key,
 			URL:            a.Action.URL,
 			Title:          a.Action.Title,
-			Timestamp:      a.Action.Timestamp,
-			FormStateDelta: a.Action.FormState,
+			Timestamp:         a.Action.Timestamp,
+			PreSnapshotIndex:  a.Action.PreSnapshotIndex,
+			PostSnapshotIndex: a.Action.PostSnapshotIndex,
+			FormStateDelta:    a.Action.FormState,
 		}
 	}
 
@@ -369,8 +373,10 @@ func parseActionFile(data []byte, fallbackIndex int) (ActionFile, error) {
 		Index     int                    `json:"index"`
 		Type      string                 `json:"type"`
 		Key       string                 `json:"key"`
-		Timestamp int64                  `json:"timestamp"`
-		Element   map[string]interface{} `json:"element"`
+		Timestamp         int64                  `json:"timestamp"`
+		PreSnapshotIndex  *int                   `json:"preSnapshotIndex"`
+		PostSnapshotIndex *int                   `json:"postSnapshotIndex"`
+		Element            map[string]interface{} `json:"element"`
 		FormState map[string]interface{} `json:"formStateDelta"`
 		URL       string                 `json:"url"`
 		Title     string                 `json:"title"`
@@ -388,8 +394,10 @@ func parseActionFile(data []byte, fallbackIndex int) (ActionFile, error) {
 			Action: RawAction{
 				Type:      flat.Type,
 				Key:       flat.Key,
-				Timestamp: flat.Timestamp,
-				Element:   flat.Element,
+				Timestamp:         flat.Timestamp,
+				PreSnapshotIndex:  flat.PreSnapshotIndex,
+				PostSnapshotIndex: flat.PostSnapshotIndex,
+				Element:           flat.Element,
 				FormState: flat.FormState,
 				URL:       flat.URL,
 				Title:     flat.Title,

@@ -209,6 +209,10 @@ export class Recorder {
     /** @type {Object|null} 最新轮询缓存的快照记录（文本 + 采样时间窗） */
     this._cachedSnapshot = null;
 
+    /** @type {Array<Object>} 最近完成的快照采样，用于选择落在操作间隔内的边界证据 */
+    this._snapshotHistory = [];
+    this._snapshotHistoryLimit = 64;
+
     /** @type {number} AX 快照采样序号 */
     this._snapshotSequence = 0;
 
@@ -356,7 +360,7 @@ export class Recorder {
       const initialSnapshot = await this._takeSnapshot();
       if (initialSnapshot) {
         this._saveSnapshot(initialSnapshot, { role: 'initial' });
-        this._cachedSnapshot = initialSnapshot;
+        this._rememberSnapshot(initialSnapshot);
         this.log.info('初始快照已保存');
       } else {
         this.log.warn('初始快照获取失败，录制继续但首个 action 可能缺少 preSnapshot');
@@ -467,7 +471,7 @@ export class Recorder {
       const initialSnapshot = await this._takeSnapshot();
       if (initialSnapshot) {
         this._saveSnapshot(initialSnapshot, { role: 'initial' });
-        this._cachedSnapshot = initialSnapshot;
+        this._rememberSnapshot(initialSnapshot);
         this.log.info('初始快照已保存');
       } else {
         this.log.warn('初始快照获取失败，录制继续但首个 action 可能缺少 preSnapshot');
@@ -597,7 +601,7 @@ export class Recorder {
       try {
         const snapshot = await this._takeSnapshot();
         if (snapshot) {
-          this._cachedSnapshot = snapshot;
+          this._rememberSnapshot(snapshot);
         }
       } catch (error) {
         // 轮询失败静默忽略，保持上一次缓存
@@ -623,9 +627,9 @@ export class Recorder {
   // ==================== 快照拍摄 ====================
 
   /**
-   * 获取当前活跃页面的 AX 快照（裁剪并格式化为文本）
+   * 获取当前活跃页面的 AX 快照，并记录本次异步采样的起止时间。
    *
-   * @returns {Promise<string|null>} 快照文本，失败返回 null
+   * @returns {Promise<Object|null>} 快照文本及采样元数据，失败返回 null
    * @private
    */
   async _takeSnapshot() {
@@ -667,6 +671,24 @@ export class Recorder {
       // 快照失败静默处理
       return null;
     }
+  }
+
+  _rememberSnapshot(snapshot) {
+    this._cachedSnapshot = snapshot;
+    this._snapshotHistory.push(snapshot);
+    if (this._snapshotHistory.length > this._snapshotHistoryLimit) {
+      this._snapshotHistory.splice(0, this._snapshotHistory.length - this._snapshotHistoryLimit);
+    }
+  }
+
+  _selectSnapshotForInterval(intervalStartAt, intervalEndAt) {
+    const candidates = this._snapshotHistory.filter((snapshot) =>
+      Number.isFinite(snapshot.captureStartedAt) &&
+      Number.isFinite(snapshot.captureCompletedAt) &&
+      snapshot.captureStartedAt >= intervalStartAt &&
+      snapshot.captureCompletedAt <= intervalEndAt,
+    );
+    return candidates.length > 0 ? candidates[candidates.length - 1] : this._cachedSnapshot;
   }
 
   // ==================== 分文件存储 ====================
@@ -847,22 +869,26 @@ export class Recorder {
       // 相邻操作共享同一边界快照：post(前一操作) = pre(当前操作)。
       // 同时记录快照采样区间相对两次事件时间戳的位置，避免把跨边界采样误认为确定证据。
       const previousPending = this._pendingAction;
-      let preSnapshotIndex = previousPending ? null : 0;
+      let preSnapshotIndex = previousPending ? null : (this._snapshotIndex > 0 ? 0 : null);
       if (previousPending && this._cachedSnapshot) {
         const intervalStartAt = Number(previousPending.action?.timestamp || 0);
         const intervalEndAt = Number(action.timestamp || 0);
+        const boundarySnapshot = this._selectSnapshotForInterval(intervalStartAt, intervalEndAt);
         const boundaryStatus = this._snapshotBoundaryStatus(
-          this._cachedSnapshot,
+          boundarySnapshot,
           intervalStartAt,
           intervalEndAt,
         );
-        const snapshotIndex = this._saveSnapshot(this._cachedSnapshot, {
+        const snapshotIndex = this._saveSnapshot(boundarySnapshot, {
           role: 'action_boundary',
           previousActionIndex: previousPending.actionIndex,
           nextActionIndex: actionIndex,
           intervalStartAt,
           intervalEndAt,
           boundaryStatus,
+          selection: boundaryStatus === 'inside_interval'
+            ? 'sampled_inside_interval'
+            : 'latest_available_fallback',
         });
         this._setActionPostSnapshot(previousPending.actionIndex, snapshotIndex);
         preSnapshotIndex = snapshotIndex;

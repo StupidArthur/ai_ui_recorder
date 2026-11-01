@@ -21,13 +21,15 @@ type Meta struct {
 // ==================== 原始动作 ====================
 
 type RawAction struct {
-	Type      string                 `json:"type"`
-	Key       string                 `json:"key,omitempty"`
-	Timestamp int64                  `json:"timestamp"`
-	Element   map[string]interface{} `json:"element"`
-	FormState map[string]interface{} `json:"formStateDelta,omitempty"`
-	URL       string                 `json:"url,omitempty"`
-	Title     string                 `json:"title,omitempty"`
+	Type              string                 `json:"type"`
+	Key               string                 `json:"key,omitempty"`
+	Timestamp         int64                  `json:"timestamp"`
+	PreSnapshotIndex  *int                   `json:"preSnapshotIndex,omitempty"`
+	PostSnapshotIndex *int                   `json:"postSnapshotIndex,omitempty"`
+	Element           map[string]interface{} `json:"element"`
+	FormState         map[string]interface{} `json:"formStateDelta,omitempty"`
+	URL               string                 `json:"url,omitempty"`
+	Title             string                 `json:"title,omitempty"`
 }
 
 type ActionFile struct {
@@ -38,14 +40,48 @@ type ActionFile struct {
 // ==================== 预处理产物 ====================
 
 type EnrichedAction struct {
-	Index          int                    `json:"index"`
-	Action         RawAction              `json:"action"`
-	Diff           string                 `json:"diff"`
-	Context        string                 `json:"context"`
-	FormStateDelta map[string]interface{} `json:"formStateDelta"`
-	Classification ActionClassification   `json:"classification"`
-	IsNoise        bool                   `json:"isNoise"`
-	MergedFrom     []int                  `json:"mergedFrom,omitempty"`
+	Index            int                    `json:"index"`
+	Action           RawAction              `json:"action"`
+	Diff             string                 `json:"diff"`
+	Context          string                 `json:"context"`
+	FormStateDelta   map[string]interface{} `json:"formStateDelta"`
+	TemporalEvidence *TemporalEvidence      `json:"temporalEvidence,omitempty"`
+	Classification   ActionClassification   `json:"classification"`
+	IsNoise          bool                   `json:"isNoise"`
+	MergedFrom       []int                  `json:"mergedFrom,omitempty"`
+}
+
+// SnapshotTiming 记录一次 AX 快照实际采样的时间窗及其所属页面。
+type SnapshotTiming struct {
+	Index              int    `json:"index"`
+	File               string `json:"file"`
+	CaptureSequence    int64  `json:"captureSequence"`
+	CaptureStartedAt   int64  `json:"captureStartedAt"`
+	CaptureCompletedAt int64  `json:"captureCompletedAt"
+	CaptureDurationMs  int64  `json:"captureDurationMs"
+	PageID             *int   `json:"pageId"`
+	URL                string `json:"url"`
+	Title              string `json:"title"`
+	Role               string `json:"role"`
+	PreviousActionIndex int   `json:"previousActionIndex,omitempty"
+	NextActionIndex     int   `json:"nextActionIndex,omitempty"
+	IntervalStartAt    int64  `json:"intervalStartAt,omitempty"
+	IntervalEndAt      int64  `json:"intervalEndAt,omitempty"
+	BoundaryStatus     string `json:"boundaryStatus,omitempty"
+	Selection          string `json:"selection,omitempty"
+}
+
+// TemporalEvidence 将物理事件时间与前后 AX 快照采样时间关联起来。
+type TemporalEvidence struct {
+	EventTimestamp                    int64          `json:"eventTimestamp"
+	PreviousEventTimestamp             int64          `json:"previousEventTimestamp,omitempty"
+	NextEventTimestamp                 int64          `json:"nextEventTimestamp,omitempty"
+	IntervalFromPreviousMs             *int64         `json:"intervalFromPreviousMs,omitempty"
+	PreSnapshot                        *SnapshotTiming `json:"preSnapshot,omitempty"
+	PostSnapshot                       *SnapshotTiming `json:"postSnapshot,omitempty"
+	PreSnapshotCompletedBeforeEvent    bool           `json:"preSnapshotCompletedBeforeEvent"
+	PostSnapshotInsideOperationInterval bool          `json:"postSnapshotInsideOperationInterval"
+	PostSnapshotBoundaryStatus         string         `json:"postSnapshotBoundaryStatus,omitempty"
 }
 
 type ActionClassification struct {

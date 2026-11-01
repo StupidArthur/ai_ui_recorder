@@ -134,6 +134,25 @@ type FormChange struct {
 	To   interface{} `json:"to"`
 }
 
+// formStateChangesAfterAction 将 action[i] 到 action[i+1] 之间的状态变化归属于 action[i]。
+// 表单状态在物理事件发生瞬间同步采集，因此相邻两次事件之间的差异属于前一操作的响应区间。
+func formStateChangesAfterAction(actions []mergedAction, index int) FormStateChanges {
+	empty := FormStateChanges{
+		Changed: map[string]FormChange{},
+		Added:   map[string]interface{}{},
+		Removed: map[string]interface{}{},
+	}
+	if index < 0 || index+1 >= len(actions) {
+		return empty
+	}
+	before := actions[index].FormStateDelta
+	after := actions[index+1].FormStateDelta
+	if before == nil || after == nil {
+		return empty
+	}
+	return computeFormStateChanges(before, after)
+}
+
 func computeFormStateChanges(prevFormState, currFormState map[string]interface{}) FormStateChanges {
 	result := FormStateChanges{
 		Changed: map[string]FormChange{},

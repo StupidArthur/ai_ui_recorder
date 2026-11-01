@@ -62,23 +62,35 @@ func preprocess(runDir string, logger *Logger) ([]EnrichedAction, Meta, error) {
 	for idx := 0; idx < totalMerged; idx++ {
 		action := mergedActions[idx]
 		i := action.Index
+		previousTimestamp := int64(0)
+		if idx > 0 {
+			previousTimestamp = mergedActions[idx-1].Timestamp
+		}
+		nextTimestamp := int64(0)
+		if idx+1 < totalMerged {
+			nextTimestamp = mergedActions[idx+1].Timestamp
+		}
+		temporalEvidence := buildTemporalEvidence(recPaths.SnapshotsDir, action, previousTimestamp, nextTimestamp, i)
 
 		if action.Skip != "" {
 			logger.Info("  action " + intToStr(int64(i)) + "/" + intToStr(int64(totalActions)) + " 已跳过 [" + action.Skip + "]")
 			enriched := EnrichedAction{
 				Index: i,
 				Action: RawAction{
-					Type:      action.Type,
-					Key:       action.Key,
-					Timestamp: action.Timestamp,
-					Element:   action.Element,
-					URL:       action.URL,
-					Title:     action.Title,
+					Type:              action.Type,
+					Key:               action.Key,
+					Timestamp:         action.Timestamp,
+					PreSnapshotIndex:  action.PreSnapshotIndex,
+					PostSnapshotIndex: action.PostSnapshotIndex,
+					Element:           action.Element,
+					URL:               action.URL,
+					Title:             action.Title,
 				},
-				Diff:           "",
-				Context:        "",
-				FormStateDelta: nil,
-				Classification: ActionClassification{Category: "skipped", ElementType: "other", Hints: []string{}},
+				Diff:             "",
+				Context:          "",
+				FormStateDelta:   nil,
+				TemporalEvidence: temporalEvidence,
+				Classification:   ActionClassification{Category: "skipped", ElementType: "other", Hints: []string{}},
 			}
 			enrichedActions = append(enrichedActions, enriched)
 			continue
@@ -106,18 +118,21 @@ func preprocess(runDir string, logger *Logger) ([]EnrichedAction, Meta, error) {
 		enriched := EnrichedAction{
 			Index: i,
 			Action: RawAction{
-				Type:      action.Type,
-				Key:       action.Key,
-				Timestamp: action.Timestamp,
-				Element:   action.Element,
-				FormState: action.FormStateDelta,
-				URL:       action.URL,
-				Title:     action.Title,
+				Type:              action.Type,
+				Key:               action.Key,
+				Timestamp:         action.Timestamp,
+				PreSnapshotIndex:  action.PreSnapshotIndex,
+				PostSnapshotIndex: action.PostSnapshotIndex,
+				Element:           action.Element,
+				FormState:         action.FormStateDelta,
+				URL:               action.URL,
+				Title:             action.Title,
 			},
-			Diff:           snapshotDiff,
-			Context:        contextExcerpt,
-			FormStateDelta: nil,
-			Classification: classification,
+			Diff:             snapshotDiff,
+			Context:          contextExcerpt,
+			FormStateDelta:   nil,
+			TemporalEvidence: temporalEvidence,
+			Classification:   classification,
 		}
 		if formStateChanges.HasChanges {
 			enriched.FormStateDelta = map[string]interface{}{
@@ -171,6 +186,7 @@ func buildEnrichedForFile(e EnrichedAction, i int) map[string]interface{} {
 		"postSnapshot":     "[见 " + RecordSnapshotsRel + "/snapshot_" + padIndex(i) + ".txt]",
 		"contextExcerpt":   e.Context,
 		"formStateChanges": e.FormStateDelta,
+		"temporalEvidence": e.TemporalEvidence,
 		"classification":   e.Classification,
 		"noise":            e.IsNoise,
 	}

@@ -46,6 +46,50 @@ func TestRecomputeStepIntervalsUsesActionOrder(t *testing.T) {
 	}
 }
 
+func TestFormStateChangesBelongToPrecedingActionInterval(t *testing.T) {
+	xpath := `//*[@id='query']`
+	state := func(value string) map[string]interface{} {
+		return map[string]interface{}{
+			xpath: map[string]interface{}{"value": value},
+		}
+	}
+	actions := []mergedAction{
+		{Index: 1, FormStateDelta: state("")},
+		{Index: 2, FormStateDelta: state("hello")},
+		{Index: 3, FormStateDelta: state("hello")},
+	}
+
+	first := formStateChangesAfterAction(actions, 0)
+	change, ok := first.Changed[xpath]
+	if !ok {
+		t.Fatalf("action 1 应接收其后操作间隔内的表单变化: %+v", first)
+	}
+	from := change.From.(map[string]interface{})["value"]
+	to := change.To.(map[string]interface{})["value"]
+	if from != "" || to != "hello" {
+		t.Fatalf("变化方向错误: from=%v to=%v", from, to)
+	}
+
+	second := formStateChangesAfterAction(actions, 1)
+	if second.HasChanges {
+		t.Fatalf("action 2 后无表单变化，不应分配变化: %+v", second)
+	}
+	last := formStateChangesAfterAction(actions, 2)
+	if last.HasChanges {
+		t.Fatalf("最后一个 action 缺少后继事件，不应推断表单变化: %+v", last)
+	}
+}
+
+func TestFormStateChangesRequireBothBoundarySamples(t *testing.T) {
+	actions := []mergedAction{
+		{Index: 1, FormStateDelta: map[string]interface{}{"field": map[string]interface{}{"value": "before"}}},
+		{Index: 2, FormStateDelta: nil},
+	}
+	if got := formStateChangesAfterAction(actions, 0); got.HasChanges {
+		t.Fatalf("缺少任一边界采样时不应推断变化: %+v", got)
+	}
+}
+
 func TestKeyFlowsIntoPromptAndStructuredStep(t *testing.T) {
 	action := EnrichedAction{
 		Index:  1,

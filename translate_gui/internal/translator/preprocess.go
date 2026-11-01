@@ -56,7 +56,6 @@ func preprocess(runDir string, logger *Logger) ([]EnrichedAction, Meta, error) {
 	logger.Info("[预处理 3/3] 逐条富化 action 数据...")
 
 	var enrichedActions []EnrichedAction
-	var prevFormState map[string]interface{}
 	noiseCount := 0
 	totalMerged := len(mergedActions)
 
@@ -82,9 +81,6 @@ func preprocess(runDir string, logger *Logger) ([]EnrichedAction, Meta, error) {
 				Classification: ActionClassification{Category: "skipped", ElementType: "other", Hints: []string{}},
 			}
 			enrichedActions = append(enrichedActions, enriched)
-			if action.FormStateDelta != nil {
-				prevFormState = action.FormStateDelta
-			}
 			continue
 		}
 
@@ -101,7 +97,7 @@ func preprocess(runDir string, logger *Logger) ([]EnrichedAction, Meta, error) {
 			contextExcerpt = extractContextExcerpt(string(preSnapshot), action.Element, ContextExcerptMaxSiblings)
 		}
 
-		formStateChanges := computeFormStateChanges(prevFormState, action.FormStateDelta)
+		formStateChanges := formStateChangesAfterAction(mergedActions, idx)
 
 		classification := classifyAction(action, snapshotDiff, formStateChanges)
 
@@ -145,9 +141,6 @@ func preprocess(runDir string, logger *Logger) ([]EnrichedAction, Meta, error) {
 		enrichedData, _ := json.MarshalIndent(enrichedForFile, "", "  ")
 		os.WriteFile(filepath.Join(transPaths.EnrichedDir, "enriched_"+padIndex(i)+".json"), enrichedData, 0644)
 
-		if action.FormStateDelta != nil {
-			prevFormState = action.FormStateDelta
-		}
 
 		statusTag := classification.Category
 		if isNoise {
